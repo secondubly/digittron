@@ -1,8 +1,8 @@
 import { client } from './client'
 import { onConnect } from './listeners/connect'
+import { onMessage } from './listeners/message'
 
 let tryCount = 0
-console.log('hello')
 await client.connect().catch(async (err: any) => {
 	tryCount++
 	// TODO: refresh token and try connection again
@@ -14,9 +14,4 @@ await client.connect().catch(async (err: any) => {
 
 client.on('connected', onConnect)
 
-client.on('message', (channel, tags, message, self) => {
-	if (self) return
-	if (message.toLowerCase() === '!hello') {
-		client.say(channel, `@${tags.username}, heya!`)
-	}
-})
+client.on('message', onMessage)
