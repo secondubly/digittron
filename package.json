@@ -15,5 +15,11 @@
   "bugs": {
     "url": "https://github.com/secondubly/digittron/issues"
   },
-  "homepage": "https://github.com/secondubly/digittron#readme"
+  "homepage": "https://github.com/secondubly/digittron#readme",
+  "dependencies": {
+    "tmi.js": "^1.8.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
 }
