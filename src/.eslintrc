@@ -1,0 +1,38 @@
+{
+	"env": {
+		"browser": true,
+		"commonjs": true,
+		"es2021": true
+	},
+	"extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended", 
+        "prettier"
+    ],
+    "plugins": [
+        "@typescript-eslint",
+        "prettier"
+    ],
+	"overrides": [],
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"ecmaVersion": "latest",
+		"project": "./src/tsconfig.json"
+	},
+	"rules": {
+		"@typescript-eslint/ban-ts-comment": [
+			"error",
+			{
+				"minimumDescriptionLength": 3,
+				"ts-check": true,
+				"ts-expect-error": "allow-with-description",
+				"ts-ignore": "allow-with-description",
+				"ts-nocheck": true
+			}
+		],
+		"@typescript-eslint/no-non-null-assertion": "off",
+		"@typescript-eslint/no-namespace": "off",
+		"@typescript-eslint/no-unused-vars": "off",
+        "prettier/prettier": 2
+	}
+}
