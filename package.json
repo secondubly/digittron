@@ -2,13 +2,13 @@
   "name": "digittron",
   "version": "1.0.0",
   "description": "secondubly's twitch bot",
-  "main": "dist/app.js",
+  "main": "dist/bot.js",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -b src",
-    "start": "node dist/app.js",
-    "start:watch": "npx nodemon src/app.ts"
+    "start": "node dist/bot.js",
+    "start:watch": "npx nodemon src/bot.ts"
   },
   "repository": {
     "type": "git",
