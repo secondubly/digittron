@@ -1,0 +1,19 @@
+{
+  "name": "digittron",
+  "version": "1.0.0",
+  "description": "secondubly's twitch bot",
+  "main": "dist/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/secondubly/digittron.git"
+  },
+  "author": "secondubly",
+  "license": "GPL-2.0-or-later",
+  "bugs": {
+    "url": "https://github.com/secondubly/digittron/issues"
+  },
+  "homepage": "https://github.com/secondubly/digittron#readme"
+}
