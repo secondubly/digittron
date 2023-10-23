@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Settings {
+  id                  Int               @id @default(autoincrement())
+  name                String            @db.VarChar(255)
+  oauth               String            @db.VarChar(255)
+  refresh_token       String            @db.VarChar(255)
+  value               Json?             @default("null")  @db.Json
+
+  @@unique([id, name], name: "settings_id_name_unique")
+  @@map("settings")
+}
+
+model Commands {
+  command_id        Int                 @id @default(autoincrement())
+  name              String              @db.VarChar(255)
+  aliases           Json?               @default("[]") @db.Json
+  description       String
+  response          String
+  enabled           Boolean             @default(true)
+  visible           Boolean             @default(true)
+  permission        CommandPermission   @default(VIEWERS)
+
+  @@map("commands")
+
+}
+
+enum CommandPermission {
+  VIEWERS
+  FOLLOWERS
+  VIPS
+  SUBSCRIBERS
+  MODERATORS
+  EDITORS
+  BROADCASTERS
+}
