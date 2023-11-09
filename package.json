@@ -27,6 +27,7 @@
     "@types/tmi.js": "^1.8.5",
     "dotenv": "^16.3.1",
     "dotenv-flow": "^4.0.0",
+    "node-fetch": "^3.3.2",
     "redis": "^4.6.10",
     "tmi.js": "^1.8.5"
   },

@@ -22,14 +22,11 @@ model Settings {
 }
 
 model Commands {
-  command_id        Int                 @id @default(autoincrement())
-  name              String              @db.VarChar(255)
+  name              String              @id @db.VarChar(255)
   aliases           Json?               @default("[]") @db.Json
-  description       String
   response          String
   enabled           Boolean             @default(true)
   visible           Boolean             @default(true)
-  permission        CommandPermission   @default(VIEWERS)
 
   @@map("commands")
 

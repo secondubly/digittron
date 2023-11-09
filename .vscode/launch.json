@@ -19,7 +19,8 @@
             ],
             "env": {
                 "TS_NODE_PROJECT": "${workspaceFolder}/src/tsconfig.json"
-            }
+            },
+            "console": "internalConsole"
         }
     ]
 }
