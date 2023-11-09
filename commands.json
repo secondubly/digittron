@@ -1,0 +1,167 @@
+[
+	{
+		"command": "uptime",
+		"response": "(author) (channelname) has been online for (uptime)",
+		"level": 7
+	},
+	{
+		"command": "followage",
+		"response": "(followage)",
+		"level": 7
+	},
+	{
+		"command": "playtime",
+		"response": "(author) (channelname) has been playing (game) for (playtime)",
+		"level": 7
+	},
+	{
+		"command": "title",
+		"response": "(author) (titleinfo)",
+		"level": 7
+	},
+	{
+		"command": "game",
+		"response": "(author) (gameinfo)",
+		"level": 7
+	},
+	{
+		"command": "age",
+		"response": "(age)",
+		"level": 7
+	},
+	{
+		"command": "raidmsg",
+		"response": "MrDestructoid MrDestructoid 01010010 01000001 01001001 01000100 00100001 00100001 00100001 MrDestructoid MrDestructoid ",
+		"level": 2
+	},
+	{
+		"command": "command",
+		"response": "to view all the commands available to you, check here! https://skip.gg/dlby_cmnds",
+		"level": 7
+	},
+	{
+		"command": "schedule",
+		"response": "/me my current schedule is up in the air but I tend to stream thursday and friday evenings (7:00pm - 10:30pm eastern), saturday afternoons, and sunday afternoon/evening! there may be random streams throughout the week so I recommend turning notifications on!",
+		"level": 7
+	},
+	{
+		"command": "steam",
+		"response": "(author) decapacitor",
+		"level": 7
+	},
+	{
+		"command": "psn",
+		"response": "(author) psn: soylentcola",
+		"level": 7
+	},
+	{
+		"command": "switch",
+		"response": "SW-7414-3174-6231",
+		"level": 7
+	},
+	{
+		"command": "test",
+		"response": "this is a test of the emergency bot system",
+		"level": 2
+	},
+	{
+		"command": "specs",
+		"response": "pc specs: https://pcpartpicker.com/user/yamcha/saved/HDrWXL | ps5:  model CFI-1015A (Disc Version) | nintendo switch",
+		"level": 7
+	},
+	{
+		"command": "lurk",
+		"response": " ┬┴┬┴┤ ͜ʖ ͡°)",
+		"level": 7
+	},
+	{
+		"command": "blind",
+		"response": "/announce this is a blind playthrough! please refrain from spoilers and backseat gaming in chat, if secondubly needs help, he will ask!",
+		"level": 2
+	},
+	{
+		"command": "firstubly",
+		"response": "(readfilerand ./txt/firstubly.txt)",
+		"level": 7
+	},
+	{
+		"command": "social",
+		"response": "/announce follow me on social media! twitter: https://twitter.com/secondubly | instagram: https://instagram.com/secondubly",
+		"level": 7
+	},
+	{
+		"command": "spotify",
+		"response": "due to the recent dmca rule changes, all music is played through a spotify playlist curated by (channelname) - you can find the link here: https://open.spotify.com/playlist/666mjTAcb7PYiWEnincpNt?si=sW3pWgbaSIOS1_NuOjA8Og note that some songs are stored on my pc so they will not be playable.",
+		"level": 7
+	},
+	{
+		"command": "popout",
+		"response": "https://www.twitch.tv/popout/secondubly/chat",
+		"level": 7
+	},
+	{
+		"command": "discord",
+		"response": "/announce we have a discord now! https://discord.gg/6EtUH9X",
+		"level": 7
+	},
+	{
+		"command": "followgoal",
+		"response": "/me as thanks for hitting 200 followers and as a holiday treat, we're giving away one $100 gift card to the winner's platform of choice once a week from December 6th to December 20th! To enter the giveaway you must be following the channel and must have enough currency with the bot, simply type !tickets 1 to enter! The raffle will begin on Sunday and close the following Sunday, you can enter at any time! Good luck to everyone and happy holidays! ♥",
+		"level": 2
+	},
+	{
+		"command": "nami",
+		"response": "May is Mental Health Awareness Month! For the month of May, (channelname) will be running a fundraiser! All donations will be going to NAMI (https://www.nami.org/About-NAMI)! (channelname) will be matching up to $400 in total donations and will have donation goals throughout the month! To donate: https://donate.tiltify.com/@secondubly/mental-health-may-2022",
+		"level": 7
+	},
+	{
+		"command": "2fa",
+		"response": "/announce If you're trying to chat and are unable to, please make sure you have the appropriate security settings enabled and refresh the stream! ",
+		"level": 2
+	},
+	{
+		"command": "ttv",
+		"response": "/announce https://ttv.lol/ 🙂",
+		"level": 7
+	},
+	{
+		"command": "throne",
+		"response": "/announce hey, are you feeling generous? check out my privacy-friendly wishlist at https://thrn.co/u/secondubly! If you buy me a gift, you'll get an alert on stream!",
+		"level": 7
+	},
+	{
+		"command": "destiny",
+		"response": "(customapi https://destinycommand.com/live/api/command?user=(sender)&channel=(channelname)&bot=phantombot&default_console=pc&response=(encodeurlparam (echo)))",
+		"level": 7
+	},
+	{
+		"command": "contentwarning",
+		"response": "This game contains the following sensitive content: strong curse words, blasphemy regarding the Catholic faith, sudden and surprising visual cuts and sound events, alcohol, cigarettes, general drug use, abusive relationships, nudity, sex, blood, suicide, sexual assault, murder (asphyxia, knives and firearms)",
+		"level": 7
+	},
+	{
+		"command": "kinetic",
+		"response": "Kinetic is a type of ammo used for !primary weapons",
+		"level": 7
+	},
+	{
+		"command": "special",
+		"response": "Special ammo is an ammo type used for !energy weapons",
+		"level": 7
+	},
+	{
+		"command": "heavy",
+		"response": "Heavy is an ammo type used for !power weapons",
+		"level": 7
+	},
+	{
+		"command": "drops",
+		"response": "Drops WILL be available HERE during the showcase! Please make sure you link your bungie and twitch accounts to be able to get them, you can do so here: https://www.bungie.net/7/en/User/Account/AccountLinking",
+		"level": 2
+	},
+	{
+		"command": "modlist",
+		"response": "check here: https://microbin.secondubly.tv/upload/snake-bee",
+		"level": 7
+	}
+]
