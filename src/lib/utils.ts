@@ -72,8 +72,11 @@ async function getOauthToken(): Promise<string> {
 	}
 
 	// validate oauth token
-	const tokenIsValid = validateOauthToken(oauthKey)
-	redisClient.set('oauth', oauthKey)
+	const tokenIsValid = await validateOauthToken(oauthKey)
+	if (!tokenIsValid) {
+		const token = (await redisClient.get('refresh_token')) as string
+		oauthKey = refreshToken(token)
+	}
 
 	return `oauth:${oauthKey}`
 }
@@ -90,13 +93,7 @@ async function validateOauthToken(token: string): Promise<boolean> {
 	})
 	const data = (await response.json()) as TwitchResponse
 
-	if (data.status === 401) {
-		// attempt to refresh token
-		const refresh_token = (await redisClient.get('refresh_token')) ?? process.env.BOT_REFRESH_TOKEN
-		const oauthToken = await refreshToken(refresh_token!)
-	}
-
-	return true
+	return data.status === 401 ? false : true
 }
 
 async function refreshToken(refreshToken: string): Promise<string> {
