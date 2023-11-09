@@ -2,8 +2,7 @@ import { client } from './client'
 import { onConnect } from './listeners/connect'
 import { onMessage } from './listeners/message'
 
-let tryCount = 0
-await client.connect().catch(async (err: any) => {
+await client.connect().catch(async (err) => {
 	console.error(err)
 })
 
