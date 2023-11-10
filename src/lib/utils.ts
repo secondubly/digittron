@@ -2,6 +2,7 @@ import { type Options } from 'tmi.js'
 import { config } from 'dotenv'
 import { createClient } from 'redis'
 import fetch, { Headers } from 'node-fetch'
+import { PrismaClient } from '@prisma/client'
 config({ path: process.cwd() + '/src/.env' })
 
 type Nullish = null | undefined
@@ -116,6 +117,16 @@ async function refreshToken(refreshToken: string): Promise<string> {
 	}
 
 	return `oauth:${data.access_token}`
+}
+
+export async function loadCommands() {
+	const prisma = new PrismaClient({
+		log: ['query', 'info', 'warn', 'error'],
+		errorFormat: 'pretty'
+	})
+	const commands = await prisma.commands.findMany().then((commands) => {
+		console.log(commands)
+	})
 }
 
 export { isNullOrUndefinedOrEmpty as isNullOrEmpty }
