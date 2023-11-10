@@ -3,6 +3,7 @@ import { config } from 'dotenv'
 import { createClient } from 'redis'
 import fetch, { Headers } from 'node-fetch'
 import { PrismaClient } from '@prisma/client'
+import { CommandCache } from './structures/Command'
 config({ path: process.cwd() + '/src/.env' })
 
 type Nullish = null | undefined
@@ -120,12 +121,14 @@ async function refreshToken(refreshToken: string): Promise<string> {
 }
 
 export async function loadCommands() {
+	let commandCache = null
 	const prisma = new PrismaClient({
 		log: ['query', 'info', 'warn', 'error'],
 		errorFormat: 'pretty'
 	})
+
 	const commands = await prisma.commands.findMany().then((commands) => {
-		console.log(commands)
+		commandCache = new CommandCache(commands)
 	})
 }
 

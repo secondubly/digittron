@@ -20,6 +20,7 @@
             "env": {
                 "TS_NODE_PROJECT": "${workspaceFolder}/src/tsconfig.json"
             },
+            "envFile": "${workspaceFolder}/src/.env",
             "console": "internalConsole"
         }
     ]
