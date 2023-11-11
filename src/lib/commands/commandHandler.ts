@@ -1,5 +1,5 @@
-import { client } from '../../client'
-import { isNullOrEmpty } from '../utils'
+import { client } from '../../client.js'
+import { isNullOrEmpty } from '../utils.js'
 
 class CommandHandler {
 	runCommand(channel: string, message: string) {
@@ -9,12 +9,11 @@ class CommandHandler {
 			return
 		}
 
-		switch (command) {
-			case 'test':
-				client.say(channel, 'this is a test of the emergency bot system')
-				break
-			default:
-				break
+		if (client.commandCache.has(command)) {
+			const foundCommand = client.commandCache.get(command)!
+			client.say(channel, foundCommand.response)
+		} else {
+			return
 		}
 	}
 

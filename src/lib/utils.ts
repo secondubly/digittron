@@ -3,8 +3,9 @@ import { config } from 'dotenv'
 import { createClient } from 'redis'
 import fetch, { Headers } from 'node-fetch'
 import { PrismaClient } from '@prisma/client'
-import { CommandCache } from './structures/Command'
+import { CommandCache } from './structures/CommandCache.js'
 config({ path: process.cwd() + '/src/.env' })
+import { client } from '../client.js'
 
 type Nullish = null | undefined
 type TwitchResponse = {
@@ -121,15 +122,28 @@ async function refreshToken(refreshToken: string): Promise<string> {
 }
 
 export async function loadCommands() {
-	let commandCache = null
+	const commandCache = null
 	const prisma = new PrismaClient({
 		log: ['query', 'info', 'warn', 'error'],
 		errorFormat: 'pretty'
 	})
 
-	const commands = await prisma.commands.findMany().then((commands) => {
-		commandCache = new CommandCache(commands)
-	})
+	try {
+		const commands = await prisma.commands.findMany()
+		const parsedCommands = commands.map((command) => {
+			return {
+				name: command.name,
+				aliases: command.aliases as string[],
+				response: command.response,
+				enabled: command.enabled,
+				visible: command.visible
+			}
+		})
+
+		client.commandCache = new CommandCache(parsedCommands)
+	} catch (err) {
+		console.log(err)
+	}
 }
 
 export { isNullOrUndefinedOrEmpty as isNullOrEmpty }

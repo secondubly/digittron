@@ -14,4 +14,20 @@ export class CommandCache {
 			this.cache.set(command.name, command)
 		})
 	}
+
+	set(command: Command) {
+		this.cache.set(command.name, command)
+	}
+
+	get(command: string) {
+		if (this.has(command)) {
+			return this.cache.get(command)
+		} else {
+			return undefined
+		}
+	}
+
+	has(command: string): boolean {
+		return this.cache.has(command) ? true : false
+	}
 }

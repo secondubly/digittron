@@ -7,6 +7,16 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/src/bot.ts",
+            "preLaunchTask": "tsc: build - src/tsconfig.json",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "envFile": "${workspaceFolder}/src/.env",
+            "console": "internalConsole"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Debug Typescript",
             "runtimeArgs": [
                 "-r",

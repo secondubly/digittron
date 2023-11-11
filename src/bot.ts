@@ -1,6 +1,6 @@
-import { client } from './client'
-import { onConnect } from './listeners/connect'
-import { onMessage } from './listeners/message'
+import { client } from './client.js'
+import { onConnect } from './listeners/connect.js'
+import { onMessage } from './listeners/message.js'
 
 client.on('connected', onConnect)
 
