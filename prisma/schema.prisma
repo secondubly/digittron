@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Settings {
+model Setting {
   id                  Int               @id @default(autoincrement())
   name                String            @db.VarChar(255)
   oauth               String            @db.VarChar(255)
@@ -21,23 +21,34 @@ model Settings {
   @@map("settings")
 }
 
-model Commands {
+model Command {
+  id                Int                 @default(autoincrement())
   name              String              @id @db.VarChar(255)
   aliases           Json?               @default("[]") @db.Json
   response          String
   enabled           Boolean             @default(true)
   visible           Boolean             @default(true)
+  commandPermission CommandPermission?  @relation(fields: [name], references: [name], onDelete: Cascade) 
 
   @@map("commands")
 
 }
 
-enum CommandPermission {
-  VIEWERS
-  FOLLOWERS
-  VIPS
-  SUBSCRIBERS
-  MODERATORS
-  EDITORS
-  BROADCASTERS
+model CommandPermission {
+  name              String            @id @db.VarChar(255)
+  level             PermissionLevel   @default(VIEWER)
+  command           Command?
+
+  @@map("command_permissions")
+}
+
+enum PermissionLevel {
+  VIEWER
+  FOLLOWER
+  REGULAR
+  VIP
+  SUBSCRIBER
+  MODERATOR
+  EDITOR
+  BROADCASTER
 }

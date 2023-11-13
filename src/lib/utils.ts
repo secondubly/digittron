@@ -129,14 +129,23 @@ export async function loadCommands() {
 	})
 
 	try {
-		const commands = await prisma.commands.findMany()
+		const commands = await prisma.command.findMany({
+			include: {
+				commandPermission: {
+					select: {
+						level: true
+					}
+				}
+			}
+		})
 		const parsedCommands = commands.map((command) => {
 			return {
 				name: command.name,
 				aliases: command.aliases as string[],
 				response: command.response,
 				enabled: command.enabled,
-				visible: command.visible
+				visible: command.visible,
+				permission: command.commandPermission!.level as string
 			}
 		})
 

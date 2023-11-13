@@ -4,6 +4,7 @@ type Command = {
 	response: string
 	enabled: boolean
 	visible: boolean
+	permission: string
 }
 
 export class CommandCache {
