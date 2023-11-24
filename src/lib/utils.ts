@@ -122,7 +122,6 @@ async function refreshToken(refreshToken: string): Promise<string> {
 }
 
 export async function loadCommands() {
-	const commandCache = null
 	const prisma = new PrismaClient({
 		log: ['query', 'info', 'warn', 'error'],
 		errorFormat: 'pretty'

@@ -24,6 +24,7 @@
   "homepage": "https://github.com/secondubly/digittron#readme",
   "dependencies": {
     "@prisma/client": "^5.4.2",
+    "@secondubly/digittron-db": "^1.0.2",
     "@types/tmi.js": "^1.8.5",
     "dotenv": "^16.3.1",
     "dotenv-flow": "^4.0.0",
