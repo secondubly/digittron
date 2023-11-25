@@ -2,12 +2,12 @@ import { type Options } from 'tmi.js'
 import { config } from 'dotenv'
 import { createClient } from 'redis'
 import fetch, { Headers } from 'node-fetch'
-import { PrismaClient } from '@prisma/client'
 import { CommandCache } from './structures/CommandCache.js'
 config({ path: process.cwd() + '/src/.env' })
 import { client } from '../client.js'
+import { createContext } from '@secondubly/digittron-db'
+const { prisma } = await createContext()
 
-type Nullish = null | undefined
 type TwitchResponse = {
 	client_id?: string
 	login?: string
@@ -122,15 +122,10 @@ async function refreshToken(refreshToken: string): Promise<string> {
 }
 
 export async function loadCommands() {
-	const prisma = new PrismaClient({
-		log: ['query', 'info', 'warn', 'error'],
-		errorFormat: 'pretty'
-	})
-
 	try {
-		const commands = await prisma.command.findMany({
+		const commands = await prisma.commands.findMany({
 			include: {
-				commandPermission: {
+				command_permissions: {
 					select: {
 						level: true
 					}
@@ -144,7 +139,7 @@ export async function loadCommands() {
 				response: command.response,
 				enabled: command.enabled,
 				visible: command.visible,
-				permission: command.commandPermission!.level as string
+				permission: command.command_permissions!.level as string
 			}
 		})
 
