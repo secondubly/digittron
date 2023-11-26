@@ -1,15 +1,24 @@
 import { client } from '../../client.js'
 import { isNullOrEmpty } from '../utils.js'
+import { executeBaseCommand } from './baseCommands.js'
 
 class CommandHandler {
-	runCommand(channel: string, message: string) {
+	async runCommand(channel: string, message: string, author?: string) {
 		const { command, args } = this.parseCommand(message)
 
 		if (isNullOrEmpty(command)) {
 			return
 		}
 
-		if (client.commandCache.has(command)) {
+		if (command === 'editcom') {
+			const result = await executeBaseCommand(command, args)
+			if (result) {
+				client.say(channel, `@${author} ${result}`)
+				return
+			}
+
+			client.say(channel, `@${author} Command successfully edited.`)
+		} else if (client.commandCache.has(command)) {
 			const foundCommand = client.commandCache.get(command)!
 			client.say(channel, foundCommand.response)
 		} else {

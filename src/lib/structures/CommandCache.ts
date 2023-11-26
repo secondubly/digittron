@@ -1,4 +1,7 @@
-type Command = {
+import { createContext } from '@secondubly/digittron-db'
+const { prisma } = await createContext()
+
+export type Command = {
 	name: string
 	aliases: string[]
 	response: string
@@ -30,5 +33,21 @@ export class CommandCache {
 
 	has(command: string): boolean {
 		return this.cache.has(command) ? true : false
+	}
+
+	async updateCommand(command: Command, updatedFields: Map<string, unknown>) {
+		this.set(command)
+		prisma.commands.update({
+			where: {
+				name: command.name
+			},
+			data: {
+				name: updatedFields.get('name') || undefined,
+				aliases: updatedFields.get('aliases') || undefined,
+				response: updatedFields.get('response') || undefined,
+				enabled: (updatedFields.get('enabled') as boolean) || undefined,
+				visible: (updatedFields.get('visible') as boolean) || undefined
+			}
+		})
 	}
 }
