@@ -78,7 +78,7 @@ async function getOauthToken(): Promise<string> {
 	const tokenIsValid = await validateOauthToken(oauthKey)
 	if (!tokenIsValid) {
 		const token = (await redisClient.get('refresh_token')) as string
-		oauthKey = refreshToken(token)
+		oauthKey = await refreshToken(token)
 	}
 
 	return `oauth:${oauthKey}`
