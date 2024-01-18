@@ -25,7 +25,7 @@
 	},
 	{
 		"command": "raidmsg",
-		"response": "MrDestructoid MrDestructoid 01010010 01000001 01001001 01000100 00100001 00100001 00100001 MrDestructoid MrDestructoid "
+		"response": "second15Raid second15Raid 01010010 01000001 01001001 01000100 00100001 00100001 00100001 second15Raid second15Raid"
 	},
 	{
 		"command": "command",
