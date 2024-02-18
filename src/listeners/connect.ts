@@ -1,7 +1,8 @@
-import { loadCommands } from '../lib/utils.js'
+import { bot } from '../bot.js'
 
-export function onConnect(address: string, port: number) {
+export function onConnect() {
 	// create db client, load commands into memory
-	loadCommands()
-	console.log(`connected to ${address}:${port}`)
+	// bot.loadCommands()
+	// bot.setupScheduler()
+	console.log(`bot connected!`)
 }

@@ -1,11 +1,10 @@
-import { client } from './client.js'
-import { onConnect } from './listeners/connect.js'
-import { onMessage } from './listeners/message.js'
+import { TwitchBot } from './client.js'
+import { envParseArray } from './lib/utils.js'
+import { onMessage } from './listeners/onMessage.js'
 
-client.on('connected', onConnect)
-
-client.on('message', onMessage)
-
-await client.connect().catch(async (err) => {
-	console.error(err)
-})
+export const bot = new TwitchBot(
+	envParseArray('TWITCH_CHANNELS', []),
+	process.env.CLIENT_ID as string,
+	process.env.CLIENT_SECRET as string,
+	onMessage
+)

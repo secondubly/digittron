@@ -1,12 +1,7 @@
-import { type Options } from 'tmi.js'
 import { config } from 'dotenv'
 import { createClient } from 'redis'
 import fetch, { Headers } from 'node-fetch'
-import { CommandCache } from './structures/CommandCache.js'
 config({ path: process.cwd() + '/src/.env' })
-import { client } from '../client.js'
-import { createContext } from '@secondubly/digittron-db'
-const { prisma } = await createContext()
 
 type TwitchResponse = {
 	client_id?: string
@@ -35,17 +30,6 @@ export const redisClient = await createClient({
 	.on('error', (err) => console.error('Redis Client Error', err))
 	.connect()
 
-export const CLIENT_OPTIONS: Options = {
-	options: {
-		debug: process.env.NODE_ENV === 'development' ? true : false
-	},
-	channels: envParseArray('TWITCH_CHANNELS', []),
-	identity: {
-		username: process.env.BOT_USERNAME,
-		password: await getOauthToken()
-	}
-}
-
 export function envParseArray(key: string, defaultValue: string[]) {
 	const value = process.env[key]
 	if (!value) {
@@ -65,11 +49,11 @@ function isNullOrUndefinedOrEmpty<T>(value: unknown): value is null | undefined 
 	}
 }
 
-async function getOauthToken(): Promise<string> {
-	const keyExists = await redisClient.exists('oauth')
+export async function getOauthToken(): Promise<string> {
+	const keyExists = await redisClient.exists('bot_access_token')
 	let oauthKey = undefined
 	if (keyExists) {
-		oauthKey = (await redisClient.get('oauth')) as string
+		oauthKey = (await redisClient.get('bot_access_token')) as string
 	} else {
 		oauthKey = process.env.BOT_OAUTH_TOKEN as string
 	}
@@ -77,7 +61,7 @@ async function getOauthToken(): Promise<string> {
 	// validate oauth token
 	const tokenIsValid = await validateOauthToken(oauthKey)
 	if (!tokenIsValid) {
-		const token = (await redisClient.get('refresh_token')) as string
+		const token = (await redisClient.get('bot_refresh_token')) as string
 		oauthKey = await refreshToken(token)
 	}
 
@@ -114,39 +98,11 @@ async function refreshToken(refreshToken: string): Promise<string> {
 		process.exit(1) // gracefully exit in case there are pending processes
 	} else if (data.access_token !== undefined) {
 		// got a new access token
-		redisClient.set('oauth', `${data.access_token}`)
-		redisClient.set('refresh_token', data.refresh_token!)
+		redisClient.set('bot_access_token', `${data.access_token}`)
+		redisClient.set('bot_refresh_token', data.refresh_token!)
 	}
 
 	return `oauth:${data.access_token}`
-}
-
-export async function loadCommands() {
-	try {
-		const commands = await prisma.commands.findMany({
-			include: {
-				command_permissions: {
-					select: {
-						level: true
-					}
-				}
-			}
-		})
-		const parsedCommands = commands.map((command) => {
-			return {
-				name: command.name,
-				aliases: command.aliases as string[],
-				response: command.response,
-				enabled: command.enabled,
-				visible: command.visible,
-				permission: command.command_permissions!.level as string
-			}
-		})
-
-		client.commandCache = new CommandCache(parsedCommands)
-	} catch (err) {
-		console.log(err)
-	}
 }
 
 export { isNullOrUndefinedOrEmpty as isNullOrEmpty }
