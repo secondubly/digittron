@@ -4,7 +4,7 @@ import { bot } from '../bot.js'
 
 export function onMessage(channel: string, user: string, text: string, message: ChatMessage) {
 	if (self) return
-	// bot.updateChatActivity(channel)
+	bot.updateChatActivity(channel)
 
 	if (text.trim().startsWith('!')) {
 		commandHandler.runCommand(channel, text, user)
