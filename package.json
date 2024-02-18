@@ -24,6 +24,10 @@
   "homepage": "https://github.com/secondubly/digittron#readme",
   "dependencies": {
     "@secondubly/digittron-db": "4.0.1",
+    "@twurple/api": "^7.0.8",
+    "@twurple/auth": "^7.0.8",
+    "@twurple/chat": "^7.0.8",
+    "@twurple/eventsub-ws": "^7.0.8",
     "@types/tmi.js": "^1.8.5",
     "dotenv": "^16.3.1",
     "dotenv-flow": "^4.0.0",
