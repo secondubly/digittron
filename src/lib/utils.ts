@@ -58,51 +58,7 @@ export async function getOauthToken(): Promise<string> {
 		oauthKey = process.env.BOT_OAUTH_TOKEN as string
 	}
 
-	// validate oauth token
-	const tokenIsValid = await validateOauthToken(oauthKey)
-	if (!tokenIsValid) {
-		const token = (await redisClient.get('bot_refresh_token')) as string
-		oauthKey = await refreshToken(token)
-	}
-
 	return `oauth:${oauthKey}`
-}
-
-async function validateOauthToken(token: string): Promise<boolean> {
-	const meta = {
-		Authorization: `OAuth ${token}`
-	}
-
-	const headers = new Headers(meta)
-	const response = await fetch('https://id.twitch.tv/oauth2/validate', {
-		method: 'GET',
-		headers: headers
-	})
-	const data = (await response.json()) as TwitchResponse
-
-	return data.status === 401 ? false : true
-}
-
-async function refreshToken(refreshToken: string): Promise<string> {
-	const params = new URLSearchParams()
-	params.append('client_id', process.env.CLIENT_ID!)
-	params.append('client_secret', process.env.CLIENT_SECRET!)
-	params.append('grant_type', 'refresh_token')
-	params.append('refresh_token', refreshToken)
-
-	const response = await fetch('https://id.twitch.tv/oauth2/token', { method: 'POST', body: params })
-	const data = (await response.json()) as RefreshTokenResponse
-
-	if (data.status === 400 || data.status === 401) {
-		console.warn('Refresh token was invalid, please have user reauthenticate!')
-		process.exit(1) // gracefully exit in case there are pending processes
-	} else if (data.access_token !== undefined) {
-		// got a new access token
-		redisClient.set('bot_access_token', `${data.access_token}`)
-		redisClient.set('bot_refresh_token', data.refresh_token!)
-	}
-
-	return `oauth:${data.access_token}`
 }
 
 export { isNullOrUndefinedOrEmpty as isNullOrEmpty }
