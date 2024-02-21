@@ -1,4 +1,4 @@
-import { client } from '../../client.js'
+import { bot } from '../../bot.js'
 import { isNullOrEmpty } from '../utils.js'
 import { executeBaseCommand } from './baseCommands.js'
 
@@ -13,14 +13,16 @@ class CommandHandler {
 		if (command === 'editcom') {
 			const result = await executeBaseCommand(command, args)
 			if (result) {
-				client.say(channel, `@${author} ${result}`)
+				bot.send(channel, `@${author} ${result}`)
 				return
 			}
 
-			client.say(channel, `@${author} Command successfully edited.`)
-		} else if (client.commandCache.has(command)) {
-			const foundCommand = client.commandCache.get(command)!
-			client.say(channel, foundCommand.response)
+			bot.send(channel, `@${author} Command successfully edited.`)
+		} else if (bot.commandCache?.has(command)) {
+			const foundCommand = bot.commandCache?.get(command)
+			if (foundCommand) {
+				bot.send(channel, foundCommand.response)
+			}
 		} else {
 			return
 		}

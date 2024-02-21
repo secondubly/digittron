@@ -1,4 +1,4 @@
-import { client } from '../../client.js'
+import { bot } from '../../bot.js'
 import type { Command } from '../structures/CommandCache.js'
 
 export const executeBaseCommand = async (command: string, args?: string[]) => {
@@ -16,14 +16,16 @@ export const executeBaseCommand = async (command: string, args?: string[]) => {
 
 		action.replace('!', '').toLowerCase() // remove exclamation point if present
 		const responseMsg = args.slice(1).join(' ')
-		if (!client.commandCache.has(action)) {
+		if (!bot.commandCache?.has(action)) {
 			// return error msg
 		}
 
-		const command = client.commandCache.get(action) as Command
+		const command = bot.commandCache?.get(action) as Command
 		command.response = responseMsg
 		const updatedFields = new Map<string, unknown>([['response', command.response]])
-		await client.commandCache.updateCommand(command, updatedFields)
+		await bot.commandCache?.updateCommand(command, updatedFields)
 		return
+	} else if (command === 'songrequest') {
+		// TODO
 	}
 }
