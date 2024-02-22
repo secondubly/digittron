@@ -6,11 +6,17 @@ import { CommandCache } from './lib/structures/CommandCache.js'
 import { Scheduler } from './lib/structures/Scheduler.js'
 import { ApiClient } from '@twurple/api'
 import { CustomRewardsCache } from './lib/structures/CustomRewardsCache.js'
-import { getUserData, redisClient } from './lib/utils.js'
+import { getParameterByName, getUserData, redisClient } from './lib/utils.js'
+import { NgrokAdapter } from '@twurple/eventsub-ngrok'
+import { EventSubHttpListener } from '@twurple/eventsub-http'
+import { onChannelRedemptionAdd } from './listeners/onChannelRedemptionAdd.js'
+import { HttpStatusCodeError } from '@twurple/api-call'
+import { StatusCodes } from 'http-status-codes'
 
 export class TwitchBot {
 	private client?: ChatClient
 	private apiClient?: ApiClient
+	private httpListener?: EventSubHttpListener
 	public commandCache?: CommandCache
 	public rewardsCache?: CustomRewardsCache
 	public scheduler?: Scheduler
@@ -71,7 +77,9 @@ export class TwitchBot {
 		await authProvider.addUserForToken(tokenData, ['chat'])
 
 		// add broadcaster auth token for automatic refreshing
-		const broadcasterCachedToken = await redisClient.get('twitch_broadcaster_token')
+		const broadcasterCachedToken = process.env.NODE_ENV
+			? await redisClient.get('test_broadcaster_token')
+			: await redisClient.get('twitch_broadcaster_token')
 		if (!broadcasterCachedToken) {
 			throw new Error('\x1b[41m[INFO] Broadcaster access token not found!\x1b[0m')
 		}
@@ -87,13 +95,24 @@ export class TwitchBot {
 			channels: this.channels,
 			isAlwaysMod: true,
 			logger: {
-				minLevel: process.env.DEV ? 'DEBUG' : 'INFO'
+				minLevel: process.env.NODE_ENV ? 'DEBUG' : 'INFO'
 			}
 		})
 
 		this.client.onMessage((channel, user, msg, info) => {
 			this.messageCallback(channel, user, msg, info)
 		})
+
+		await this.apiClient?.eventSub.deleteAllSubscriptions()
+
+		const user = await this.apiClient?.users.getUserByName(this.channels[0])
+		await this.setupEventListener() // REVIEW: should we move this into start?
+		if (this.httpListener) {
+			this.httpListener.start()
+			this.httpListener.onChannelRedemptionAdd(user!.id, ({ userName: username, rewardCost, rewardTitle, broadcasterName }) => {
+				onChannelRedemptionAdd(username, rewardCost, rewardTitle, broadcasterName, this.client)
+			})
+		}
 
 		await this.start()
 	}
@@ -104,7 +123,7 @@ export class TwitchBot {
 		this.setupScheduler()
 		this.client?.connect()
 		this.client?.onAuthenticationSuccess(() => {
-			console.log('\x1b[42m\x1b[34m[INFO] Connected!\x1b[0m')
+			console.log(`[${new Date().toISOString()}] \x1b[32m[INFO] Connected!\x1b[0m`)
 		})
 	}
 
@@ -141,9 +160,16 @@ export class TwitchBot {
 	}
 
 	async loadCustomRewards(): Promise<void> {
-		const user = await this.apiClient?.users.getUserByName(this.channels[0])
-		const channelPointRewards = (await this.apiClient?.channelPoints.getCustomRewards(user!.id)) ?? []
-		this.rewardsCache = new CustomRewardsCache(channelPointRewards)
+		try {
+			const user = await this.apiClient?.users.getUserByName(this.channels[0])
+			const channelPointRewards = (await this.apiClient?.channelPoints.getCustomRewards(user!.id)) ?? []
+			this.rewardsCache = new CustomRewardsCache(channelPointRewards)
+		} catch (e) {
+			if (e instanceof HttpStatusCodeError && e.statusCode === StatusCodes.FORBIDDEN) {
+				const id = getParameterByName('broadcaster_id', e.url)
+				console.warn(`User ${id} is not an Affiliate or Partner`)
+			}
+		}
 	}
 
 	setupScheduler(): void {
@@ -163,5 +189,21 @@ export class TwitchBot {
 			throw Error("\x1b[41m[INFO] I can't send messages in that channel!\x1b[0m")
 		}
 		this.client?.say(channel, message)
+	}
+
+	async setupEventListener() {
+		if (!this.apiClient) {
+			throw new Error('\x1b[41m[INFO] Broadcaster access token not found!\x1b[0m')
+		}
+
+		this.httpListener = new EventSubHttpListener({
+			adapter: new NgrokAdapter({
+				ngrokConfig: {
+					authtoken: process.env.NGROK_AUTH_TOKEN
+				}
+			}),
+			apiClient: this.apiClient,
+			secret: process.env.LISTENER_SECRET ?? 'thisShouldBeARandomlyGeneratedFixedString'
+		})
 	}
 }
