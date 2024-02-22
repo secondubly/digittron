@@ -11,12 +11,10 @@ export type Command = {
 }
 
 export class CommandCache {
-	cache: Map<string, Command> = new Map<string, Command>()
+	cache: Map<string, Command>
 
 	constructor(commands: Command[]) {
-		commands.forEach((command) => {
-			this.cache.set(command.name, command)
-		})
+		this.cache = new Map<string, Command>(commands.map((command) => [command.name, command]))
 	}
 
 	set(command: Command) {
@@ -32,7 +30,7 @@ export class CommandCache {
 	}
 
 	has(command: string): boolean {
-		return this.cache.has(command) ? true : false
+		return this.cache.has(command)
 	}
 
 	async updateCommand(command: Command, updatedFields: Map<string, unknown>) {
