@@ -1,6 +1,6 @@
 import type { ChatClient } from '@twurple/chat'
 
-export function onChannelRedemptionAdd(
+export function onSongRequestRedeem(
 	username: string,
 	rewardCost: number,
 	rewardTitle: string,

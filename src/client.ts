@@ -9,7 +9,7 @@ import { CustomRewardsCache } from './lib/structures/CustomRewardsCache.js'
 import { getParameterByName, getUserData, redisClient } from './lib/utils.js'
 import { NgrokAdapter } from '@twurple/eventsub-ngrok'
 import { EventSubHttpListener } from '@twurple/eventsub-http'
-import { onChannelRedemptionAdd } from './listeners/onChannelRedemptionAdd.js'
+import { onSongRequestRedeem } from './listeners/onSongRequestRedeem.js'
 import { HttpStatusCodeError } from '@twurple/api-call'
 import { StatusCodes } from 'http-status-codes'
 
@@ -109,9 +109,13 @@ export class TwitchBot {
 		await this.setupEventListener() // REVIEW: should we move this into start?
 		if (this.httpListener) {
 			this.httpListener.start()
-			this.httpListener.onChannelRedemptionAdd(user!.id, ({ userName: username, rewardCost, rewardTitle, broadcasterName }) => {
-				onChannelRedemptionAdd(username, rewardCost, rewardTitle, broadcasterName, this.client)
-			})
+			this.httpListener.onChannelRedemptionAddForReward(
+				user!.id,
+				process.env.TWITCH_SONG_REQUEST_REWARD_ID ?? '',
+				({ userName: username, rewardCost, rewardTitle, broadcasterName }) => {
+					onSongRequestRedeem(username, rewardCost, rewardTitle, broadcasterName, this.client)
+				}
+			)
 		}
 
 		await this.start()
