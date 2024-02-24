@@ -5,25 +5,23 @@ const SPOTIFY_AUTH_TOKEN = JSON.parse((await redisClient.get('spotify_access_tok
 
 const api = SpotifyApi.withAccessToken(process.env.SPOTIFY_CLIENT_ID ?? '', SPOTIFY_AUTH_TOKEN)
 type SongData = {
-	type: string
 	artist?: string
 	title?: string
 	id?: string
 }
 
 const getSpotifyData = (input: string): SongData | undefined => {
-	const urlRegEx = /^(?:spotify:|(?:https?:\/\/(?:open|play)\.spotify\.com\/))(?:embed)?\/?(album|track)(?::|\/)((?:[0-9a-zA-Z]){22})/
+	const urlRegEx = /^(?:spotify:|(?:https?:\/\/(?:open|play)\.spotify\.com\/))(?:embed)?\/?(track)(?::|\/)((?:[0-9a-zA-Z]){22})/
 	let match = input.match(urlRegEx)
 	// If user provided a URL
 	if (match) {
 		const albumOrTrack = match[1]
 		const spotifyID = match[2]
-		if (albumOrTrack !== 'album') {
+		if (albumOrTrack !== 'track') {
 			// if it's NOT a track then return an error
 			throw Error('User did not provide a track.')
 		} else {
 			return {
-				type: albumOrTrack,
 				id: spotifyID
 			}
 		}
@@ -36,7 +34,6 @@ const getSpotifyData = (input: string): SongData | undefined => {
 		const title = match[2]
 
 		return {
-			type: 'track',
 			artist,
 			title
 		}
@@ -71,3 +68,10 @@ export const addSongToQueue = async (input: string): Promise<boolean> => {
 	await api.player.addItemToPlaybackQueue(songInfo.uri)
 	return true
 }
+
+export const __testing =
+	process.env.NODE_ENV === 'test'
+		? {
+				getSpotifyData
+		  }
+		: void 0
