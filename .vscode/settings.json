@@ -1,0 +1,8 @@
+{
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": false,
+    "prettier.configPath": "{workspaceFolder}/src/.prettierrc",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit"
+    }
+}
