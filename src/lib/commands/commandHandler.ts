@@ -1,34 +1,11 @@
-import { bot } from '../../bot.js'
 import { isNullOrEmpty } from '../utils.js'
 import { executeBaseCommand } from './baseCommands.js'
 
-class CommandHandler {
-	async runCommand(channel: string, message: string, author?: string) {
-		const { command, args } = this.parseCommand(message)
+// TODO: make static class
+export class CommandHandler {
+	public static async run(channel: string, message: string, author?: string) {}
 
-		if (isNullOrEmpty(command)) {
-			return
-		}
-
-		if (command === 'editcom') {
-			const result = await executeBaseCommand(command, args)
-			if (result) {
-				bot.send(channel, `@${author} ${result}`)
-				return
-			}
-
-			bot.send(channel, `@${author} Command successfully edited.`)
-		} else if (bot.commandCache?.has(command)) {
-			const foundCommand = bot.commandCache?.get(command)
-			if (foundCommand) {
-				bot.send(channel, foundCommand.response)
-			}
-		} else {
-			return
-		}
-	}
-
-	private parseCommand(message: string) {
+	private static parse(message: string) {
 		const regex = /\!(.*?)$/gm //eslint-disable-line
 		const fullCommand = regex.exec(message)
 
@@ -47,5 +24,3 @@ class CommandHandler {
 		return {}
 	}
 }
-
-export default new CommandHandler()
