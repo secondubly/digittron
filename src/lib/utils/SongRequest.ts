@@ -27,7 +27,7 @@ const getSpotifyData = (input: string): SongData | undefined => {
 		}
 	}
 
-	const titleRegEx = /^(.*?)\s-\s(.*?)$/gm
+	const titleRegEx = /^(.*?)\s-\s(.*?)$/
 	match = input.match(titleRegEx)
 	if (match) {
 		const artist = match[1]
@@ -75,3 +75,4 @@ export const __testing =
 				getSpotifyData
 		  }
 		: void 0
+export { SongData }

@@ -1,5 +1,6 @@
 import { expect, test, describe, beforeAll, assertType } from 'vitest'
 import { __testing, type SongData } from '../src/lib/utils/SongRequest'
+// @ts-ignore
 const { getSpotifyData } = __testing
 
 beforeAll(() => {
