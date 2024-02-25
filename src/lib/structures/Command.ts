@@ -4,12 +4,12 @@ import { DigittronClient } from '../../client'
 
 export interface CommandOptions {
 	/**
-	 * Command name (default alias)
+	 * Command name
 	 */
 	name: string
 
 	/**
-	 * Userlevel access (viewer (everyone), regular, follower, vip, subscriber, moderator, editor, broadcaster)
+	 * Userlevel access
 	 */
 	userlevel: keyof typeof PermissionLevel
 
@@ -29,7 +29,7 @@ export interface CommandOptions {
 	args?: CommandArgument[]
 
 	/**
-	 * More aliases
+	 * Command aliases
 	 */
 	aliases?: string[]
 
@@ -47,6 +47,12 @@ export interface CommandOptions {
 	 * TextCommand
 	 */
 	message?: string
+
+	/**
+	 * Whether command is enabled or not (defaults to true if not present)
+	 */
+	enabled?: boolean
+
 	sendType?: keyof typeof MessageType
 }
 
