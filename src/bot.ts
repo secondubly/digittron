@@ -1,10 +1,12 @@
-import { TwitchBot } from './client.js'
-import { envParseArray } from './lib/utils.js'
-import { onMessage } from './listeners/onMessage.js'
+import { type AccessToken } from '@twurple/auth'
+import { envParseArray, redisClient } from './lib/utils.js'
+import { DigittronClient } from './client.js'
 
-export const bot = new TwitchBot(
-	process.env.NODE_ENV ? ['thirdadentally'] : envParseArray('TWITCH_CHANNELS', []),
-	process.env.CLIENT_ID as string,
-	process.env.CLIENT_SECRET as string,
-	onMessage
-)
+const botToken: AccessToken = JSON.parse((await redisClient.get('twitch_bot_token')) as string)
+const bot = new DigittronClient({
+	prefix: '!',
+	channels: process.env.NODE_ENV ? ['thirdadentally'] : envParseArray('TWITCH_CHANNELS', []),
+	CLIENT_ID: process.env.CLIENT_ID as string,
+	CLIENT_SECRET: process.env.CLIENT_SECRET as string,
+	botAccessToken: botToken
+})

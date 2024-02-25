@@ -1,30 +1,9 @@
 import { config } from 'dotenv'
+config({ path: process.cwd() + '/src/.env' })
 import { createClient } from 'redis'
 import fetch, { Headers, RequestInit, Response } from 'node-fetch'
 import { HelixUserData } from '@twurple/api/lib/interfaces/endpoints/user.external'
 import { AccessToken } from '@twurple/auth'
-config({ path: process.cwd() + '/src/.env' })
-
-type TwitchResponse = {
-	client_id?: string
-	login?: string
-	scopes?: string[]
-	user_id?: string
-	expires_in?: number
-	status?: number
-	message?: string
-}
-
-type RefreshTokenResponse = {
-	access_token?: string
-	expires_in?: number
-	refresh_token?: string
-	scope?: string[]
-	token_type?: string
-	error?: string
-	status?: number
-	message?: string
-}
 
 export const redisClient = await createClient({
 	url: process.env.REDIS_URL
