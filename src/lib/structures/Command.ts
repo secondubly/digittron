@@ -89,7 +89,7 @@ export type NamedParameters = Record<string, string | number | boolean>
 
 export type CommandProvider = Record<string, CommandOptions>
 
-export class Command {
+export abstract class Command {
 	constructor(
 		public client: DigittronClient,
 		public options: CommandOptions
@@ -105,7 +105,7 @@ export class Command {
 	 * @param msg
 	 * @param parameters
 	 */
-	async run(msg: ChatMessage, parameters: unknown): Promise<any> {}
+	abstract run(msg: ChatMessage, parameters: unknown): Promise<unknown>
 
 	/**
 	 * Prepare the command to be executed
