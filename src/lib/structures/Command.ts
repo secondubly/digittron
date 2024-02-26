@@ -1,5 +1,5 @@
 import { PermissionLevel } from '@prisma/client'
-import { ChatMessage } from './ChatMessage'
+import { ChatMessage } from './chat/ChatMessage'
 import { DigittronClient } from '../../client'
 
 export interface CommandOptions {
@@ -89,21 +89,15 @@ export type NamedParameters = Record<string, string | number | boolean>
 
 export type CommandProvider = Record<string, CommandOptions>
 
-export class BaseCommand {
+export class Command {
 	constructor(
 		public client: DigittronClient,
 		public options: CommandOptions
 	) {}
 
-	async onPubSub(event: PubSubRedemptionMessage, args?: string[]): Promise<void> {}
+	// async onPubSub(event: PubSubRedemptionMessage, args?: string[]): Promise<void> {}
 
-	/**
-	 * Method called when execCommand()
-	 *
-	 * @param msg
-	 * @param chatter
-	 */
-	async execute(msg: ChatMessage): Promise<any> {}
+	// async execute(msg: ChatMessage): Promise<any> {}
 
 	/**
 	 * Method called when command is executed
@@ -119,40 +113,40 @@ export class BaseCommand {
 	 * @param msg
 	 * @param parameters
 	 */
-	async prepareRun(msg: ChatMessage, parameters: string[]): Promise<any> {
-		const namedParameters: NamedParameters = {}
+	// async prepareRun(msg: ChatMessage, parameters: string[]): Promise<any> {
+	// 	const namedParameters: NamedParameters = {}
 
-		if (this.options.args && this.options.args.length > 0) {
-			for (let i = 0; i < this.options.args.length; i++) {
-				const args = this.options.args[i]
+	// 	if (this.options.args && this.options.args.length > 0) {
+	// 		for (let i = 0; i < this.options.args.length; i++) {
+	// 			const args = this.options.args[i]
 
-				if (parameters[i]) {
-					if (args.type) {
-						namedParameters[args.name] = args.type(parameters[i])
-					}
+	// 			if (parameters[i]) {
+	// 				if (args.type) {
+	// 					namedParameters[args.name] = args.type(parameters[i])
+	// 				}
 
-					if (args.prepare) {
-						const preparedValue = args.prepare(namedParameters[args.name] || parameters[i])
+	// 				if (args.prepare) {
+	// 					const preparedValue = args.prepare(namedParameters[args.name] || parameters[i])
 
-						if (preparedValue) {
-							namedParameters[args.name] = preparedValue
-						}
-					}
-				} else {
-					if (args.defaultValue) {
-						namedParameters[args.name] = args.defaultValue
-					} else {
-						namedParameters[args.name] = null
-					}
-				}
-			}
-		}
+	// 					if (preparedValue) {
+	// 						namedParameters[args.name] = preparedValue
+	// 					}
+	// 				}
+	// 			} else {
+	// 				if (args.defaultValue) {
+	// 					namedParameters[args.name] = args.defaultValue
+	// 				} else {
+	// 					namedParameters[args.name] = null
+	// 				}
+	// 			}
+	// 		}
+	// 	}
 
-		await this.run(msg, namedParameters)
-	}
+	// 	await this.run(msg, namedParameters)
+	// }
 
 	/**
-	 * Pre validation before to know if command can be executed
+	 * Check to make sure command can be executed
 	 *
 	 * @param msg
 	 */
@@ -183,7 +177,7 @@ export class BaseCommand {
 		}
 
 		if (this.options.userlevel === PermissionLevel.REGULAR) {
-			if (![...this.client.config.botOwners, this.client.getUsername()].includes(msg.author.username)) {
+			if (![...this.client.getBotOwners(), this.client.getUsername()].includes(msg.author.username)) {
 				return 'This command can be executed only from bot owners'
 			}
 		}
@@ -214,6 +208,12 @@ export class BaseCommand {
 
 		return true
 	}
+
+	/**
+	 * Makes an API call and retturns the result
+	 * @param url
+	 */
+	private static call(url: string) {}
 }
 
 // export abstract class Command {

@@ -22,6 +22,7 @@ type DigittronConfig = {
 
 export class DigittronClient extends EventEmitter {
 	private id: string = ''
+	public db = prisma
 	public tmi: Client
 	public api: ApiClient
 	public auth: RefreshingAuthProvider
@@ -167,6 +168,7 @@ export class DigittronClient extends EventEmitter {
 		}
 
 		// bot.updateChatActivity(channel)
+		this.emit('message', message)
 
 		if (message.trim().startsWith('!')) {
 			this.handler.run(channel, message, tags.username)

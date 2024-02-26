@@ -76,7 +76,6 @@ export class EventSubClient {
 		if (!this.user) {
 			const channelName = this.client.getChannels().map((channel) => channel.substring(1))
 			this.user = (await this.client.api.users.getUserByName(channelName[0])) as HelixUser
-			console.log(this.user.displayName)
 		}
 
 		// bind song request
