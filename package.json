@@ -39,6 +39,7 @@
     "redis": "^4.6.10",
     "strict-event-emitter": "^0.5.1",
     "tmi.js": "^1.8.5",
+    "ts-twitch-api": "^0.2.1",
     "winston": "^3.11.0"
   },
   "devDependencies": {

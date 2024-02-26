@@ -2,8 +2,8 @@ import { config } from 'dotenv'
 config({ path: process.cwd() + '/src/.env' })
 import { createClient } from 'redis'
 import fetch, { Headers, RequestInit, Response } from 'node-fetch'
-import { HelixUserData } from '@twurple/api/lib/interfaces/endpoints/user.external'
 import { AccessToken } from '@twurple/auth'
+import { GetUsersResponse, User } from 'ts-twitch-api'
 
 export const redisClient = await createClient({
 	url: process.env.REDIS_URL
@@ -43,43 +43,40 @@ const fetchWithRetries = async (url: string, options: RequestInit, retryCount = 
 	}
 }
 
-export const getUserData = async (authToken: AccessToken, username?: string): Promise<HelixUserData | null> => {
-	const headers = new Headers()
-	const url = username ? `https://api.twitch.tv/helix/users?login=${username}` : 'https://api.twitch.tv/helix/users'
-	let e
-
-	headers.append('Authorization', `Bearer ${authToken}`)
-	headers.append('Client-Id', process.env.TWITCH_CLIENT_ID!)
+export const getUsersData = async (users: string[]): Promise<User[] | null> => {
+	let result: User[] | null = null
 	try {
-		const response = await fetch(url, {
+		const appAccessToken = await redisClient.get('app_access_token')
+		if (!appAccessToken) {
+			throw Error('Could not get app access token, please reauthenticate your bot account.')
+		}
+
+		const searchParams = new URLSearchParams(users.map((user) => ['login', user]))
+		console.log(`https://api.twitch.tv/helix/users?${searchParams}`)
+		const usersResponse = await fetch(`https://api.twitch.tv/helix/users?${searchParams}`, {
 			method: 'GET',
-			headers
+			headers: new Headers({
+				Authorization: `Bearer ${appAccessToken}`,
+				'Client-Id': process.env.CLIENT_ID ?? ''
+			})
 		})
 
-		if (!response.ok) {
-			// manually refresh oauth token and try again
-			const refreshToken = (await redisClient.get('twitch_bot_token')) ?? null
-			if (!refreshToken) {
-				throw Error('No refresh token found!')
-			}
-
-			const parsedToken = JSON.parse(refreshToken) as AccessToken
-			const authToken = refreshOauth(parsedToken.refreshToken!)
-
-			await redisClient.set('bot_access_token', JSON.stringify(authToken))
-		}
-
-		const result = (await response.json()) as HelixUserData
-		if (!result) {
+		if (!usersResponse.ok) {
+			// TODO: check if access token expired
 			return null
-		} else {
-			return result
 		}
-	} catch (err) {
-		e = err
+
+		const json = (await usersResponse.json()) as GetUsersResponse
+		if (!json) {
+			result = null
+		} else {
+			result = json.data as User[]
+		}
+	} catch (e) {
+		console.error(e)
 	}
-	// should never fire
-	throw e
+
+	return result
 }
 
 export const refreshOauth = async (refreshToken: string): Promise<AccessToken> => {
