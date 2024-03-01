@@ -53,7 +53,6 @@ export const getUsersData = async (users: string[]): Promise<User[] | null> => {
 		}
 
 		const searchParams = new URLSearchParams(users.map((user) => ['login', user]))
-		console.log(`https://api.twitch.tv/helix/users?${searchParams}`)
 		const usersResponse = await fetch(`https://api.twitch.tv/helix/users?${searchParams}`, {
 			method: 'GET',
 			headers: new Headers({

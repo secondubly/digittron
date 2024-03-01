@@ -1,6 +1,5 @@
 import { createContext } from '@secondubly/digittron-db'
 const { prisma } = await createContext()
-import { parseArguments } from './lib/structures/Command'
 import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
 import { ChatUserstate, Client } from '@twurple/auth-tmi'
 import { EventSubClient } from './lib/client/EventSubClient.js'
@@ -11,6 +10,7 @@ import { EventEmitter } from 'events'
 import { Logger } from './lib/client/Logger.js'
 import { CommandHandler } from './lib/commands/commandHandler.js'
 import { Command } from './lib/structures/Command.js'
+import { Spotify } from './lib/utils/SongRequest.js'
 
 type DigittronConfig = {
 	prefix: string
@@ -31,6 +31,7 @@ export class DigittronClient extends EventEmitter {
 	public commands: CommandCache
 	private config: DigittronConfig
 	private handler: typeof CommandHandler
+	private songHandler: typeof Spotify
 	constructor(config: DigittronConfig) {
 		super()
 
@@ -38,6 +39,7 @@ export class DigittronClient extends EventEmitter {
 		this.config = config
 		this.logger = Logger
 		this.handler = CommandHandler
+		this.songHandler = Spotify
 
 		this.auth = new RefreshingAuthProvider({
 			clientId: this.config.CLIENT_ID,
@@ -117,6 +119,7 @@ export class DigittronClient extends EventEmitter {
 		await this.eventSub.connect()
 
 		this.tmi.on('message', this.onMessage.bind(this))
+		this.tmi.on('redeem', this.onRedeem.bind(this))
 		this.tmi.on('connected', (address: string, port: number) => {
 			this.logger.info(`Connected to ${address}:${port}`)
 		})
@@ -136,23 +139,23 @@ export class DigittronClient extends EventEmitter {
 				}
 			})
 
-			const commands: Command[] = results.map((c) => {
-				const args = parseArguments(c.response)
-				return new Command(this, {
-					name: c.name,
-					userlevel: c.command_permissions.level,
-					description: '',
-					examples: [],
-					args: [],
-					aliases: c.aliases as string[],
-					hideFromHelp: false,
-					botChannelOnly: false,
-					message: c.response,
-					enabled: true
-				})
-			})
+			// const commands: Command[] = results.map((c) => {
+			// 	const args = this.handler.parseArguments(c.response)
+			// 	return new Command(this, {
+			// 		name: c.name,
+			// 		userlevel: c.command_permissions.level,
+			// 		description: '',
+			// 		examples: [],
+			// 		args: [],
+			// 		aliases: c.aliases as string[],
+			// 		hideFromHelp: false,
+			// 		botChannelOnly: false,
+			// 		message: c.response,
+			// 		enabled: true
+			// 	})
+			// })
 
-			this.commands = new CommandCache(commands)
+			// this.commands = new CommandCache(commands)
 		} catch (err) {
 			console.error(err)
 		}
@@ -184,6 +187,17 @@ export class DigittronClient extends EventEmitter {
 
 		if (message.trim().startsWith('!')) {
 			this.handler.run(channel, message, tags.username)
+		}
+	}
+
+	private async onRedeem(channel: string, _username: string, rewardType: string, _tags: ChatUserstate, message: string): Promise<void> {
+		if (rewardType === process.env.TWITCH_SONG_REQUEST_REWARD_ID) {
+			try {
+				const spotifyData = await this.songHandler.addSongToQueue(message)
+				this.say(channel, 'success')
+			} catch (e) {
+				console.log(e)
+			}
 		}
 	}
 }
