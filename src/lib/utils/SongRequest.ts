@@ -25,7 +25,6 @@ export class Spotify {
 				throw Error('User did not provide a track.')
 			} else {
 				return {
-					type: albumOrTrack,
 					id: spotifyID
 				}
 			}
@@ -38,7 +37,6 @@ export class Spotify {
 			const title = match[2]
 
 			return {
-				type: 'track',
 				artist,
 				title
 			}
@@ -59,28 +57,35 @@ export class Spotify {
 		}
 	}
 
-	private static addItemToPlaybackQueue = async (song: SimplifiedTrack): Promise<void> => {
+	private static addItemToPlaybackQueue = async (song: SimplifiedTrack): Promise<number | undefined> => {
 		try {
 			await this.api.player.addItemToPlaybackQueue(song.uri)
-			this.queue.push(song)
-			return
+			return this.queue.push(song) + 1
 		} catch (e) {
 			console.error(e)
+			return undefined
 		}
 	}
 
-	public static addSongToQueue = async (input: string): Promise<boolean> => {
+	public static addSongToQueue = async (input: string): Promise<{ song: SimplifiedTrack; index: number } | undefined> => {
 		const data = this.getSpotifyData(input)
 		if (!data) {
-			throw Error('Could not find a track with that information.')
+			throw new Error('Could not find a track with that information.')
 		}
 		const songInfo = await this.getSongInfo(data)
 		if (!songInfo) {
-			throw Error('Could not find a track with that information.')
+			throw new Error('Could not find a track with that information.')
 		}
 
 		// add song to queue
-		await this.addItemToPlaybackQueue(songInfo)
-		return true
+		const index = await this.addItemToPlaybackQueue(songInfo)
+		if (!index) {
+			return undefined
+		}
+
+		return {
+			song: songInfo,
+			index
+		}
 	}
 }

@@ -190,11 +190,14 @@ export class DigittronClient extends EventEmitter {
 		}
 	}
 
-	private async onRedeem(channel: string, _username: string, rewardType: string, _tags: ChatUserstate, message: string): Promise<void> {
+	private async onRedeem(channel: string, username: string, rewardType: string, _tags: ChatUserstate, message: string): Promise<void> {
 		if (rewardType === process.env.TWITCH_SONG_REQUEST_REWARD_ID) {
 			try {
-				const spotifyData = await this.songHandler.addSongToQueue(message)
-				this.say(channel, 'success')
+				const result = await this.songHandler.addSongToQueue(message)
+				if (result === undefined) {
+					this.say(channel, 'Could not find a song with that information.')
+				}
+				this.say(channel, `@${username} successfully added ${result?.song.artists[0]} - ${result?.song.track} at position ${result?.index}`)
 			} catch (e) {
 				console.log(e)
 			}
