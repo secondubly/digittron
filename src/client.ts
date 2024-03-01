@@ -196,8 +196,10 @@ export class DigittronClient extends EventEmitter {
 				const result = await this.songHandler.addSongToQueue(message)
 				if (result === undefined) {
 					this.say(channel, 'Could not find a song with that information.')
+				} else {
+					const { song, index: position } = result
+					this.say(channel, `@${username} successfully added ${song.artists[0]} - ${song.track} at position ${position}`)
 				}
-				this.say(channel, `@${username} successfully added ${result?.song.artists[0]} - ${result?.song.track} at position ${result?.index}`)
 			} catch (e) {
 				console.log(e)
 			}
