@@ -1,13 +1,16 @@
+import { PermissionLevel } from '@prisma/client'
+import { DigittronClient } from '../../client'
+
 export interface CommandOptions {
 	/**
-	 * Command name (default alias)
+	 * Command name
 	 */
 	name: string
 
 	/**
-	 * Userlevel access (everyone, regular, vip, subscriber, moderator, broadcaster)
+	 * Userlevel access
 	 */
-	userlevel: keyof typeof UserLevel
+	userlevel: keyof typeof PermissionLevel
 
 	/**
 	 * Command description (required for output to !help <command>)
@@ -18,14 +21,12 @@ export interface CommandOptions {
 	 * Command examples (requited for output to !help <command>)
 	 */
 	examples?: string[]
-
 	/**
 	 * Command arguments
 	 */
 	args?: CommandArgument[]
-
 	/**
-	 * More aliases
+	 * Command aliases
 	 */
 	aliases?: string[]
 
@@ -43,7 +44,11 @@ export interface CommandOptions {
 	 * TextCommand
 	 */
 	message?: string
-	sendType?: keyof typeof MessageType
+
+	/**
+	 * Whether command is enabled or not (defaults to true if not present)
+	 */
+	enabled?: boolean
 }
 
 export interface CommandArgument {
@@ -67,42 +72,19 @@ export interface CommandArgument {
 	 */
 	prepare?: (value: unknown, msg?: ChatMessage) => string | number | boolean | void
 }
-
-export enum UserLevel {
-	vip = 'vip',
-	everyone = 'everyone',
-	regular = 'regular',
-	subscriber = 'subscriber',
-	moderator = 'moderator',
-	broadcaster = 'broadcaster'
-}
-
-export enum MessageType {
-	reply = 'reply',
-	actionReply = 'actionReply',
-	say = 'say',
-	actionSay = 'actionSay'
-}
-
 export type NamedParameters = Record<string, string | number | boolean>
 
 export type CommandProvider = Record<string, CommandOptions>
 
-export class BaseCommand {
+export class Command {
 	constructor(
-		public client: TwurpleClient,
+		public client: DigittronClient,
 		public options: CommandOptions
 	) {}
 
-	async onPubSub(event: PubSubRedemptionMessage, args?: string[]): Promise<void> {}
+	// async onPubSub(event: PubSubRedemptionMessage, args?: string[]): Promise<void> {}
 
-	/**
-	 * Method called when execCommand()
-	 *
-	 * @param msg
-	 * @param chatter
-	 */
-	async execute(msg: ChatMessage): Promise<any> {}
+	// async execute(msg: ChatMessage): Promise<any> {}
 
 	/**
 	 * Method called when command is executed
@@ -110,7 +92,7 @@ export class BaseCommand {
 	 * @param msg
 	 * @param parameters
 	 */
-	async run(msg: ChatMessage, parameters: unknown): Promise<any> {}
+	abstract run(msg: ChatMessage, parameters: unknown): Promise<unknown>
 
 	/**
 	 * Prepare the command to be executed
@@ -118,40 +100,40 @@ export class BaseCommand {
 	 * @param msg
 	 * @param parameters
 	 */
-	async prepareRun(msg: ChatMessage, parameters: string[]): Promise<any> {
-		const namedParameters: NamedParameters = {}
+	// async prepareRun(msg: ChatMessage, parameters: string[]): Promise<any> {
+	// 	const namedParameters: NamedParameters = {}
 
-		if (this.options.args && this.options.args.length > 0) {
-			for (let i = 0; i < this.options.args.length; i++) {
-				const args = this.options.args[i]
+	// 	if (this.options.args && this.options.args.length > 0) {
+	// 		for (let i = 0; i < this.options.args.length; i++) {
+	// 			const args = this.options.args[i]
 
-				if (parameters[i]) {
-					if (args.type) {
-						namedParameters[args.name] = args.type(parameters[i])
-					}
+	// 			if (parameters[i]) {
+	// 				if (args.type) {
+	// 					namedParameters[args.name] = args.type(parameters[i])
+	// 				}
 
-					if (args.prepare) {
-						const preparedValue = args.prepare(namedParameters[args.name] || parameters[i])
+	// 				if (args.prepare) {
+	// 					const preparedValue = args.prepare(namedParameters[args.name] || parameters[i])
 
-						if (preparedValue) {
-							namedParameters[args.name] = preparedValue
-						}
-					}
-				} else {
-					if (args.defaultValue) {
-						namedParameters[args.name] = args.defaultValue
-					} else {
-						namedParameters[args.name] = null
-					}
-				}
-			}
-		}
+	// 					if (preparedValue) {
+	// 						namedParameters[args.name] = preparedValue
+	// 					}
+	// 				}
+	// 			} else {
+	// 				if (args.defaultValue) {
+	// 					namedParameters[args.name] = args.defaultValue
+	// 				} else {
+	// 					namedParameters[args.name] = null
+	// 				}
+	// 			}
+	// 		}
+	// 	}
 
-		await this.run(msg, namedParameters)
-	}
+	// 	await this.run(msg, namedParameters)
+	// }
 
 	/**
-	 * Pre validation before to known if can execute command
+	 * Check to make sure command can be executed
 	 *
 	 * @param msg
 	 */
@@ -167,7 +149,7 @@ export class BaseCommand {
 			}
 		}
 
-		if (this.options.userlevel === UserLevel.everyone) {
+		if (this.options.userlevel === PermissionLevel.VIEWER) {
 			return true
 		}
 
@@ -181,31 +163,31 @@ export class BaseCommand {
 			validationPassed = true
 		}
 
-		if (this.options.userlevel === UserLevel.regular) {
-			if (![...this.client.config.botOwners, this.client.getUsername()].includes(msg.author.username)) {
-				return 'This command can be executed only from bot owners'
+		if (this.options.userlevel === PermissionLevel.REGULAR) {
+			if (![...this.client.getBotOwners(), this.client.getUsername()].includes(msg.author.username)) {
+				return 'Only bot owners can execute this command'
 			}
 		}
 
-		if (this.options.userlevel === UserLevel.subscriber) {
+		if (this.options.userlevel === PermissionLevel.SUBSCRIBER) {
 			if (!validationPassed && !msg.author.isSubscriber) {
-				return 'This command can be executed only from the subscribers'
+				return 'Only subscribers can execute this command'
 			}
 		}
 
-		if (this.options.userlevel === UserLevel.vip) {
+		if (this.options.userlevel === PermissionLevel.VIP) {
 			if (!validationPassed && !msg.author.isVip) {
-				return 'This command can be executed only from the vips'
+				return 'Only VIPs'
 			}
 		}
 
-		if (this.options.userlevel === UserLevel.moderator) {
+		if (this.options.userlevel === PermissionLevel.MODERATOR) {
 			if (!validationPassed) {
 				return 'This command can be executed only from the broadcaster'
 			}
 		}
 
-		if (this.options.userlevel === UserLevel.broadcaster) {
+		if (this.options.userlevel === PermissionLevel.BROADCASTER) {
 			if (!msg.author.isBroadcaster) {
 				return 'This command can be executed only from a mod or the broadcaster'
 			}
@@ -213,6 +195,14 @@ export class BaseCommand {
 
 		return true
 	}
+
+	/**
+	 * Makes an API call and retturns the result
+	 * @param url
+	 */
+	private static call(url: string) {}
+
+	public static parseArguments(input: string) {}
 }
 
 // export abstract class Command {

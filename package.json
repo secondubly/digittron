@@ -23,10 +23,11 @@
   },
   "homepage": "https://github.com/secondubly/digittron#readme",
   "dependencies": {
-    "@secondubly/digittron-db": "4.0.1",
+    "@secondubly/digittron-db": "^6.1.0",
     "@spotify/web-api-ts-sdk": "^1.2.0",
     "@twurple/api": "^7.0.10",
     "@twurple/auth": "^7.0.10",
+    "@twurple/auth-tmi": "^7.0.10",
     "@twurple/chat": "^7.0.10",
     "@twurple/eventsub-http": "^7.0.10",
     "@twurple/eventsub-ngrok": "^7.0.10",
@@ -37,7 +38,10 @@
     "http-status-codes": "^2.3.0",
     "node-fetch": "^3.3.2",
     "redis": "^4.6.10",
-    "tmi.js": "^1.8.5"
+    "strict-event-emitter": "^0.5.1",
+    "tmi.js": "^1.8.5",
+    "ts-twitch-api": "^0.2.1",
+    "winston": "^3.11.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.19",

@@ -1,142 +1,135 @@
-const { prisma } = await createContext()
-import { ChatClient, ChatMessage } from '@twurple/chat'
-import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
 import { createContext } from '@secondubly/digittron-db'
+const { prisma } = await createContext()
+import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
+import { ChatUserstate, Client } from '@twurple/auth-tmi'
+import { EventSubClient } from './lib/client/EventSubClient.js'
 import { CommandCache } from './lib/structures/CommandCache.js'
-import { Scheduler } from './lib/structures/Scheduler.js'
+import { getUsersData, redisClient } from './lib/utils.js'
 import { ApiClient } from '@twurple/api'
-import { CustomRewardsCache } from './lib/structures/CustomRewardsCache.js'
-import { getParameterByName, getUserData, redisClient } from './lib/utils.js'
-import { NgrokAdapter } from '@twurple/eventsub-ngrok'
-import { EventSubHttpListener } from '@twurple/eventsub-http'
-import { onSongRequestRedeem } from './listeners/onSongRequestRedeem.js'
-import { HttpStatusCodeError } from '@twurple/api-call'
-import { StatusCodes } from 'http-status-codes'
+import { EventEmitter } from 'events'
+import { Logger } from './lib/client/Logger.js'
+import { CommandHandler } from './lib/commands/commandHandler.js'
+import { Command } from './lib/structures/Command.js'
+import { Spotify } from './lib/utils/SongRequest.js'
 
-export class TwitchBot {
-	private client?: ChatClient
-	private apiClient?: ApiClient
-	private httpListener?: EventSubHttpListener
-	public commandCache?: CommandCache
-	public rewardsCache?: CustomRewardsCache
-	public scheduler?: Scheduler
-	public id?: string
+type DigittronConfig = {
+	prefix: string
+	channels: string[]
+	CLIENT_ID: string
+	CLIENT_SECRET: string
+	ENV?: string
+}
 
-	constructor(
-		private channels: string[],
-		private clientID: string | undefined,
-		private clientSecret: string | undefined,
-		private messageCallback: (channel: string, user: string, message: string, info: ChatMessage) => void
-	) {
-		this.init()
+export class DigittronClient extends EventEmitter {
+	private id: string = ''
+	public db = prisma
+	public tmi: Client
+	public api: ApiClient
+	public auth: RefreshingAuthProvider
+	public eventSub: EventSubClient
+	public logger: typeof Logger
+	public commands: CommandCache
+	private config: DigittronConfig
+	private handler: typeof CommandHandler
+	private songHandler: typeof Spotify
+	constructor(config: DigittronConfig) {
+		super()
+
+		this.commands = new CommandCache([])
+		this.config = config
+		this.logger = Logger
+		this.handler = CommandHandler
+		this.songHandler = Spotify
+
+		this.auth = new RefreshingAuthProvider({
+			clientId: this.config.CLIENT_ID,
+			clientSecret: this.config.CLIENT_SECRET
+		})
+
+		this.auth.onRefresh(async (userId, newTokenData) => {
+			// REVIEW: do we need to await this?
+			await redisClient.set(userId, JSON.stringify(newTokenData))
+		})
+
+		this.auth.onRefreshFailure((userId) => {
+			this.logger.warn(`User ${userId} needs to reauthenticate.`)
+		})
+
+		this.connect()
 	}
 
-	private async init(): Promise<void> {
-		if (this.channels.length === 0 || !this.clientID || !this.clientSecret) {
-			throw new Error('\x1b[41m[INFO] Channels, Client ID or Client Secret is not set!\x1b[0m')
+	async connect(): Promise<void> {
+		this.id = (await redisClient.get('twitch_bot_id')) ?? this.id
+
+		if (this.id === '') {
+			throw Error('Bot ID could not be found.')
 		}
 
-		const botAccessToken = await redisClient.get('twitch_bot_token')
-		if (!botAccessToken) {
-			throw new Error('\x1b[41m[INFO] Bot access token not found!\x1b[0m')
+		const token = await redisClient.get(this.id)
+		if (!token) {
+			throw Error('Bot access token not found, please reauthenticate.')
 		}
 
-		const parsedBotToken: AccessToken = JSON.parse(botAccessToken)
-		const tokenData: AccessToken = {
-			accessToken: parsedBotToken.accessToken,
-			refreshToken: parsedBotToken.refreshToken,
-			// auto-refresh the bot access token on startup
-			expiresIn: 0,
-			obtainmentTimestamp: 0,
-			scope: parsedBotToken.scope
+		const botAccessToken = JSON.parse(token) as AccessToken
+		// force token refresh
+		botAccessToken.expiresIn = 0
+		botAccessToken.obtainmentTimestamp = 0
+		await this.auth.addUser(this.id, botAccessToken, ['chat'])
+
+		// get all channel tokens
+		const userData = await getUsersData(this.config.channels)
+		if (!userData || userData.length === 0) {
+			throw new Error('No user data found for config twitch channels')
 		}
 
-		const authProvider = new RefreshingAuthProvider({
-			clientId: this.clientID,
-			clientSecret: this.clientSecret
-		})
-
-		this.id = (await redisClient.get('twitch_bot_id')) ?? undefined
-		authProvider.onRefresh(async (userId: string, newTokenData: AccessToken) => {
-			const stringToken = JSON.stringify(newTokenData)
-			if (userId === this.id) {
-				await redisClient.set('twitch_bot_token', stringToken)
-			} else if (!this.id) {
-				// get and set bot id
-				const user = await getUserData(newTokenData)
-				this.id = user?.id
-				if (user?.id) {
-					redisClient.set('twitch_bot_id', user.id)
-				}
-			} else {
-				await redisClient.set('twitch_broadcaster_token', stringToken)
+		const userIds = userData.map((user) => user.id)
+		const tokens = await redisClient.MGET(userIds) // NOTE: MGET guarantees return order https://github.com/redis/redis/issues/4647
+		for (const [idx, token] of tokens.entries()) {
+			if (!token) {
+				continue
 			}
-		})
-
-		// adds bot auth token for automatic refreshing
-		await authProvider.addUserForToken(tokenData, ['chat'])
-
-		// add broadcaster auth token for automatic refreshing
-		const broadcasterCachedToken = process.env.NODE_ENV
-			? await redisClient.get('test_broadcaster_token')
-			: await redisClient.get('twitch_broadcaster_token')
-		if (!broadcasterCachedToken) {
-			throw new Error('\x1b[41m[INFO] Broadcaster access token not found!\x1b[0m')
+			const accessToken = JSON.parse(token) as AccessToken
+			this.auth.addUser(userIds[idx], accessToken)
 		}
-		const parsedBroadcasterToken: AccessToken = JSON.parse(broadcasterCachedToken)
-		await authProvider.addUserForToken(parsedBroadcasterToken)
-
-		this.apiClient = new ApiClient({
-			authProvider
-		})
-
-		this.client = new ChatClient({
-			authProvider,
-			channels: this.channels,
-			isAlwaysMod: true,
-			logger: {
-				minLevel: process.env.NODE_ENV ? 'DEBUG' : 'INFO'
-			}
-		})
-
-		this.client.onMessage((channel, user, msg, info) => {
-			this.messageCallback(channel, user, msg, info)
-		})
-
-		await this.apiClient?.eventSub.deleteAllSubscriptions()
-
-		const user = await this.apiClient?.users.getUserByName(this.channels[0])
-		await this.setupEventListener() // REVIEW: should we move this into start?
-		if (this.httpListener) {
-			this.httpListener.start()
-			this.httpListener.onChannelRedemptionAddForReward(
-				user!.id,
-				process.env.TWITCH_SONG_REQUEST_REWARD_ID ?? '',
-				({ userName: username, rewardCost, rewardTitle, broadcasterName }) => {
-					onSongRequestRedeem(username, rewardCost, rewardTitle, broadcasterName, this.client)
-				}
-			)
-		}
-
-		await this.start()
-	}
-
-	private async start(): Promise<void> {
 		await this.loadCommands()
-		await this.loadCustomRewards()
-		this.setupScheduler()
-		this.client?.connect()
-		this.client?.onAuthenticationSuccess(() => {
-			console.log(`[${new Date().toISOString()}] \x1b[32m[INFO] Connected!\x1b[0m`)
+
+		this.api = new ApiClient({
+			authProvider: this.auth,
+			logger: {
+				timestamps: true,
+				colors: true,
+				emoji: true,
+				minLevel: 3
+			}
 		})
+
+		this.tmi = new Client({
+			options: {
+				debug: true
+			},
+			connection: {
+				secure: true,
+				reconnect: true
+			},
+			authProvider: this.auth,
+			channels: this.config.channels
+		})
+
+		this.eventSub = new EventSubClient(this)
+		await this.eventSub.connect()
+
+		this.tmi.on('message', this.onMessage.bind(this))
+		this.tmi.on('redeem', this.onRedeem.bind(this))
+		this.tmi.on('connected', (address: string, port: number) => {
+			this.logger.info(`Connected to ${address}:${port}`)
+		})
+
+		await this.tmi.connect()
 	}
 
-	async loadCommands(): Promise<void> {
-		if (!this.client) {
-			throw Error('\x1b[41m[INFO] Client not initialized!\x1b[0m')
-		}
+	private async loadCommands(): Promise<void> {
 		try {
-			const commands = await prisma.commands.findMany({
+			const results = await prisma.commands.findMany({
 				include: {
 					command_permissions: {
 						select: {
@@ -146,68 +139,65 @@ export class TwitchBot {
 				}
 			})
 
-			const parsedCommands = commands.map((command) => {
-				return {
-					name: command.name,
-					aliases: command.aliases as string[],
-					response: command.response,
-					enabled: command.enabled,
-					visible: command.visible,
-					permission: command.command_permissions!.level as string
-				}
-			})
+			// const commands: Command[] = results.map((c) => {
+			// 	const args = this.handler.parseArguments(c.response)
+			// 	return new Command(this, {
+			// 		name: c.name,
+			// 		userlevel: c.command_permissions.level,
+			// 		description: '',
+			// 		examples: [],
+			// 		args: [],
+			// 		aliases: c.aliases as string[],
+			// 		hideFromHelp: false,
+			// 		botChannelOnly: false,
+			// 		message: c.response,
+			// 		enabled: true
+			// 	})
+			// })
 
-			this.commandCache = new CommandCache(parsedCommands)
+			// this.commands = new CommandCache(commands)
 		} catch (err) {
-			console.log(err)
+			console.error(err)
 		}
 	}
 
-	async loadCustomRewards(): Promise<void> {
-		try {
-			const user = await this.apiClient?.users.getUserByName(this.channels[0])
-			const channelPointRewards = (await this.apiClient?.channelPoints.getCustomRewards(user!.id)) ?? []
-			this.rewardsCache = new CustomRewardsCache(channelPointRewards)
-		} catch (e) {
-			if (e instanceof HttpStatusCodeError && e.statusCode === StatusCodes.FORBIDDEN) {
-				const id = getParameterByName('broadcaster_id', e.url)
-				console.warn(`User ${id} is not an Affiliate or Partner`)
+	getChannels() {
+		return this.config.channels
+	}
+
+	getUsername() {
+		return this.tmi.getUsername()
+	}
+
+	getBotOwners() {
+		return []
+	}
+
+	async say(channel: string, message: string): Promise<[string]> {
+		return await this.tmi.say(channel, message)
+	}
+
+	private async onMessage(channel: string, tags: ChatUserstate, message: string, self: boolean): Promise<void> {
+		if (self) {
+			return
+		}
+
+		// bot.updateChatActivity(channel)
+		this.emit('message', message)
+
+		if (message.trim().startsWith('!')) {
+			this.handler.run(channel, message, tags.username)
+		}
+	}
+
+	private async onRedeem(channel: string, _username: string, rewardType: string, _tags: ChatUserstate, message: string): Promise<void> {
+		if (rewardType === process.env.TWITCH_SONG_REQUEST_REWARD_ID) {
+			try {
+				const spotifyData = await this.songHandler.addSongToQueue(message)
+				this.say(channel, 'success')
+			} catch (e) {
+				console.log(e)
 			}
 		}
-	}
-
-	setupScheduler(): void {
-		this.scheduler = new Scheduler()
-	}
-
-	async updateChatActivity(channel: string) {
-		if (!this.scheduler) {
-			throw Error('\x1b[41m[INFO] Scheduler not initialized!\x1b[0m')
-		}
-		this.scheduler.chatActivity++
-		this.scheduler.channel = channel
-	}
-
-	async send(channel: string, message: string): Promise<void> {
-		if (!this.channels.includes(channel)) {
-			throw Error("\x1b[41m[INFO] I can't send messages in that channel!\x1b[0m")
-		}
-		this.client?.say(channel, message)
-	}
-
-	async setupEventListener() {
-		if (!this.apiClient) {
-			throw new Error('\x1b[41m[INFO] Broadcaster access token not found!\x1b[0m')
-		}
-
-		this.httpListener = new EventSubHttpListener({
-			adapter: new NgrokAdapter({
-				ngrokConfig: {
-					authtoken: process.env.NGROK_AUTH_TOKEN
-				}
-			}),
-			apiClient: this.apiClient,
-			secret: process.env.LISTENER_SECRET ?? 'thisShouldBeARandomlyGeneratedFixedString'
-		})
 	}
 }
