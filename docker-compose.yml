@@ -1,0 +1,44 @@
+services:
+  prisma-studio:
+          container_name: prisma-studio
+          image: timothyjmiller/prisma-studio:latest
+          restart: unless-stopped
+          depends_on:
+              postgres:
+                  condition: service_healthy
+          profiles:
+              - dev
+          environment:
+              # prisma studio requires the env variable name be POSTGRES_URL
+              POSTGRES_URL: ${DATABASE_URL}
+          ports:
+              - ${PRISMA_STUDIO_PORT}:${PRISMA_STUDIO_PORT}
+  postgres:
+        image: postgres:16.2
+        container_name: postgres
+        hostname: postgres
+        environment:
+            POSTGRES_USER: ${DB_USER}
+            POSTGRES_PASSWORD: ${DB_USER_PASS}
+            POSTGRES_DB: ${DB_NAME}
+        ports:
+            - ${DB_PORT}:${DB_PORT}
+        restart: 'unless-stopped'
+        volumes:
+            - 'pg-data:/var/lib/postgresql/data'
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+  digittron:
+        build: .
+        container_name: digittron
+        depends_on:
+          postgres:
+            condition: service_healthy
+          tty: true
+          env_file:
+            - src/.env
+volumes:
+  pg-data:
