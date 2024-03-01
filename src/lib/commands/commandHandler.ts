@@ -1,6 +1,7 @@
-import { isNullOrEmpty } from '../utils.js'
-import { executeBaseCommand } from './baseCommands.js'
+import { CommandArgument } from '../structures/Command.js'
 
+
+private const 
 // TODO: make static class
 export class CommandHandler {
 	public static async run(channel: string, message: string, author?: string) {}
@@ -22,5 +23,9 @@ export class CommandHandler {
 		}
 
 		return {}
+	}
+
+	public static parseArguments(input: string): CommandArgument[] {
+		// parse out any arguments from the response string
 	}
 }

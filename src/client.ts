@@ -1,5 +1,6 @@
 import { createContext } from '@secondubly/digittron-db'
 const { prisma } = await createContext()
+import { parseArguments } from './lib/structures/Command'
 import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
 import { ChatUserstate, Client } from '@twurple/auth-tmi'
 import { EventSubClient } from './lib/client/EventSubClient.js'
@@ -9,6 +10,7 @@ import { ApiClient } from '@twurple/api'
 import { EventEmitter } from 'events'
 import { Logger } from './lib/client/Logger.js'
 import { CommandHandler } from './lib/commands/commandHandler.js'
+import { Command } from './lib/structures/Command.js'
 
 type DigittronConfig = {
 	prefix: string
@@ -124,7 +126,7 @@ export class DigittronClient extends EventEmitter {
 
 	private async loadCommands(): Promise<void> {
 		try {
-			const commands = await prisma.commands.findMany({
+			const results = await prisma.commands.findMany({
 				include: {
 					command_permissions: {
 						select: {
@@ -134,18 +136,23 @@ export class DigittronClient extends EventEmitter {
 				}
 			})
 
-			const parsedCommands = commands.map((command) => {
-				return {
-					name: command.name,
-					aliases: command.aliases as string[],
-					response: command.response,
-					enabled: command.enabled,
-					visible: command.visible,
-					permission: command.command_permissions!.level as string
-				}
+			const commands: Command[] = results.map((c) => {
+				const args = parseArguments(c.response)
+				return new Command(this, {
+					name: c.name,
+					userlevel: c.command_permissions.level,
+					description: '',
+					examples: [],
+					args: [],
+					aliases: c.aliases as string[],
+					hideFromHelp: false,
+					botChannelOnly: false,
+					message: c.response,
+					enabled: true
+				})
 			})
 
-			this.commands = new CommandCache(parsedCommands)
+			this.commands = new CommandCache(commands)
 		} catch (err) {
 			console.error(err)
 		}

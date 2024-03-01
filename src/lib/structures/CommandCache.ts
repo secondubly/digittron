@@ -1,50 +1,46 @@
 import { createContext } from '@secondubly/digittron-db'
+import { PermissionLevel } from '@prisma/client'
+import type { CommandOptions, Command } from './Command'
 const { prisma } = await createContext()
 
-export type Command = {
+export type ParsedCommand = {
 	name: string
 	aliases: string[]
 	response: string
 	enabled: boolean
 	visible: boolean
-	permission: string
+	permission: keyof typeof PermissionLevel
 }
 
 export class CommandCache {
-	cache: Map<string, Command>
+	cache: Record<CommandOptions['name'], Command> = {}
 
 	constructor(commands: Command[]) {
-		this.cache = new Map<string, Command>(commands.map((command) => [command.name, command]))
+		commands.forEach((command) => {
+			this.cache[command.options.name] = command
+		})
 	}
 
 	set(command: Command) {
-		this.cache.set(command.name, command)
+		this.cache[command.options.name] = command
 	}
 
 	get(command: string) {
-		if (this.has(command)) {
-			return this.cache.get(command)
-		} else {
-			return undefined
-		}
+		return this.cache[command]
 	}
 
-	has(command: string): boolean {
-		return this.cache.has(command)
-	}
-
-	async updateCommand(command: Command, updatedFields: Map<string, unknown>) {
+	async updateCommand(command: Command, updatedFields: Record<string, string | string[] | boolean | null>) {
 		this.set(command)
 		prisma.commands.update({
 			where: {
-				name: command.name
+				name: command.options.name
 			},
 			data: {
-				name: updatedFields.get('name') || undefined,
-				aliases: updatedFields.get('aliases') || undefined,
-				response: updatedFields.get('response') || undefined,
-				enabled: (updatedFields.get('enabled') as boolean) || undefined,
-				visible: (updatedFields.get('visible') as boolean) || undefined
+				name: updatedFields['name'] as string,
+				aliases: updatedFields['aliases'] as string[],
+				response: updatedFields['response'] as string,
+				enabled: updatedFields['enabled'] as boolean,
+				visible: updatedFields['visible'] as boolean
 			}
 		})
 	}

@@ -1,5 +1,4 @@
 import { PermissionLevel } from '@prisma/client'
-import { ChatMessage } from './chat/ChatMessage'
 import { DigittronClient } from '../../client'
 
 export interface CommandOptions {
@@ -22,12 +21,10 @@ export interface CommandOptions {
 	 * Command examples (requited for output to !help <command>)
 	 */
 	examples?: string[]
-
 	/**
 	 * Command arguments
 	 */
 	args?: CommandArgument[]
-
 	/**
 	 * Command aliases
 	 */
@@ -52,8 +49,6 @@ export interface CommandOptions {
 	 * Whether command is enabled or not (defaults to true if not present)
 	 */
 	enabled?: boolean
-
-	sendType?: keyof typeof MessageType
 }
 
 export interface CommandArgument {
@@ -77,19 +72,11 @@ export interface CommandArgument {
 	 */
 	prepare?: (value: unknown, msg?: ChatMessage) => string | number | boolean | void
 }
-
-export enum MessageType {
-	reply = 'reply',
-	actionReply = 'actionReply',
-	say = 'say',
-	actionSay = 'actionSay'
-}
-
 export type NamedParameters = Record<string, string | number | boolean>
 
 export type CommandProvider = Record<string, CommandOptions>
 
-export abstract class Command {
+export class Command {
 	constructor(
 		public client: DigittronClient,
 		public options: CommandOptions
@@ -178,19 +165,19 @@ export abstract class Command {
 
 		if (this.options.userlevel === PermissionLevel.REGULAR) {
 			if (![...this.client.getBotOwners(), this.client.getUsername()].includes(msg.author.username)) {
-				return 'This command can be executed only from bot owners'
+				return 'Only bot owners can execute this command'
 			}
 		}
 
 		if (this.options.userlevel === PermissionLevel.SUBSCRIBER) {
 			if (!validationPassed && !msg.author.isSubscriber) {
-				return 'This command can be executed only from the subscribers'
+				return 'Only subscribers can execute this command'
 			}
 		}
 
 		if (this.options.userlevel === PermissionLevel.VIP) {
 			if (!validationPassed && !msg.author.isVip) {
-				return 'This command can be executed only from the vips'
+				return 'Only VIPs'
 			}
 		}
 
@@ -214,6 +201,8 @@ export abstract class Command {
 	 * @param url
 	 */
 	private static call(url: string) {}
+
+	public static parseArguments(input: string) {}
 }
 
 // export abstract class Command {
