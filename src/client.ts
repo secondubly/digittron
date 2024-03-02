@@ -9,7 +9,6 @@ import { ApiClient } from '@twurple/api'
 import { EventEmitter } from 'events'
 import { Logger } from './lib/client/Logger.js'
 import { CommandHandler } from './lib/commands/commandHandler.js'
-import { Command } from './lib/structures/Command.js'
 import { Spotify } from './lib/utils/SongRequest.js'
 
 type DigittronConfig = {
@@ -23,10 +22,10 @@ type DigittronConfig = {
 export class DigittronClient extends EventEmitter {
 	private id: string = ''
 	public db = prisma
-	public tmi: Client
-	public api: ApiClient
+	public tmi!: Client
+	public api!: ApiClient
 	public auth: RefreshingAuthProvider
-	public eventSub: EventSubClient
+	public eventSub!: EventSubClient
 	public logger: typeof Logger
 	public commands: CommandCache
 	private config: DigittronConfig
@@ -119,6 +118,7 @@ export class DigittronClient extends EventEmitter {
 		await this.eventSub.connect()
 
 		this.tmi.on('message', this.onMessage.bind(this))
+		// @ts-ignore: there is an overload constructor that matches this call
 		this.tmi.on('redeem', this.onRedeem.bind(this))
 		this.tmi.on('connected', (address: string, port: number) => {
 			this.logger.info(`Connected to ${address}:${port}`)

@@ -1,5 +1,7 @@
 FROM node:20-buster-slim
 ENV NODE_ENV='development'
+ENV TOKEN="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"
+ENV OWNER="@secondubly"
 
 RUN apt-get update && apt-get install libssl-dev ca-certificates -y
 
@@ -8,6 +10,9 @@ WORKDIR /usr/src/app
 
 # Copy package.json and package-lock.json
 COPY package*.json .
+
+# Copy npmrc
+COPY .npmrc .
 
 # Copy src files
 COPY src/ src/

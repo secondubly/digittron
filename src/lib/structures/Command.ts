@@ -70,13 +70,14 @@ export interface CommandArgument {
 	/**
 	 * Prepare value
 	 */
-	prepare?: (value: unknown, msg?: ChatMessage) => string | number | boolean | void
+	// prepare?: (value: unknown, msg?: ChatMessage) => string | number | boolean | void
+	prepare?: (value: unknown, msg?: string) => string | number | boolean | void
 }
 export type NamedParameters = Record<string, string | number | boolean>
 
 export type CommandProvider = Record<string, CommandOptions>
 
-export class Command {
+export abstract class Command {
 	constructor(
 		public client: DigittronClient,
 		public options: CommandOptions
@@ -92,7 +93,7 @@ export class Command {
 	 * @param msg
 	 * @param parameters
 	 */
-	abstract run(msg: ChatMessage, parameters: unknown): Promise<unknown>
+	abstract run(msg: string, parameters: unknown): Promise<unknown>
 
 	/**
 	 * Prepare the command to be executed
@@ -137,64 +138,64 @@ export class Command {
 	 *
 	 * @param msg
 	 */
-	preValidate(msg: ChatMessage): string | boolean {
-		// TODO: withWhisper command option
-		if (msg.messageType === 'whisper') {
-			return 'This command can be executed only in the bot channel'
-		}
+	// preValidate(msg: ChatMessage): string | boolean {
+	// 	// TODO: withWhisper command option
+	// 	if (msg.messageType === 'whisper') {
+	// 		return 'This command can be executed only in the bot channel'
+	// 	}
 
-		if (this.options.botChannelOnly) {
-			if (msg.channel.name !== this.client.getUsername()) {
-				return 'This command can be executed only in the bot channel'
-			}
-		}
+	// 	if (this.options.botChannelOnly) {
+	// 		if (msg.channel.name !== this.client.getUsername()) {
+	// 			return 'This command can be executed only in the bot channel'
+	// 		}
+	// 	}
 
-		if (this.options.userlevel === PermissionLevel.VIEWER) {
-			return true
-		}
+	// 	if (this.options.userlevel === PermissionLevel.VIEWER) {
+	// 		return true
+	// 	}
 
-		let validationPassed = false
+	// 	let validationPassed = false
 
-		if (msg.author.isBroadcaster) {
-			validationPassed = true
-		}
+	// 	if (msg.author.isBroadcaster) {
+	// 		validationPassed = true
+	// 	}
 
-		if (msg.author.isModerator) {
-			validationPassed = true
-		}
+	// 	if (msg.author.isModerator) {
+	// 		validationPassed = true
+	// 	}
 
-		if (this.options.userlevel === PermissionLevel.REGULAR) {
-			if (![...this.client.getBotOwners(), this.client.getUsername()].includes(msg.author.username)) {
-				return 'Only bot owners can execute this command'
-			}
-		}
+	// 	if (this.options.userlevel === PermissionLevel.REGULAR) {
+	// 		if (![...this.client.getBotOwners(), this.client.getUsername()].includes(msg.author.username)) {
+	// 			return 'Only bot owners can execute this command'
+	// 		}
+	// 	}
 
-		if (this.options.userlevel === PermissionLevel.SUBSCRIBER) {
-			if (!validationPassed && !msg.author.isSubscriber) {
-				return 'Only subscribers can execute this command'
-			}
-		}
+	// 	if (this.options.userlevel === PermissionLevel.SUBSCRIBER) {
+	// 		if (!validationPassed && !msg.author.isSubscriber) {
+	// 			return 'Only subscribers can execute this command'
+	// 		}
+	// 	}
 
-		if (this.options.userlevel === PermissionLevel.VIP) {
-			if (!validationPassed && !msg.author.isVip) {
-				return 'Only VIPs'
-			}
-		}
+	// 	if (this.options.userlevel === PermissionLevel.VIP) {
+	// 		if (!validationPassed && !msg.author.isVip) {
+	// 			return 'Only VIPs'
+	// 		}
+	// 	}
 
-		if (this.options.userlevel === PermissionLevel.MODERATOR) {
-			if (!validationPassed) {
-				return 'This command can be executed only from the broadcaster'
-			}
-		}
+	// 	if (this.options.userlevel === PermissionLevel.MODERATOR) {
+	// 		if (!validationPassed) {
+	// 			return 'This command can be executed only from the broadcaster'
+	// 		}
+	// 	}
 
-		if (this.options.userlevel === PermissionLevel.BROADCASTER) {
-			if (!msg.author.isBroadcaster) {
-				return 'This command can be executed only from a mod or the broadcaster'
-			}
-		}
+	// 	if (this.options.userlevel === PermissionLevel.BROADCASTER) {
+	// 		if (!msg.author.isBroadcaster) {
+	// 			return 'This command can be executed only from a mod or the broadcaster'
+	// 		}
+	// 	}
 
-		return true
-	}
+	// 	return true
+	// }
 
 	/**
 	 * Makes an API call and retturns the result
