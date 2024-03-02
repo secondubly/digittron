@@ -44,6 +44,21 @@ let questions = [
             }
             return 'Invalid length for Client Secret'
         }  
+    },
+    {
+        type: 'list',
+        name: 'channels',
+        message: 'Please enter the usernames of the twitch channel the bot should join separated by commas',
+        initial: '',
+        separator: ','
+    },
+    {
+        type: 'text',
+        name: 'username',
+        message: 'What is the bot account\'s username?'
+    },
+    {
+        
     }
 ];
 
@@ -64,13 +79,21 @@ async function readWriteAsync(id) {
 
 await (async() => {
     const response = await prompt(questions)
-    const {client_id: clientID, client_secret: clientSecret} = response
-    console.log(clientID)
-    fs.copyFile('./src/.env.example', './src/.env', (err) => {
-        if (err) {
-            throw err
-        }
-    })
+    const {
+        client_id: clientID, 
+        client_secret: clientSecret,
+        channels: channels
+    } = response
+    console.log('Channels: ', channels)
+    // fs.copyFile('./src/.env.example', './src/.env', (err) => {
+    //     if (err) {
+    //         throw err
+    //     }
+    // })
 
-    await readWriteAsync(clientID)
+    // const writeData = {
+    //     clientID,
+    //     clientSecret
+    // }
+    // await readWriteAsync(clientID)
 })()
