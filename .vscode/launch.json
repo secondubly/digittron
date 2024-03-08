@@ -5,47 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "name": "Docker: Attach to Node",
+            "type": "docker",
             "request": "launch",
-            "name": "Launch Program",
-            "program": "${workspaceFolder}/src/bot.ts",
-            "preLaunchTask": "tsc: build - src/tsconfig.json",
-            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-            "envFile": "${workspaceFolder}/src/.env",
-            "console": "internalConsole"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Debug Typescript",
-            "runtimeArgs": [
-                "-r",
-                "ts-node/register",
-                "--loader",
-                "ts-node/esm"
-            ],
-            "args": [
-                "${workspaceFolder}/src/bot.ts"
-            ],
-            "env": {
-                "TS_NODE_PROJECT": "${workspaceFolder}/src/tsconfig.json"
-            },
-            "envFile": "${workspaceFolder}/src/.env",
-            "console": "internalConsole"
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "Debug Current Test File",
-            "autoAttachChildProcesses": true,
-            "skipFiles": [
-                "<node_internals>/**",
-                "**/node_modules/**"
-            ],
-            "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
-            "args": ["run", "${relativeFile}"],
-            "smartStep": true,
-            "console": "integratedTerminal"
+			"preLaunchTask": "Compose Up",
+			"postDebugTask": "Compose Down",
+            "platform": "node"
         }
     ]
 }
