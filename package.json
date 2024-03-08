@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/secondubly/digittron#readme",
   "dependencies": {
-    "@secondubly/digittron-db": "^6.1.0",
+    "@secondubly/digittron-db": "^6.1.1",
     "@spotify/web-api-ts-sdk": "^1.2.0",
     "@twurple/api": "^7.0.10",
     "@twurple/auth": "^7.0.10",
@@ -34,6 +34,7 @@
     "@types/jest": "^29.5.12",
     "@types/tmi.js": "^1.8.5",
     "dotenv": "^16.3.1",
+    "dotenv-cli": "^7.3.0",
     "dotenv-flow": "^4.0.0",
     "http-status-codes": "^2.3.0",
     "node-fetch": "^3.3.2",

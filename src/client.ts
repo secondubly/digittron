@@ -1,5 +1,7 @@
 import { createContext } from '@secondubly/digittron-db'
 const { prisma } = await createContext()
+import { PrismaClientInitializationError } from '@prisma/client/runtime/library.js'
+
 import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
 import { ChatUserstate, Client } from '@twurple/auth-tmi'
 import { EventSubClient } from './lib/client/EventSubClient.js'
@@ -157,7 +159,14 @@ export class DigittronClient extends EventEmitter {
 
 			// this.commands = new CommandCache(commands)
 		} catch (err) {
-			console.error(err)
+			if (err instanceof PrismaClientInitializationError) {
+				if (err.errorCode === 'P1001') {
+					// try to reconnect
+					this.logger.info('Attempting to reconnect to database')
+					await prisma.$connect()
+				}
+				console.error(err)
+			}
 		}
 	}
 

@@ -7,7 +7,7 @@ import { GetUsersResponse, User } from 'ts-twitch-api'
 import type { CommandArgument } from '../lib/structures/Command'
 
 export const redisClient = await createClient({
-	url: process.env.REDIS_URL
+	url: 'redis://redis:6379'
 })
 	.on('error', (err) => console.error('Redis Client Error', err))
 	.connect()

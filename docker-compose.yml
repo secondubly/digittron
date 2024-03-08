@@ -1,3 +1,4 @@
+name: digittron
 services:
   prisma-studio:
           container_name: prisma-studio
@@ -12,7 +13,7 @@ services:
               # prisma studio requires the env variable name be POSTGRES_URL
               POSTGRES_URL: ${DATABASE_URL}
           ports:
-              - '5555:5555'
+              - ${PRISMA_STUDIO_PORT}:${PRISMA_STUDIO_PORT}
   postgres:
         image: postgres:16.2
         container_name: postgres
@@ -36,36 +37,39 @@ services:
         container_name: redis
         restart: always
         ports:
-            - '6379:6379'
+            - ${REDIS_PORT}:${REDIS_PORT}
         command: redis-server --save 20 1 --loglevel warning
         volumes:
             - 'cache:/data'
         healthcheck:
-            test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+            test: [ "CMD", "redis-cli", "ping" ]
             interval: 10s
             timeout: 5s
             retries: 5
-            start_period: 30s
-  digittron:
+  bot:
+        container_name: bot
         build: 
             context: .
+            args:
+                DATABASE_URL: ${DATABASE_URL}
             secrets:
                 - TOKEN
-        container_name: digittron
         depends_on:
             postgres:
                 condition: service_healthy
             redis:
                 condition: service_healthy
         tty: true
+        environment:
+            DATABASE_URL: ${DATABASE_URL}
         env_file:
             - src/.env
 volumes:
   pg-data:
     driver: local
-
   cache:
     driver: local
+
 secrets:
     TOKEN:
         environment: "TOKEN"

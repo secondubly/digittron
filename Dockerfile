@@ -1,35 +1,30 @@
-ARG OWNER
-FROM node:20-buster-slim
-ENV NODE_ENV 'development'
-ENV OWNER "secondubly"
+FROM node:lts-slim AS builder
+ARG OWNER="secondubly"
+ENV OWNER $OWNER
+ENV NODE_ENV $NODE_ENV
 
-RUN apt-get update && apt-get install libssl-dev ca-certificates -y
+RUN npm i npm@latest -g && \
+    apt-get update -y && apt-get install -y openssl
 
-# Create app directory
-WORKDIR /usr/src/app
+WORKDIR /opt/bot
+COPY ./docker-entrypoint.sh ./docker-entrypoint.sh
+ENTRYPOINT [ "docker-entrypoint.sh" ]
 
-# Copy package.json and package-lock.json
-COPY package*.json .
+COPY --chown=node:node package.json package-lock.json ./
 
-# Setup npmrc
 RUN --mount=type=secret,id=TOKEN \
     TOKEN=$(cat /run/secrets/TOKEN) && \
-    echo //npm.pkg.github.com/:_authToken=${TOKEN} >> ~/.npmrc
-RUN echo @${OWNER}:registry=https://npm.pkg.github.com/ >> ~/.npmrc
+    echo //npm.pkg.github.com/:_authToken=${TOKEN} >> ~/.npmrc && \
+    echo @${OWNER}:registry=https://npm.pkg.github.com/ >> ~/.npmrc && \
+    npm ci && npm cache clean --force
 
-RUN cat ~/.npmrc
+USER node
 
-# Copy src files
-COPY src/ src/
+ENV PATH /opt/bot/node_modules/.bin:$PATH
 
-# Install packages
-RUN npm ci
+WORKDIR /opt/bot
+COPY --chown=node:node . .
 
-# remove github token from npmrc
-RUN echo > ~/.npmrc
-
-# Build the project
+# build source
 RUN npm run build
-
-# Run the start script in package.json
 CMD ["npm", "run", "start"]
