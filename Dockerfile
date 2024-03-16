@@ -27,4 +27,4 @@ COPY --chown=node:node . .
 
 # build source
 RUN npm run build
-CMD ["npm", "run", "start"]
+CMD ["./docker-entrypoint.sh"]
