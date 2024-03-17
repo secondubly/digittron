@@ -4,10 +4,9 @@ import { createClient } from 'redis'
 import fetch, { Headers, RequestInit, Response } from 'node-fetch'
 import { AccessToken } from '@twurple/auth'
 import { GetUsersResponse, User } from 'ts-twitch-api'
-import type { CommandArgument } from '../lib/structures/Command'
 
 export const redisClient = await createClient({
-	url: 'redis://redis:6379'
+	url: process.env.REDIS_URL
 })
 	.on('error', (err) => console.error('Redis Client Error', err))
 	.connect()
