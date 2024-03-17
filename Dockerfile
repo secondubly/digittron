@@ -18,6 +18,8 @@ RUN --mount=type=secret,id=TOKEN \
     echo @${OWNER}:registry=https://npm.pkg.github.com/ >> ~/.npmrc && \
     npm ci && npm cache clean --force
 
+RUN chown -R node:node ./node_modules
+
 USER node
 
 ENV PATH /opt/bot/node_modules/.bin:$PATH
