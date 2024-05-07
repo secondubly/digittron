@@ -33,6 +33,7 @@ export class CommandHandler {
 	}
 
 	public static parseArguments(input: string): CommandArgument[] {
-		// parse out any arguments from the response string
+		// TODO: implement
+		return []
 	}
 }

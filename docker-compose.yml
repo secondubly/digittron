@@ -1,0 +1,75 @@
+name: digittron
+services:
+  prisma-studio:
+          container_name: prisma-studio
+          image: timothyjmiller/prisma-studio:latest
+          restart: unless-stopped
+          depends_on:
+              postgres:
+                  condition: service_healthy
+          profiles:
+              - dev
+          environment:
+              # prisma studio requires the env variable name be POSTGRES_URL
+              POSTGRES_URL: ${DATABASE_URL}
+          ports:
+              - ${PRISMA_STUDIO_PORT}:${PRISMA_STUDIO_PORT}
+  postgres:
+        image: postgres:16.2
+        container_name: postgres
+        hostname: postgres
+        environment:
+            POSTGRES_USER: ${PSQL_USER}
+            POSTGRES_PASSWORD: ${PSQL_PASS}
+            POSTGRES_DB: ${PSQL_DB_NAME}
+        ports:
+            - ${PSQL_PORT}:${PSQL_PORT}
+        restart: 'unless-stopped'
+        volumes:
+            - 'pg-data:/var/lib/postgresql/data'
+        healthcheck:
+            test: ['CMD-SHELL', 'pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER']
+            interval: 10s
+            timeout: 5s
+            retries: 5
+  redis:
+        image: redis:7.2.4
+        container_name: redis
+        restart: always
+        ports:
+            - ${REDIS_PORT}:${REDIS_PORT}
+        command: redis-server --save 20 1 --loglevel warning
+        volumes:
+            - 'cache:/data'
+        healthcheck:
+            test: [ "CMD", "redis-cli", "ping" ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+  bot:
+        container_name: bot
+        build: 
+            context: .
+            args:
+                DATABASE_URL: ${DATABASE_URL}
+            secrets:
+                - TOKEN
+        depends_on:
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_healthy
+        tty: true
+        environment:
+            DATABASE_URL: ${DATABASE_URL}
+        env_file:
+            - src/.env
+volumes:
+  pg-data:
+    driver: local
+  cache:
+    driver: local
+
+secrets:
+    TOKEN:
+        environment: "TOKEN"

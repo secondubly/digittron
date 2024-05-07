@@ -3,15 +3,14 @@ import { DigittronClient } from '../../client'
 import { CustomRewardsCache } from '../structures/CustomRewardsCache.js'
 import { ConnectionAdapter, EventSubHttpListener } from '@twurple/eventsub-http'
 import { NgrokAdapter } from '@twurple/eventsub-ngrok'
-import { DirectConnectionAdapter } from '@twurple/eventsub-http'
 import { HttpStatusCodeError } from '@twurple/api-call'
 import { StatusCodes } from 'http-status-codes'
 import { getParameterByName } from '../utils.js'
 
 export class EventSubClient {
 	private client: DigittronClient
-	private rewards: CustomRewardsCache
-	private user: HelixUser
+	private rewards!: CustomRewardsCache
+	private user!: HelixUser
 
 	constructor(client: DigittronClient) {
 		this.client = client
