@@ -24,6 +24,7 @@
   "homepage": "https://github.com/secondubly/digittron#readme",
   "dependencies": {
     "@secondubly/digittron-db": "^6.1.0",
+    "@sinclair/typebox": "^0.32.29",
     "@spotify/web-api-ts-sdk": "^1.2.0",
     "@twurple/api": "^7.0.10",
     "@twurple/auth": "^7.0.10",
