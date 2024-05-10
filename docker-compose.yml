@@ -53,7 +53,8 @@ services:
             args:
                 DATABASE_URL: ${DATABASE_URL}
             secrets:
-                - TOKEN
+                - npmrc
+                - npmrc_prod
         depends_on:
             postgres:
                 condition: service_healthy
@@ -63,7 +64,7 @@ services:
         environment:
             DATABASE_URL: ${DATABASE_URL}
         env_file:
-            - src/.env
+            - ./src/.env
 volumes:
   pg-data:
     driver: local
@@ -71,5 +72,7 @@ volumes:
     driver: local
 
 secrets:
-    TOKEN:
-        environment: "TOKEN"
+    npmrc:
+        file: .npmrc
+    npmrc_prod:
+        file: .npmrc
