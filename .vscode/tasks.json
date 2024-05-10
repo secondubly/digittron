@@ -7,6 +7,18 @@
 			"dockerCompose": {
 				"up": {
 					"detached": true,
+					"build": true
+				},
+				"envFile": "${workspaceFolder}/src/.env",
+				"files": ["${workspaceFolder}/docker-compose.yml"]
+			}
+		},
+		{
+			"label": "Compose Up (Dev)",
+			"type": "docker-compose",
+			"dockerCompose": {
+				"up": {
+					"detached": false,
 					"build": true,
 					"profiles": ["dev"]
 				},
