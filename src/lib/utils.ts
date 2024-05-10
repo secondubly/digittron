@@ -46,9 +46,14 @@ const fetchWithRetries = async (url: string, options: RequestInit, retryCount = 
 export const getUsersData = async (users: string[]): Promise<User[] | null> => {
 	let result: User[] | null = null
 	try {
-		const appAccessToken = await redisClient.get('app_access_token')
+		const twitchBotID = await redisClient.get('twitch_bot_id')
+		if (!twitchBotID) {
+			throw Error('Twitch Bot ID not set, please re-run authentication.')
+		}
+		const stringToken = await redisClient.get(twitchBotID)
+		const appAccessToken = stringToken ? (JSON.parse(stringToken) as AccessToken).accessToken : null
 		if (!appAccessToken) {
-			throw Error('Could not get app access token, please reauthenticate your bot account.')
+			throw Error('Could not retrieve app access token.')
 		}
 
 		const searchParams = new URLSearchParams(users.map((user) => ['login', user]))
@@ -61,12 +66,15 @@ export const getUsersData = async (users: string[]): Promise<User[] | null> => {
 		})
 
 		if (!usersResponse.ok) {
+			console.warn('User response status: ' + usersResponse.status)
+			console.warn(`Request URL: https://api.twitch.tv/helix/users?${searchParams}`)
 			// TODO: check if access token expired
 			return null
 		}
 
 		const json = (await usersResponse.json()) as GetUsersResponse
 		if (!json) {
+			console.warn('User response object: ' + json)
 			result = null
 		} else {
 			result = json.data as User[]

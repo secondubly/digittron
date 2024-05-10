@@ -49,6 +49,7 @@ export class DigittronClient extends EventEmitter {
 
 		this.auth.onRefresh(async (userId, newTokenData) => {
 			// REVIEW: do we need to await this?
+			console.log('successful token refresh')
 			await redisClient.set(userId, JSON.stringify(newTokenData))
 		})
 
@@ -75,11 +76,13 @@ export class DigittronClient extends EventEmitter {
 		// force token refresh
 		botAccessToken.expiresIn = 0
 		botAccessToken.obtainmentTimestamp = 0
+		console.log('Force token refresh')
 		await this.auth.addUser(this.id, botAccessToken, ['chat'])
 
 		// get all channel tokens
 		const userData = await getUsersData(this.config.channels)
 		if (!userData || userData.length === 0) {
+			console.warn('User Data object: ' + userData)
 			throw new Error('No user data found for config twitch channels')
 		}
 
