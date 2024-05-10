@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -b src",
+  "build:dev": "tsc -p src/tsconfig.dev.json",
     "format": "prettier --config src/.prettierrc 'src/**/*.ts' --write",
     "lint": "eslint --ignore-path \"src/.eslintignore\" -c \"src/.eslintrc\" --ext .js,.ts .",
     "start": "node dist/bot.js",
