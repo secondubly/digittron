@@ -4,5 +4,6 @@
 node_modules
 setup.js
 .npmrc
-.vscode
-.devcontainer
+.vscode/
+.devcontainer/
+dist/
