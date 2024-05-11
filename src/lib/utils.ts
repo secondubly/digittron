@@ -4,6 +4,8 @@ import { createClient } from 'redis'
 import fetch, { Headers, RequestInit, Response } from 'node-fetch'
 import { AccessToken } from '@twurple/auth'
 import { GetUsersResponse, User } from 'ts-twitch-api'
+import { StatusCodes } from 'http-status-codes'
+import { Logger } from './client/Logger'
 
 export const redisClient = await createClient({
 	url: process.env.REDIS_URL
@@ -51,7 +53,7 @@ export const getUsersData = async (users: string[]): Promise<User[] | null> => {
 			throw Error('Twitch Bot ID not set, please re-run authentication.')
 		}
 		const stringToken = await redisClient.get(twitchBotID)
-		const appAccessToken = stringToken ? (JSON.parse(stringToken) as AccessToken).accessToken : null
+		let appAccessToken = stringToken ? (JSON.parse(stringToken) as AccessToken) : null
 		if (!appAccessToken) {
 			throw Error('Could not retrieve app access token.')
 		}
@@ -60,16 +62,25 @@ export const getUsersData = async (users: string[]): Promise<User[] | null> => {
 		const usersResponse = await fetch(`https://api.twitch.tv/helix/users?${searchParams}`, {
 			method: 'GET',
 			headers: new Headers({
-				Authorization: `Bearer ${appAccessToken}`,
+				Authorization: `Bearer ${appAccessToken.accessToken}`,
 				'Client-Id': process.env.CLIENT_ID ?? ''
 			})
 		})
 
-		if (!usersResponse.ok) {
-			console.warn('User response status: ' + usersResponse.status)
-			console.warn(`Request URL: https://api.twitch.tv/helix/users?${searchParams}`)
-			// TODO: check if access token expired
-			return null
+		if (usersResponse.status === StatusCodes.UNAUTHORIZED) {
+			// attempt access token refresh
+			const refreshToken = appAccessToken.refreshToken
+			if (!refreshToken) {
+				console.log(appAccessToken)
+				throw Error('Bot access token does not have a corresponding refresh token.')
+			}
+
+			appAccessToken = await refreshOauth(refreshToken)
+			await redisClient.set(twitchBotID, JSON.stringify(appAccessToken))
+			return getUsersData(users)
+		} else if (!usersResponse.ok) {
+			const errorMsg = `Something went wrong: ${usersResponse.statusText} (Status Code: ${usersResponse.status})`
+			Logger.error(errorMsg)
 		}
 
 		const json = (await usersResponse.json()) as GetUsersResponse
@@ -89,8 +100,8 @@ export const getUsersData = async (users: string[]): Promise<User[] | null> => {
 export const refreshOauth = async (refreshToken: string): Promise<AccessToken> => {
 	const url =
 		'https://id.twitch.tv/oauth2/token?' +
-		`client_id=${process.env.PUBLIC_TWITCH_CLIENT_ID}` +
-		`&client_secret=${process.env.TWITCH_CLIENT_SECRET}` +
+		`client_id=${process.env.CLIENT_ID}` +
+		`&client_secret=${process.env.CLIENT_SECRET}` +
 		'&grant_type=refresh_token&' +
 		`refresh_token=${encodeURIComponent(refreshToken)}`
 
@@ -102,6 +113,7 @@ export const refreshOauth = async (refreshToken: string): Promise<AccessToken> =
 	})
 
 	if (!response.ok) {
+		console.log(url)
 		throw Error('Invalid Response ' + response.statusText)
 	}
 

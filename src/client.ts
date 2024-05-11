@@ -1,17 +1,15 @@
 import { createContext } from '@secondubly/digittron-db'
 const { prisma } = await createContext()
-import { PrismaClientInitializationError } from '@prisma/client/runtime/library.js'
-
 import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
 import { ChatUserstate, Client } from '@twurple/auth-tmi'
 import { EventSubClient } from './lib/client/EventSubClient.js'
-import { CommandCache } from './lib/structures/CommandCache.js'
 import { getUsersData, redisClient } from './lib/utils.js'
 import { ApiClient } from '@twurple/api'
 import { EventEmitter } from 'events'
-import { Logger } from './lib/client/Logger.js'
-import { CommandHandler } from './lib/commands/commandHandler.js'
+import { Logger as Log } from './lib/client/Logger.js'
+import { CommandHandler } from './handlers/commandHandler.js'
 import { Spotify } from './lib/utils/SongRequest.js'
+import { cache } from './lib/cache.js'
 
 type DigittronConfig = {
 	prefix: string
@@ -28,18 +26,15 @@ export class DigittronClient extends EventEmitter {
 	public api!: ApiClient
 	public auth: RefreshingAuthProvider
 	public eventSub!: EventSubClient
-	public logger: typeof Logger
-	public commands: CommandCache
 	private config: DigittronConfig
 	private handler: typeof CommandHandler
 	private songHandler: typeof Spotify
 	constructor(config: DigittronConfig) {
 		super()
 
-		this.commands = new CommandCache([])
 		this.config = config
-		this.logger = Logger
 		this.handler = CommandHandler
+		this.handler.setupClient(this)
 		this.songHandler = Spotify
 
 		this.auth = new RefreshingAuthProvider({
@@ -49,12 +44,11 @@ export class DigittronClient extends EventEmitter {
 
 		this.auth.onRefresh(async (userId, newTokenData) => {
 			// REVIEW: do we need to await this?
-			console.log('successful token refresh')
 			await redisClient.set(userId, JSON.stringify(newTokenData))
 		})
 
 		this.auth.onRefreshFailure((userId) => {
-			this.logger.warn(`User ${userId} needs to reauthenticate.`)
+			Log.warn(`User ${userId} needs to reauthenticate.`)
 		})
 
 		this.connect()
@@ -76,8 +70,7 @@ export class DigittronClient extends EventEmitter {
 		// force token refresh
 		botAccessToken.expiresIn = 0
 		botAccessToken.obtainmentTimestamp = 0
-		console.log('Force token refresh')
-		await this.auth.addUser(this.id, botAccessToken, ['chat'])
+		this.auth.addUser(this.id, botAccessToken, ['chat'])
 
 		// get all channel tokens
 		const userData = await getUsersData(this.config.channels)
@@ -95,7 +88,7 @@ export class DigittronClient extends EventEmitter {
 			const accessToken = JSON.parse(token) as AccessToken
 			this.auth.addUser(userIds[idx], accessToken)
 		}
-		await this.loadCommands()
+		await cache.loadBotCommands()
 
 		this.api = new ApiClient({
 			authProvider: this.auth,
@@ -126,51 +119,10 @@ export class DigittronClient extends EventEmitter {
 		// @ts-ignore: there is an overload constructor that matches this call
 		this.tmi.on('redeem', this.onRedeem.bind(this))
 		this.tmi.on('connected', (address: string, port: number) => {
-			this.logger.info(`Connected to ${address}:${port}`)
+			Log.info(`Connected to ${address}:${port}`)
 		})
 
 		await this.tmi.connect()
-	}
-
-	private async loadCommands(): Promise<void> {
-		try {
-			const results = await prisma.commands.findMany({
-				include: {
-					command_permissions: {
-						select: {
-							level: true
-						}
-					}
-				}
-			})
-
-			// const commands: Command[] = results.map((c) => {
-			// 	const args = this.handler.parseArguments(c.response)
-			// 	return new Command(this, {
-			// 		name: c.name,
-			// 		userlevel: c.command_permissions.level,
-			// 		description: '',
-			// 		examples: [],
-			// 		args: [],
-			// 		aliases: c.aliases as string[],
-			// 		hideFromHelp: false,
-			// 		botChannelOnly: false,
-			// 		message: c.response,
-			// 		enabled: true
-			// 	})
-			// })
-
-			// this.commands = new CommandCache(commands)
-		} catch (err) {
-			if (err instanceof PrismaClientInitializationError) {
-				if (err.errorCode === 'P1001') {
-					// try to reconnect
-					this.logger.info('Attempting to reconnect to database')
-					await prisma.$connect()
-				}
-				console.error(err)
-			}
-		}
 	}
 
 	getChannels() {
@@ -198,7 +150,7 @@ export class DigittronClient extends EventEmitter {
 		this.emit('message', message)
 
 		if (message.trim().startsWith('!')) {
-			this.handler.run(channel, message, tags.username)
+			this.handler.processCmd(channel, message, tags.username)
 		}
 	}
 
@@ -213,7 +165,9 @@ export class DigittronClient extends EventEmitter {
 					this.say(channel, `@${username} successfully added ${song.artists[0]} - ${song.track} at position ${position}`)
 				}
 			} catch (e) {
-				console.log(e)
+				if (e instanceof Error) {
+					Log.error(e.message, e.stack)
+				}
 			}
 		}
 	}
