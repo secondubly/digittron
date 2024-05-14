@@ -54,8 +54,6 @@ services:
             target: dev
             args:
                 DATABASE_URL: ${DATABASE_URL}
-            secrets:
-                - npmrc
         volumes:
             - ./src:/usr/bot/src
             - ./src/nodemon.json:/usr/bot/src/nodemon.json
@@ -75,9 +73,3 @@ volumes:
     driver: local
   cache:
     driver: local
-
-secrets:
-    npmrc:
-        file: .npmrc
-    npmrc_prod:
-        file: .npmrc

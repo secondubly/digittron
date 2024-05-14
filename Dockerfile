@@ -26,8 +26,6 @@ RUN wget -O /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/
     && chmod +x /usr/local/bin/dumb-init
 WORKDIR /usr/bot
 COPY ./docker-entrypoint.sh .
-RUN --mount=type=secret,id=npmrc_prod,target=/root/.npmrc \
-    npm ci --omit=dev
 COPY --from=build --chown=node:node /usr/bot/dist ./dist
 
 CMD ["dumb-init", "./docker-entrypoint.sh"]

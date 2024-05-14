@@ -5,9 +5,6 @@ services:
         context: .
         args:
             DATABASE_URL: ${DATABASE_URL}
-        secrets:
-            - npmrc
-            - npmrc_prod
     depends_on:
         postgres:
             condition: service_healthy
