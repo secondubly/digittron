@@ -10,6 +10,7 @@ import { Logger as Log } from './lib/client/Logger.js'
 import { CommandHandler } from './handlers/commandHandler.js'
 import { Spotify } from './lib/utils/SongRequest.js'
 import { cache } from './lib/cache.js'
+import { getUserRank } from 'helpers/getUserRank.js'
 
 type DigittronConfig = {
 	prefix: string
@@ -116,6 +117,7 @@ export class DigittronClient extends EventEmitter {
 		await this.eventSub.connect()
 
 		this.tmi.on('message', this.onMessage.bind(this))
+		this.tmi.on('join', this.onJoin.bind(this))
 		// @ts-ignore: there is an overload constructor that matches this call
 		this.tmi.on('redeem', this.onRedeem.bind(this))
 		this.tmi.on('connected', (address: string, port: number) => {
@@ -151,6 +153,31 @@ export class DigittronClient extends EventEmitter {
 
 		if (message.trim().startsWith('!')) {
 			this.handler.processCmd(channel, message, tags.username)
+		}
+	}
+
+	private async onJoin(channel: string, user: string) {
+		// get user id
+		try {
+			const userInfo = await this.api.users.getUserByName(user)
+			const channelData = await this.api.users.getUserByName(channel)
+			if (!userInfo || !channelData) {
+				return
+			}
+
+			if (cache.users.has(userInfo.id)) {
+				return
+			}
+
+			// add user to cache
+			cache.users.set(userInfo.id, {
+				id: userInfo.id,
+				name: userInfo.name,
+				rank: await getUserRank(this.api, channelData, userInfo),
+				watchTime: 0
+			})
+		} catch (e) {
+			throw new Error()
 		}
 	}
 

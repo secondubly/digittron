@@ -5,12 +5,14 @@ import { CommandType } from '@prisma/client'
 import { PrismaClientInitializationError } from '@prisma/client/runtime/library.js'
 import { test } from '../commands/test.js'
 import { Logger } from './client/Logger.js'
+import type { UserData } from 'types/UserData'
 const { prisma } = await createContext()
 
 class Cache {
 	private commands: Record<string, Command> = {}
-	private channelPointRewards: Record<string, HelixCustomReward[]> = {}
-	private commandAliases: Record<string, Command> = {}
+	public channelPointRewards: Record<string, HelixCustomReward[]> = {}
+	public commandAliases: Record<string, Command> = {}
+	public users: Map<string, UserData> = new Map()
 
 	init() {
 		this.loadBotCommands()
@@ -59,6 +61,10 @@ class Cache {
 
 	getBotCommands(): Command[] {
 		return Object.values(this.commands)
+	}
+
+	getUser(username: string) {
+		return [...this.users.values()].find((user) => user.name === username)
 	}
 }
 
