@@ -1,16 +1,23 @@
 import { PermissionLevel, CommandType } from '@prisma/client'
 import { DigittronClient } from '../client'
+import { UserData } from './UserData'
 
-export interface Command {
-	id?: string
-	type?: CommandType.E
-	name: string
-	aliases: string[]
-	description?: string
-	permission?: PermissionLevel
-	enabled?: boolean
-	hidden?: boolean
-	callback: (client: DigittronClient, author: string | undefined, channel: string, ...args: unknown[]) => unknown
+abstract class Command {
+	abstract id?: string
+	abstract type: CommandType
+	abstract name: string
+	abstract aliases: string[]
+	abstract description?: string
+	abstract permission: PermissionLevel
+	abstract enabled?: boolean
+	abstract hidden?: boolean
+	abstract callback(client: DigittronClient, user: UserData, channel: string, ...args: unknown[]): void
+	abstract canExecute(author: UserData): boolean {
+		if (author.rank !== this.permission) {
+			return false
+		}
+		return true
+	}
 }
 
 export interface ParsedCommand {

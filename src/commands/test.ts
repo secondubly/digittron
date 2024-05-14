@@ -1,11 +1,39 @@
+import { DigittronClient } from 'client'
 import { Command } from '../types/command'
-import { PermissionLevel } from '@prisma/client'
+import { PermissionLevel, CommandType } from '@prisma/client'
+import { UserData } from 'types/UserData'
 
-export const test: Command = {
-	name: 'test',
-	aliases: [],
-	permission: PermissionLevel.BROADCASTER,
-	callback: (client, _, channel, ...args: unknown[]) => {
-		client.say(channel, 'this is a test of the emergency bot broadcasting system!')
+class TestCommand extends Command {
+	id?: string
+	type: CommandType
+	name: string
+	aliases: string[]
+	description?: string
+	permission: PermissionLevel
+	enabled?: boolean
+	hidden?: boolean
+	constructor() {
+		super()
+		this.type = CommandType.DEFAULT
+		this.name = 'test'
+		this.aliases = []
+		this.permission = PermissionLevel.BROADCASTER
+	}
+
+	callback(client: DigittronClient, user: UserData, channel: string, ...args: unknown[]): void {
+		if (this.canExecute(user)) {
+			client.say(channel, 'this is a test of the emergency bot broadcasting system!')
+		}
+		return
+	}
+
+	canExecute(author: UserData): boolean {
+		if (author.rank !== PermissionLevel.BROADCASTER || author.rank !== PermissionLevel.MODERATOR) {
+			return false
+		}
+
+		return true
 	}
 }
+
+export const test = new TestCommand()
