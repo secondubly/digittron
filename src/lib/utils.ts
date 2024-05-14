@@ -6,7 +6,6 @@ import { AccessToken } from '@twurple/auth'
 import { GetUsersResponse, User } from 'ts-twitch-api'
 import { StatusCodes } from 'http-status-codes'
 import { Logger } from './client/Logger'
-
 export const redisClient = await createClient({
 	url: process.env.REDIS_URL
 })
@@ -76,6 +75,7 @@ export const getUsersData = async (users: string[]): Promise<User[] | null> => {
 			}
 
 			appAccessToken = await refreshOauth(refreshToken)
+			console.debug('get user data refresh app access token: ' + JSON.stringify(appAccessToken))
 			await redisClient.set(twitchBotID, JSON.stringify(appAccessToken))
 			return getUsersData(users)
 		} else if (!usersResponse.ok) {
@@ -113,7 +113,6 @@ export const refreshOauth = async (refreshToken: string): Promise<AccessToken> =
 	})
 
 	if (!response.ok) {
-		console.log(url)
 		throw Error('Invalid Response ' + response.statusText)
 	}
 
