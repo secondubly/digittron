@@ -1,8 +1,8 @@
 import { findBotCommand } from '../helpers/findBotCommand.js'
-import { Command, ParsedCommand } from '../types/command.js'
+import { ParsedCommand } from '../types/command.js'
 import { DigittronClient } from '../client.js'
-import { PermissionLevel } from '@prisma/client'
 import { Logger } from '../lib/client/Logger.js'
+import { cache } from 'lib/cache.js'
 
 export class CommandHandler {
 	static client: DigittronClient
@@ -20,14 +20,19 @@ export class CommandHandler {
 			return
 		}
 
-		if (this.runAllChecks(parsedCommand.command, author) === false) {
-			return
-		}
-
 		if (!this.client) {
 			Logger.warn('Client has not been initialized, no messages can be sent!')
 		} else {
-			parsedCommand.command.callback(this.client, author, channel.substring(1), parsedCommand.args)
+			if (!author) {
+				Logger.warn(`Message does not have a valid sender. (Message: ${message})`)
+				return
+			}
+			const user = cache.getUser(author)
+			if (!user) {
+				Logger.warn(`Could not get user data for ${author} (Message: ${message})`)
+				return
+			}
+			parsedCommand.command.callback(this.client, user, channel.substring(1), parsedCommand.args)
 		}
 	}
 
@@ -54,13 +59,5 @@ export class CommandHandler {
 		}
 
 		return
-	}
-
-	private static runAllChecks(command: Command, author?: string): boolean {
-		if (command.permission === PermissionLevel.BROADCASTER && author !== 'secondubly') {
-			return false
-		}
-
-		return true
 	}
 }
