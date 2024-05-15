@@ -3,7 +3,7 @@ config({ path: process.cwd() + '/src/.env' })
 import { createClient } from 'redis'
 import fetch, { Headers, RequestInit, Response } from 'node-fetch'
 import { AccessToken } from '@twurple/auth'
-import { GetUsersResponse, User } from 'ts-twitch-api'
+import { GetUsersResponse, User, TwitchApi } from 'ts-twitch-api'
 import { StatusCodes } from 'http-status-codes'
 import { Logger } from './client/Logger'
 export const redisClient = await createClient({
@@ -11,6 +11,14 @@ export const redisClient = await createClient({
 })
 	.on('error', (err) => console.error('Redis Client Error', err))
 	.connect()
+
+type JSONAccessToken = {
+	access_token: string
+	expires_in: number
+	refresh_token: string
+	scopes: string[]
+	token_type: string
+}
 
 export function envParseArray(key: string, defaultValue: string[]) {
 	const value = process.env[key]
@@ -116,8 +124,16 @@ export const refreshOauth = async (refreshToken: string): Promise<AccessToken> =
 		throw Error('Invalid Response ' + response.statusText)
 	}
 
-	const result = (await response.json()) as AccessToken
-	return result
+	const jsonToken = response.json() as unknown as JSONAccessToken
+	const parsedToken = {
+		accessToken: jsonToken.access_token,
+		expiresIn: jsonToken.expires_in,
+		refreshToken: jsonToken.refresh_token,
+		scope: jsonToken.scopes
+	} as AccessToken
+	console.log('original token ' + jsonToken)
+	console.log('parsed token ' + parsedToken)
+	return parsedToken
 }
 
 export const getParameterByName = (name: string, url = window.location.href) => {

@@ -10,7 +10,7 @@ import { Logger as Log } from './lib/client/Logger.js'
 import { CommandHandler } from './handlers/commandHandler.js'
 import { Spotify } from './lib/utils/SongRequest.js'
 import { cache } from './lib/cache.js'
-import { getUserRank } from 'helpers/getUserRank.js'
+import { getUserRank } from './helpers/getUserRank.js'
 
 type DigittronConfig = {
 	prefix: string
@@ -45,6 +45,7 @@ export class DigittronClient extends EventEmitter {
 
 		this.auth.onRefresh(async (userId, newTokenData) => {
 			// REVIEW: do we need to await this?
+			console.info('token data: ' + JSON.stringify(newTokenData))
 			await redisClient.set(userId, JSON.stringify(newTokenData))
 		})
 
