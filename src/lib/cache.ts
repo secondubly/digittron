@@ -1,4 +1,4 @@
-import { Command } from '../types/command'
+import { Command } from './structures/Command.js'
 import { createContext } from '@secondubly/digittron-db'
 import { HelixCustomReward } from '@twurple/api'
 import { CommandType } from '@prisma/client'

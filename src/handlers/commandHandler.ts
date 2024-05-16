@@ -1,8 +1,8 @@
 import { findBotCommand } from '../helpers/findBotCommand.js'
-import { ParsedCommand } from '../types/command.js'
+import { ParsedCommand } from '../lib/structures/Command.js'
 import { DigittronClient } from '../client.js'
 import { Logger } from '../lib/client/Logger.js'
-import { cache } from 'lib/cache.js'
+import { cache } from '../lib/cache.js'
 
 export class CommandHandler {
 	static client: DigittronClient

@@ -1,5 +1,5 @@
 import { DigittronClient } from 'client'
-import { Command } from '../types/command'
+import { Command } from '../lib/structures/Command.js'
 import { PermissionLevel, CommandType } from '@prisma/client'
 import { UserData } from 'types/UserData'
 
