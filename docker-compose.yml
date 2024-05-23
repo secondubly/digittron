@@ -1,19 +1,19 @@
 name: digittron
 services:
   prisma-studio:
-          container_name: prisma-studio
-          image: timothyjmiller/prisma-studio:latest
-          restart: unless-stopped
-          depends_on:
-              postgres:
-                  condition: service_healthy
-          profiles:
-              - dev
-          environment:
-              # prisma studio requires the env variable name be POSTGRES_URL
-              POSTGRES_URL: ${DATABASE_URL}
-          ports:
-              - ${PRISMA_STUDIO_PORT}:${PRISMA_STUDIO_PORT}
+    container_name: prisma-studio
+    image: timothyjmiller/prisma-studio:latest
+    restart: unless-stopped
+    depends_on:
+        postgres:
+            condition: service_healthy
+    profiles:
+        - dev
+    environment:
+        # prisma studio requires the env variable name be POSTGRES_URL
+        POSTGRES_URL: ${DATABASE_URL}
+    ports:
+        - ${PRISMA_STUDIO_PORT}:${PRISMA_STUDIO_PORT}
   postgres:
         image: postgres:16.2
         container_name: postgres
@@ -33,43 +33,49 @@ services:
             timeout: 5s
             retries: 5
   redis:
-        image: redis:7.2.4
-        container_name: redis
-        restart: always
-        ports:
-            - ${REDIS_PORT}:${REDIS_PORT}
-        command: redis-server --save 20 1 --loglevel warning
-        volumes:
-            - 'cache:/data'
-        healthcheck:
-            test: [ "CMD", "redis-cli", "ping" ]
-            interval: 10s
-            timeout: 5s
-            retries: 5
+    image: redis:7.2.4
+    container_name: redis
+    restart: always
+    ports:
+        - ${REDIS_PORT}:${REDIS_PORT}
+    command: redis-server --save 20 1 --loglevel warning
+    volumes:
+        - 'cache:/data'
+    healthcheck:
+        test: [ "CMD", "redis-cli", "ping" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
   bot:
-        container_name: bot
-        build: 
-            context: .
-            dockerfile: Dockerfile
-            target: dev
-            args:
-                DATABASE_URL: ${DATABASE_URL}
-        volumes:
-            - ./src:/usr/bot/src
-            - ./src/nodemon.json:/usr/bot/src/nodemon.json
-        depends_on:
-            postgres:
-                condition: service_healthy
-            redis:
-                condition: service_healthy
-        tty: true
-        environment:
+    container_name: bot
+    build: 
+        context: .
+        dockerfile: Dockerfile
+        target: dev
+        args:
             DATABASE_URL: ${DATABASE_URL}
-        env_file:
-            - ./src/.env
-        command: npm run dev
+    volumes:
+        - ./src:/usr/bot/src
+        - ./src/nodemon.json:/usr/bot/src/nodemon.json
+    depends_on:
+        postgres:
+            condition: service_healthy
+        redis:
+            condition: service_healthy
+    tty: true
+    environment:
+        DATABASE_URL: ${DATABASE_URL}
+    env_file:
+        - ./src/.env
+    secrets:
+        - npmrc
+    command: npm run dev
 volumes:
   pg-data:
     driver: local
   cache:
     driver: local
+
+secrets:
+    npmrc:
+        file: ./.npmrc
