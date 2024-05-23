@@ -179,7 +179,7 @@ export class DigittronClient extends EventEmitter {
 			})
 		} catch (e) {
 			if (e instanceof Error) {
-				throw new Error(e)
+				Log.error(e.message, e.stack)
 			}
 		}
 	}
