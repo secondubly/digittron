@@ -7,7 +7,7 @@ RUN wget -O /usr/local/bin/dumb-init https://github.com/Yelp/dumb-init/releases/
 WORKDIR /usr/bot
 COPY package*.json ./
 COPY src/tsconfig.json .
-RUN --mount=type=secret,id=npmrc,target=/root/.npmrc npm install
+RUN --mount=type=secret,id=npmrc,target=./.npmrc npm install
 COPY src/ ./src
 
 FROM base as dev
