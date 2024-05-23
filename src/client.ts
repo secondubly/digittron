@@ -161,7 +161,7 @@ export class DigittronClient extends EventEmitter {
 		// get user id
 		try {
 			const userInfo = await this.api.users.getUserByName(user)
-			const channelData = await this.api.users.getUserByName(channel)
+			const channelData = await this.api.users.getUserByName(channel.slice(1))
 			if (!userInfo || !channelData) {
 				return
 			}
@@ -178,7 +178,9 @@ export class DigittronClient extends EventEmitter {
 				watchTime: 0
 			})
 		} catch (e) {
-			throw new Error()
+			if (e instanceof Error) {
+				throw new Error(e)
+			}
 		}
 	}
 
