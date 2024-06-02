@@ -20,7 +20,7 @@ class TestCommand extends Command {
 		this.permission = PermissionLevel.BROADCASTER
 	}
 
-	callback(client: DigittronClient, user: UserData, channel: string, ...args: unknown[]): void {
+	callback(client: DigittronClient, user: UserData, channel: string, ..._: unknown[]): void {
 		if (this.canExecute(user)) {
 			client.say(channel, 'this is a test of the emergency bot broadcasting system!')
 		}
@@ -28,7 +28,7 @@ class TestCommand extends Command {
 	}
 
 	canExecute(author: UserData): boolean {
-		if (author.rank !== PermissionLevel.BROADCASTER || author.rank !== PermissionLevel.MODERATOR) {
+		if (author.rank !== PermissionLevel.BROADCASTER && author.rank !== PermissionLevel.MODERATOR) {
 			return false
 		}
 
