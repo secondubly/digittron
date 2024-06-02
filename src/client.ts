@@ -45,7 +45,6 @@ export class DigittronClient extends EventEmitter {
 
 		this.auth.onRefresh(async (userId, newTokenData) => {
 			// REVIEW: do we need to await this?
-			console.info('token data: ' + JSON.stringify(newTokenData))
 			await redisClient.set(userId, JSON.stringify(newTokenData))
 		})
 
