@@ -10,14 +10,14 @@ export const getUserRank = async (api: ApiClient, broadcasterData: HelixUser, us
 
 	if (user.name === broadcasterData.name) {
 		return PermissionLevel.BROADCASTER
+	} else if (isModerator) {
+		return PermissionLevel.MODERATOR
 	} else if (isSubscribed) {
 		return PermissionLevel.SUBSCRIBER
 	} else if (isVIP) {
 		return PermissionLevel.VIP
 	} else if (isFollowing) {
 		return PermissionLevel.FOLLOWER
-	} else if (isModerator) {
-		return PermissionLevel.MODERATOR
 	} else {
 		return PermissionLevel.VIEWER
 	}

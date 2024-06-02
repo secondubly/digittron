@@ -3,6 +3,7 @@ import { ParsedCommand } from '../lib/structures/Command.js'
 import { DigittronClient } from '../client.js'
 import { Logger } from '../lib/client/Logger.js'
 import { cache } from '../lib/cache.js'
+import { getUserRank } from '../helpers/getUserRank.js'
 
 export class CommandHandler {
 	static client: DigittronClient
@@ -27,10 +28,28 @@ export class CommandHandler {
 				Logger.warn(`Message does not have a valid sender. (Message: ${message})`)
 				return
 			}
-			const user = cache.getUser(author)
+			let user = cache.getUser(author)
 			if (!user) {
-				Logger.warn(`Could not get user data for ${author} (Message: ${message})`)
-				return
+				// grab data from api
+				const helixUser = await this.client.api.users.getUserByName(author)
+				if (!helixUser) {
+					Logger.warn(`Could not get user data for ${author} (Message: ${message})`)
+					return
+				}
+
+				const broadcasterData = await this.client.api.users.getUserByName(channel.slice(1))
+				if (!broadcasterData) {
+					Logger.warn(`Could not get broadcaster data for ${channel} (Message: ${message})`)
+					return
+				}
+
+				user = {
+					id: helixUser.id,
+					name: helixUser.name,
+					rank: await getUserRank(this.client.api, broadcasterData, helixUser),
+					watchTime: 0
+				}
+				cache.setUser(user)
 			}
 			parsedCommand.command.callback(this.client, user, channel.substring(1), parsedCommand.args)
 		}

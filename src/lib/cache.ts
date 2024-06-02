@@ -66,6 +66,10 @@ class Cache {
 	getUser(username: string) {
 		return [...this.users.values()].find((user) => user.name === username)
 	}
+
+	setUser(user: UserData) {
+		this.users.set(user.id, user)
+	}
 }
 
 export const cache = new Cache()
