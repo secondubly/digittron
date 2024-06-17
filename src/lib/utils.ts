@@ -131,8 +131,6 @@ export const refreshOauth = async (refreshToken: string): Promise<AccessToken> =
 		refreshToken: jsonToken.refresh_token,
 		scope: jsonToken.scopes
 	} as AccessToken
-	console.log('original token ' + jsonToken)
-	console.log('parsed token ' + parsedToken)
 	return parsedToken
 }
 
