@@ -38,8 +38,7 @@ class TitleCommand extends Command {
 			return
 		}
 
-		// TODO: check for mods and broadcaster
-		if (user.name !== 'secondubly') {
+		if (user.rank !== PermissionLevel.BROADCASTER && user.rank !== PermissionLevel.MODERATOR) {
 			return
 		} else {
 			const title = args[0] as string
