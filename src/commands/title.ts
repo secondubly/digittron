@@ -41,7 +41,7 @@ class TitleCommand extends Command {
 		if (user.rank !== PermissionLevel.BROADCASTER && user.rank !== PermissionLevel.MODERATOR) {
 			return
 		} else {
-			const title = args[0] as string
+			const title = args.join(' ')
 			if (isNullOrEmpty(title)) {
 				client.say(channel, 'Invalid command, please try again!')
 				return
