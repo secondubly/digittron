@@ -42,8 +42,8 @@ class GameCommand extends Command {
 		if (user.rank !== PermissionLevel.BROADCASTER && user.rank !== PermissionLevel.MODERATOR) {
 			return
 		} else {
-			const title = args.join(' ')
-			if (isNullOrEmpty(title)) {
+			const gameName = args.join(' ')
+			if (isNullOrEmpty(gameName)) {
 				client.say(channel, 'Invalid command, please try again!')
 				return
 			}
@@ -54,9 +54,9 @@ class GameCommand extends Command {
 			}
 
 			try {
-				const game = await this.getGame(title, client.api)
+				const game = await this.getGame(gameName, client.api)
 				if (game === undefined) {
-					client.say(channel, `Could not find a game with the name ${title}`)
+					client.say(channel, `Could not find a game with the name ${game}`)
 					return
 				}
 
