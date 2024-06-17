@@ -1,8 +1,8 @@
-import { Command } from 'lib/structures/Command'
+import { Command } from '../lib/structures/Command'
 import { CommandType, PermissionLevel } from '@prisma/client'
 import { DigittronClient } from 'client'
 import { UserData } from 'types/UserData'
-import { isNullOrEmpty } from 'lib/utils'
+import { isNullOrEmpty } from '../lib/utils'
 
 class TitleCommand extends Command {
 	id?: string
@@ -22,7 +22,7 @@ class TitleCommand extends Command {
 		this.permission = PermissionLevel.VIEWER
 	}
 
-	async callback(client: DigittronClient, user: UserData, channel: string, ...args: unknown[]): Promise<void> {
+	async callback(client: DigittronClient, user: UserData, channel: string, args: unknown[]): Promise<void> {
 		if (args.length === 0) {
 			const userData = await client.api.users.getUserByName(channel)
 			if (!userData) {
@@ -61,3 +61,5 @@ class TitleCommand extends Command {
 		}
 	}
 }
+
+export const title = new TitleCommand()

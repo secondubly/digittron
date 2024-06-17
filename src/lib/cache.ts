@@ -4,6 +4,7 @@ import { HelixCustomReward } from '@twurple/api'
 import { CommandType } from '@prisma/client'
 import { PrismaClientInitializationError } from '@prisma/client/runtime/library.js'
 import { test } from '../commands/test.js'
+import { title } from '../commands/title.js'
 import { Logger } from './client/Logger.js'
 import type { UserData } from 'types/UserData'
 const { prisma } = await createContext()
@@ -20,6 +21,7 @@ class Cache {
 
 	loadDefaultCommands() {
 		this.commands['test'] = test
+		this.commands['title'] = title
 	}
 
 	async loadBotCommands() {

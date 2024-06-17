@@ -51,7 +51,7 @@ export class CommandHandler {
 				}
 				cache.setUser(user)
 			}
-			parsedCommand.command.callback(this.client, user, channel.substring(1), parsedCommand.args)
+			parsedCommand.command.callback(this.client, user, channel.substring(1), parsedCommand.args ?? [])
 		}
 	}
 
