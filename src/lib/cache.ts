@@ -3,9 +3,10 @@ import { createContext } from '@secondubly/digittron-db'
 import { HelixCustomReward } from '@twurple/api'
 import { CommandType } from '@prisma/client'
 import { PrismaClientInitializationError } from '@prisma/client/runtime/library.js'
+import { game } from '../commands/game.js'
 import { test } from '../commands/test.js'
 import { title } from '../commands/title.js'
-import { game } from '../commands/game.js'
+import { poll } from '../commands/poll.js'
 import { Logger } from './client/Logger.js'
 import type { UserData } from 'types/UserData'
 const { prisma } = await createContext()
@@ -24,6 +25,7 @@ class Cache {
 		this.commands['test'] = test
 		this.commands['title'] = title
 		this.commands['game'] = game
+		this.commands['poll'] = poll
 	}
 
 	async loadBotCommands() {
@@ -51,14 +53,14 @@ class Cache {
 					hidden: false
 				} as Command
 			})
-		} catch (err) {
-			if (err instanceof PrismaClientInitializationError) {
-				if (err.errorCode === 'P1001') {
+		} catch (e) {
+			if (e instanceof PrismaClientInitializationError) {
+				if (e.errorCode === 'P1001') {
 					// try to reconnect
 					Logger.info('Attempting to reconnect to database')
 					await prisma.$connect()
 				}
-				console.error(err)
+				console.error(e)
 			}
 		}
 	}
