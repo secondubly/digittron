@@ -60,7 +60,7 @@ export class CommandHandler {
 		const fullCommand = regex.exec(message)?.filter((match) => match !== null && match !== undefined && match !== '')
 		if (fullCommand) {
 			fullCommand.shift()
-			const args = fullCommand[1] ? fullCommand[1].split(' ') : null
+			const args = fullCommand[1] ? fullCommand[1].split(/ +/g) : null
 			const commandName = fullCommand[0]
 			const command = findBotCommand(commandName)
 
