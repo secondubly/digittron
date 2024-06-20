@@ -62,7 +62,7 @@ class PollCommand extends Command {
 
 		const channelData = await client.api.channels.getChannelInfoById(userData)
 		if (!channelData) {
-			throw Error(`Could not get game for ${channel}`)
+			throw Error(`Could not get channel data for ${channel}`)
 		}
 
 		try {

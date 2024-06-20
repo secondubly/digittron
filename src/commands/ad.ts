@@ -40,11 +40,6 @@ class AdCommand extends Command {
 			throw Error(`Could not get user data for ${channel}`)
 		}
 
-		const channelData = await client.api.channels.getChannelInfoById(userData)
-		if (!channelData) {
-			throw Error(`Could not get channel data for ${channel}`)
-		}
-
 		if (!VALID_DURATION.includes(args[0] as number)) {
 			client.say(channel, `Invalid duration provided. Valid durations include: ${VALID_DURATION.join(', ')}`)
 			return
