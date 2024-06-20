@@ -9,6 +9,7 @@ import { title } from '../commands/title.js'
 import { poll } from '../commands/poll.js'
 import { Logger } from './client/Logger.js'
 import type { UserData } from 'types/UserData'
+import { marker } from 'commands/marker.js'
 const { prisma } = await createContext()
 
 class Cache {
@@ -22,10 +23,11 @@ class Cache {
 	}
 
 	loadDefaultCommands() {
+		this.commands['game'] = game
+		this.commands['marker'] = marker
+		this.commands['poll'] = poll
 		this.commands['test'] = test
 		this.commands['title'] = title
-		this.commands['game'] = game
-		this.commands['poll'] = poll
 	}
 
 	async loadBotCommands() {

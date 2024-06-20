@@ -61,6 +61,7 @@ export const getUsersData = async (users: string[]): Promise<User[] | null> => {
 		}
 		const stringToken = await redisClient.get(twitchBotID)
 		let appAccessToken = stringToken ? (JSON.parse(stringToken) as AccessToken) : null
+		console.debug('Bot Access Token \n', appAccessToken)
 		if (!appAccessToken) {
 			throw Error('Could not retrieve app access token.')
 		}
@@ -141,6 +142,17 @@ export const getParameterByName = (name: string, url = window.location.href) => 
 	if (!results) return null
 	if (!results[2]) return ''
 	return decodeURIComponent(results[2].replace(/\+/g, ' '))
+}
+
+export const secondsToHms = (time: number) => {
+	const h = Math.floor(time / 3600)
+	const m = Math.floor((time % 3600) / 60)
+	const s = Math.floor((time % 3600) % 60)
+
+	if (h > 0) {
+		return ('0' + h).slice(-2) + ':' + ('0' + m).slice(-2) + ':' + ('0' + s).slice(-2)
+	}
+	return ('0' + m).slice(-2) + ':' + ('0' + s).slice(-2)
 }
 
 export { isNullOrUndefinedOrEmpty as isNullOrEmpty }
