@@ -86,5 +86,8 @@ export class EventSubClient {
 				this.client.say(broadcasterName, `${username} redeemed ${rewardTitle} for ${rewardCost}`)
 			}
 		)
+
+		// TODO: send message when ads are starting
+		// listener.onChannelAdBreakBegin(this.user.id, (data) => {})
 	}
 }
