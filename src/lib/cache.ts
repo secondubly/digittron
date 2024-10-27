@@ -1,6 +1,7 @@
 import { Command } from './structures/Command.js'
 import { HelixCustomReward, HelixUser } from '@twurple/api'
 import { PrismaClientInitializationError } from '@prisma/client/runtime/library.js'
+import { CommandType } from '@prisma/client'
 import { game } from '../commands/game.js'
 import { test } from '../commands/test.js'
 import { title } from '../commands/title.js'
@@ -100,7 +101,6 @@ class Cache {
 				name: helixUser?.name,
 				rank: getUserRank(this.broadcaster as HelixUser, helixUser as HelixUser),
 				watchTime: 0
-
 			} as UserData
 			cache.setUser(user)
 		}

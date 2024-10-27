@@ -1,4 +1,4 @@
-import { PermissionLevel, CommandType } from '@prisma/client'
+import { PermissionLevel, CommandType } from '@secondubly/digittron-db'
 import { DigittronClient } from '../../client'
 import { UserData } from '../../types/UserData'
 

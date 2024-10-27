@@ -1,15 +1,14 @@
-import { $Enums } from '.prisma/client'
 import { DigittronClient } from 'client'
 import { Command } from 'lib/structures/Command'
 import { UserData } from 'types/UserData'
-import { CommandType, PermissionLevel } from '.prisma/client'
+import { CommandType, PermissionLevel } from '@prisma/client'
 import { CommercialLength } from '@twurple/api'
 import { Logger } from '../lib/client/Logger.js'
 
 const VALID_DURATION = [30, 60, 90, 120, 150, 180]
 class AdCommand extends Command {
 	id?: string | undefined
-	type: $Enums.CommandType
+	type: CommandType
 	name: string
 	aliases: string[]
 	description?: string | undefined

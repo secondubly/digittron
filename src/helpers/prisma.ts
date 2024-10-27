@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
-let prisma = new PrismaClient()
+import { PrismaClient, CommandPermission } from '@secondubly/digittron-db'
+const prisma: PrismaClient = new PrismaClient()
 
 export default prisma

@@ -4,6 +4,7 @@ import { UserData } from 'types/UserData'
 import { isNullOrEmpty } from '../lib/utils'
 import { ApiClient, HelixGame } from '@twurple/api'
 import { PermissionLevel, CommandType } from '@prisma/client'
+import { api } from 'helpers/twurple'
 
 class GameCommand extends Command {
 	id?: string
@@ -25,12 +26,12 @@ class GameCommand extends Command {
 
 	async callback(client: DigittronClient, user: UserData, channel: string, args: unknown[]): Promise<void> {
 		if (!args.length) {
-			const userData = await client.api.users.getUserByName(channel)
+			const userData = await api.users.getUserByName(channel)
 			if (!userData) {
 				throw Error(`Could not get user data for ${channel}`)
 			}
 
-			const channelData = await client.api.channels.getChannelInfoById(userData)
+			const channelData = await api.channels.getChannelInfoById(userData)
 			if (!channelData) {
 				throw Error(`Could not get game for ${channel}`)
 			}
@@ -48,19 +49,20 @@ class GameCommand extends Command {
 				return
 			}
 
-			const channelData = await client.api.users.getUserByName(channel)
+			const channelData = await api.users.getUserByName(channel)
 			if (!channelData) {
 				throw Error(`Could not get user data for ${channel}`)
 			}
 
 			try {
-				const game = await this.getGame(gameName, client.api)
+				// TODO: rewrite method
+				const game = await this.getGame(gameName, api)
 				if (game === undefined) {
 					client.say(channel, `Could not find a game with the name ${game}`)
 					return
 				}
 
-				await client.api.channels.updateChannelInfo(channelData.id, { gameId: game.id })
+				await api.channels.updateChannelInfo(channelData.id, { gameId: game.id })
 				client.say(channel, `@${user.name} Successfully updated game to “${game.name}”`)
 			} catch (e) {
 				client.say(channel, 'Something went wrong, sorry!')
