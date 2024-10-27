@@ -131,3 +131,4 @@ dist
 
 # don't commit npmrc
 .npmrc
+src/.env.development
