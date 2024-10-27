@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/secondubly/digittron#readme",
   "dependencies": {
-    "@types/tmi.js": "^1.8.5",
+    "@types/tmi.js": "^1.8.6",
     "tmi.js": "^1.8.5"
   },
   "devDependencies": {
