@@ -1,9 +1,9 @@
 import { Command } from '../lib/structures/Command'
-import { CommandType, PermissionLevel } from '@prisma/client'
 import { DigittronClient } from 'client'
 import { UserData } from 'types/UserData'
 import { isNullOrEmpty } from '../lib/utils'
 import { ApiClient, HelixGame } from '@twurple/api'
+import { PermissionLevel, CommandType } from '@prisma/client'
 
 class GameCommand extends Command {
 	id?: string
@@ -24,7 +24,7 @@ class GameCommand extends Command {
 	}
 
 	async callback(client: DigittronClient, user: UserData, channel: string, args: unknown[]): Promise<void> {
-		if (args.length === 0) {
+		if (!args.length) {
 			const userData = await client.api.users.getUserByName(channel)
 			if (!userData) {
 				throw Error(`Could not get user data for ${channel}`)

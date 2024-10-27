@@ -1,6 +1,6 @@
 export interface UserData {
-	id: string
+	id: string // Twitch ID
 	name: string
-	rank: PermissionLevel
-	watchTime: number
+	rank: PermissionLevel // default to VIEWER
+	watchTime: number // in minutes
 }

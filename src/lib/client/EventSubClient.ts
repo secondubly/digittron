@@ -6,6 +6,7 @@ import { NgrokAdapter } from '@twurple/eventsub-ngrok'
 import { HttpStatusCodeError } from '@twurple/api-call'
 import { StatusCodes } from 'http-status-codes'
 import { getParameterByName } from '../utils.js'
+import { api, auth } from '../../helpers/twurple'
 
 export class EventSubClient {
 	private client: DigittronClient
@@ -19,7 +20,7 @@ export class EventSubClient {
 
 	private async loadCustomRewards(): Promise<void> {
 		try {
-			const channelPointRewards = (await this.client.api.channelPoints.getCustomRewards(this.user.id)) ?? []
+			const channelPointRewards = (await api.channelPoints.getCustomRewards(this.user.id)) ?? []
 			this.rewards = new CustomRewardsCache(channelPointRewards)
 			return
 		} catch (e) {
@@ -32,7 +33,7 @@ export class EventSubClient {
 
 	async connect() {
 		const apiClient = new ApiClient({
-			authProvider: this.client.auth,
+			authProvider: auth,
 			logger: {
 				timestamps: true,
 				colors: true,
@@ -65,7 +66,7 @@ export class EventSubClient {
 		// 	})
 		// }
 		const listener = new EventSubHttpListener({
-			apiClient: this.client.api,
+			apiClient: api,
 			adapter,
 			secret: process.env.LISTENER_SECRET ?? 'thisShouldBeARandomlyGeneratedFixedStringA'
 		})
@@ -74,7 +75,7 @@ export class EventSubClient {
 
 		if (!this.user) {
 			const channelName = this.client.getChannels().map((channel) => channel.substring(1))
-			this.user = (await this.client.api.users.getUserByName(channelName[0])) as HelixUser
+			this.user = (await api.users.getUserByName(channelName[0])) as HelixUser
 		}
 
 		// bind song request

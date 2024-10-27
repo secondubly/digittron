@@ -1,16 +1,14 @@
-import { createContext } from '@secondubly/digittron-db'
-const { prisma } = await createContext()
 import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
 import { ChatUserstate, Client } from '@twurple/auth-tmi'
 import { EventSubClient } from './lib/client/EventSubClient.js'
 import { getUsersData, redisClient } from './lib/utils.js'
-import { ApiClient } from '@twurple/api'
 import { EventEmitter } from 'events'
 import { Logger as Log } from './lib/client/Logger.js'
 import { CommandHandler } from './handlers/commandHandler.js'
 import { Spotify } from './lib/utils/SongRequest.js'
 import { cache } from './lib/cache.js'
 import { getUserRank } from './helpers/getUserRank.js'
+import { api, auth } from './helpers/twurple.js'
 
 type DigittronConfig = {
 	prefix: string
@@ -22,11 +20,8 @@ type DigittronConfig = {
 
 export class DigittronClient extends EventEmitter {
 	private id: string = ''
-	public db = prisma
-	public tmi!: Client
-	public api!: ApiClient
-	public auth: RefreshingAuthProvider
-	public eventSub!: EventSubClient
+	public tmi: Client
+	public eventSub?: EventSubClient
 	private config: DigittronConfig
 	private handler: typeof CommandHandler
 	private songHandler: typeof Spotify
@@ -35,21 +30,17 @@ export class DigittronClient extends EventEmitter {
 
 		this.config = config
 		this.handler = CommandHandler
-		this.handler.setupClient(this)
 		this.songHandler = Spotify
-
-		this.auth = new RefreshingAuthProvider({
-			clientId: this.config.CLIENT_ID,
-			clientSecret: this.config.CLIENT_SECRET
-		})
-
-		this.auth.onRefresh(async (userId, newTokenData) => {
-			// REVIEW: do we need to await this?
-			await redisClient.set(userId, JSON.stringify(newTokenData))
-		})
-
-		this.auth.onRefreshFailure((userId) => {
-			Log.warn(`User ${userId} needs to reauthenticate.`)
+		this.tmi = new Client({
+			options: {
+				debug: true
+			},
+			connection: {
+				secure: true,
+				reconnect: true
+			},
+			authProvider: auth,
+			channels: this.config.channels
 		})
 
 		this.connect()
@@ -71,7 +62,7 @@ export class DigittronClient extends EventEmitter {
 		// force token refresh
 		botAccessToken.expiresIn = 0
 		botAccessToken.obtainmentTimestamp = 0
-		this.auth.addUser(this.id, botAccessToken, ['chat'])
+		auth.addUser(this.id, botAccessToken, ['chat'])
 
 		// get all channel tokens
 		const userData = await getUsersData(this.config.channels)
@@ -87,31 +78,9 @@ export class DigittronClient extends EventEmitter {
 				continue
 			}
 			const accessToken = JSON.parse(token) as AccessToken
-			this.auth.addUser(userIds[idx], accessToken)
+			auth.addUser(userIds[idx], accessToken)
 		}
 		await cache.loadBotCommands()
-
-		this.api = new ApiClient({
-			authProvider: this.auth,
-			logger: {
-				timestamps: true,
-				colors: true,
-				emoji: true,
-				minLevel: 3
-			}
-		})
-
-		this.tmi = new Client({
-			options: {
-				debug: true
-			},
-			connection: {
-				secure: true,
-				reconnect: true
-			},
-			authProvider: this.auth,
-			channels: this.config.channels
-		})
 
 		this.eventSub = new EventSubClient(this)
 		await this.eventSub.connect()
@@ -152,15 +121,18 @@ export class DigittronClient extends EventEmitter {
 		this.emit('message', message)
 
 		if (message.trim().startsWith('!')) {
-			this.handler.processCmd(channel, message, tags.username)
+			const response = await this.handler.processCmd(channel, message, tags.username)
+			if (response) {
+				this.say(channel, response)
+			}
 		}
 	}
 
 	private async onJoin(channel: string, user: string) {
 		// get user id
 		try {
-			const userInfo = await this.api.users.getUserByName(user)
-			const channelData = await this.api.users.getUserByName(channel.slice(1))
+			const userInfo = await api.users.getUserByName(user)
+			const channelData = await api.users.getUserByName(channel.slice(1))
 			if (!userInfo || !channelData) {
 				return
 			}
@@ -173,7 +145,7 @@ export class DigittronClient extends EventEmitter {
 			cache.users.set(userInfo.id, {
 				id: userInfo.id,
 				name: userInfo.name,
-				rank: await getUserRank(this.api, channelData, userInfo),
+				rank: await getUserRank(channelData, userInfo),
 				watchTime: 0
 			})
 		} catch (e) {

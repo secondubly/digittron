@@ -13,17 +13,6 @@ export abstract class Command {
 	abstract hidden?: boolean
 	abstract callback(client: DigittronClient, user: UserData, channel: string, ...args: unknown[]): void
 	canExecute(author: UserData): boolean {
-		if (author.rank !== this.permission) {
-			return false
-		}
-		return true
+		return author.rank === this.permission
 	}
-}
-
-export interface ParsedCommand {
-	name: string
-	author?: string
-	source: string
-	command: Command
-	args?: string[]
 }
