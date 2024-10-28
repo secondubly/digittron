@@ -3,6 +3,7 @@ import { CommandType, PermissionLevel } from '@prisma/client'
 import { DigittronClient } from 'client'
 import { UserData } from 'types/UserData'
 import { isNullOrEmpty } from '../lib/utils'
+import { api } from 'helpers/twurple.js'
 
 class TitleCommand extends Command {
 	id?: string
@@ -24,12 +25,12 @@ class TitleCommand extends Command {
 
 	async callback(client: DigittronClient, user: UserData, channel: string, args: unknown[]): Promise<void> {
 		if (args.length === 0) {
-			const userData = await client.api.users.getUserByName(channel)
+			const userData = await api.users.getUserByName(channel)
 			if (!userData) {
 				throw Error(`Could not get user data for ${channel}`)
 			}
 
-			const channelData = await client.api.channels.getChannelInfoById(userData)
+			const channelData = await api.channels.getChannelInfoById(userData)
 			if (!channelData) {
 				throw Error(`Could not get stream title for ${channel}`)
 			}
@@ -47,13 +48,13 @@ class TitleCommand extends Command {
 				return
 			}
 
-			const channelData = await client.api.users.getUserByName(channel)
+			const channelData = await api.users.getUserByName(channel)
 			if (!channelData) {
 				throw Error(`Could not get user data for ${channel}`)
 			}
 
 			try {
-				await client.api.channels.updateChannelInfo(channelData.id, { title })
+				await api.channels.updateChannelInfo(channelData.id, { title })
 				client.say(channel, `@${user.name} Successfully updated stream title to “${title}”`)
 			} catch (e) {
 				client.say(channel, 'Something went wrong, sorry!')

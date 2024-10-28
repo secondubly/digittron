@@ -1,16 +1,17 @@
-import { $Enums, CommandType, PermissionLevel } from '.prisma/client'
+import { CommandType, PermissionLevel } from '@prisma/client'
 import { DigittronClient } from 'client'
 import { Command } from '../lib/structures/Command'
 import { UserData } from 'types/UserData'
 import { Logger } from '../lib/client/Logger.js'
+import { api } from 'helpers/twurple'
 
 class PollCommand extends Command {
 	id?: string | undefined
-	type: $Enums.CommandType
+	type: CommandType
 	name: string
 	aliases: string[]
 	description?: string | undefined
-	permission: $Enums.PermissionLevel
+	permission: PermissionLevel
 	enabled?: boolean | undefined
 	hidden?: boolean | undefined
 
@@ -55,18 +56,18 @@ class PollCommand extends Command {
 			return
 		}
 
-		const userData = await client.api.users.getUserByName(channel)
+		const userData = await api.users.getUserByName(channel)
 		if (!userData) {
 			throw Error(`Could not get user data for ${channel}`)
 		}
 
-		const channelData = await client.api.channels.getChannelInfoById(userData)
+		const channelData = await api.channels.getChannelInfoById(userData)
 		if (!channelData) {
 			throw Error(`Could not get channel data for ${channel}`)
 		}
 
 		try {
-			await client.api.polls.createPoll(channelData.id, {
+			await api.polls.createPoll(channelData.id, {
 				title,
 				choices,
 				duration

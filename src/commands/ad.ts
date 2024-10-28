@@ -4,6 +4,7 @@ import { UserData } from 'types/UserData'
 import { CommandType, PermissionLevel } from '@prisma/client'
 import { CommercialLength } from '@twurple/api'
 import { Logger } from '../lib/client/Logger.js'
+import { api } from 'helpers/twurple.js'
 
 const VALID_DURATION = [30, 60, 90, 120, 150, 180]
 class AdCommand extends Command {
@@ -12,7 +13,7 @@ class AdCommand extends Command {
 	name: string
 	aliases: string[]
 	description?: string | undefined
-	permission: $Enums.PermissionLevel
+	permission: PermissionLevel
 	enabled?: boolean | undefined
 	hidden?: boolean | undefined
 
@@ -34,7 +35,7 @@ class AdCommand extends Command {
 			return
 		}
 
-		const userData = await client.api.users.getUserByName(channel)
+		const userData = await api.users.getUserByName(channel)
 		if (!userData) {
 			throw Error(`Could not get user data for ${channel}`)
 		}
@@ -48,7 +49,7 @@ class AdCommand extends Command {
 		const silent = args[1] === 'silent' ? true : false
 
 		try {
-			client.api.channels.startChannelCommercial(userData, duration)
+			api.channels.startChannelCommercial(userData, duration)
 			if (!silent) {
 				client.say(channel, `A commerical will be starting soon and will last ${duration} seconds`)
 			}

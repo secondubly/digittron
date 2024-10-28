@@ -5,7 +5,7 @@ import fetch, { Headers, RequestInit, Response } from 'node-fetch'
 import { AccessToken } from '@twurple/auth'
 import { GetUsersResponse, User, TwitchApi } from 'ts-twitch-api'
 import { StatusCodes } from 'http-status-codes'
-import { Logger } from './client/Logger'
+import { Logger } from './client/Logger.js'
 export const redisClient = await createClient({
 	url: process.env.REDIS_URL
 })

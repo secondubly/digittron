@@ -6,7 +6,7 @@ import { NgrokAdapter } from '@twurple/eventsub-ngrok'
 import { HttpStatusCodeError } from '@twurple/api-call'
 import { StatusCodes } from 'http-status-codes'
 import { getParameterByName } from '../utils.js'
-import { api, auth } from '../../helpers/twurple'
+import { api, auth } from '../../helpers/twurple.js'
 
 export class EventSubClient {
 	private client: DigittronClient

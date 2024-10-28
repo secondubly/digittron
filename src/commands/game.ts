@@ -4,7 +4,7 @@ import { UserData } from 'types/UserData'
 import { isNullOrEmpty } from '../lib/utils'
 import { ApiClient, HelixGame } from '@twurple/api'
 import { PermissionLevel, CommandType } from '@prisma/client'
-import { api } from 'helpers/twurple'
+import { api } from 'helpers/twurple.js'
 
 class GameCommand extends Command {
 	id?: string

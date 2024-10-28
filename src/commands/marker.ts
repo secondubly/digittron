@@ -1,17 +1,18 @@
-import { $Enums, CommandType, PermissionLevel } from '.prisma/client'
+import { CommandType, PermissionLevel } from '@prisma/client'
 import { DigittronClient } from 'client'
-import { Logger } from 'lib/client/Logger'
-import { Command } from 'lib/structures/Command'
+import { api } from 'helpers/twurple.js'
+import { Logger } from 'lib/client/Logger.js'
+import { Command } from 'lib/structures/Command.js'
 import { secondsToHms } from 'lib/utils'
-import { UserData } from 'types/UserData'
+import { UserData } from 'types/UserData.js'
 
 class MarkerCommand extends Command {
 	id?: string | undefined
-	type: $Enums.CommandType
+	type: CommandType
 	name: string
 	aliases: string[]
 	description?: string | undefined
-	permission: $Enums.PermissionLevel
+	permission: PermissionLevel
 	enabled?: boolean | undefined
 	hidden?: boolean | undefined
 
@@ -24,7 +25,7 @@ class MarkerCommand extends Command {
 	}
 
 	async callback(client: DigittronClient, user: UserData, channel: string, args: unknown[]): Promise<void> {
-		const userData = await client.api.users.getUserByName(channel)
+		const userData = await api.users.getUserByName(channel)
 		if (!userData) {
 			throw Error(`Could not get user data for ${channel}`)
 		}
@@ -34,7 +35,7 @@ class MarkerCommand extends Command {
 		}
 
 		try {
-			const marker = await client.api.streams.createStreamMarker(userData.id, description)
+			const marker = await api.streams.createStreamMarker(userData.id, description)
 			const response = description
 				? `Stream marker created at: ${secondsToHms(marker.positionInSeconds)} with description: ${description}`
 				: `Stream marker created at: ${secondsToHms(marker.positionInSeconds)}`
