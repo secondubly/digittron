@@ -33,7 +33,7 @@ services:
             timeout: 5s
             retries: 5
   redis:
-    image: redis:7.2.4
+    image: redis:alpine
     container_name: redis
     restart: always
     ports:
@@ -54,6 +54,9 @@ services:
         target: dev
         args:
             DATABASE_URL: ${DATABASE_URL}
+            NPM_TOKEN: ${NPM_TOKEN}
+        secrets:
+            - npmrc
     volumes:
         - ./src:/usr/bot/src
         - ./src/nodemon.json:/usr/bot/src/nodemon.json
@@ -67,8 +70,6 @@ services:
         DATABASE_URL: ${DATABASE_URL}
     env_file:
         - ./src/.env.development
-    secrets:
-        - npmrc
     command: npm run dev
 volumes:
   pg-data:
