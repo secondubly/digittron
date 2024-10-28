@@ -1,10 +1,10 @@
 import { DigittronClient } from 'client'
-import { Command } from 'lib/structures/Command'
-import { UserData } from 'types/UserData'
+import { Command } from '../lib/structures/Command.js'
+import { UserData } from '../types/UserData.js'
 import { CommandType, PermissionLevel } from '@prisma/client'
 import { CommercialLength } from '@twurple/api'
 import { Logger } from '../lib/client/Logger.js'
-import { api } from 'helpers/twurple.js'
+import { api } from '../helpers/twurple.js'
 
 const VALID_DURATION = [30, 60, 90, 120, 150, 180]
 class AdCommand extends Command {

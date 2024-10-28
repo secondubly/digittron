@@ -1,5 +1,5 @@
 import { PermissionLevel, CommandType } from '@secondubly/digittron-db'
-import { DigittronClient } from '../../client'
+import { DigittronClient } from '../../client.js'
 import { UserData } from '../../types/UserData'
 
 export abstract class Command {

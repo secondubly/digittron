@@ -1,6 +1,6 @@
 import { RefreshingAuthProvider } from '@twurple/auth'
-import { redisClient } from 'lib/utils'
-import { Logger as Log } from 'lib/client/Logger.js'
+import { redisClient } from '../lib/utils.js'
+import { Logger as Log } from '../lib/client/Logger.js'
 import { ApiClient } from '@twurple/api'
 
 export const auth = new RefreshingAuthProvider({

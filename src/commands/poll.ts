@@ -1,9 +1,9 @@
 import { CommandType, PermissionLevel } from '@prisma/client'
 import { DigittronClient } from 'client'
-import { Command } from '../lib/structures/Command'
-import { UserData } from 'types/UserData'
+import { Command } from '../lib/structures/Command.js'
+import { UserData } from 'types/UserData.js'
 import { Logger } from '../lib/client/Logger.js'
-import { api } from 'helpers/twurple'
+import { api } from '../helpers/twurple.js'
 
 class PollCommand extends Command {
 	id?: string | undefined

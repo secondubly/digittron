@@ -1,7 +1,7 @@
 import { DigittronClient } from 'client'
 import { Command } from '../lib/structures/Command.js'
 import { PermissionLevel, CommandType } from '@prisma/client'
-import { UserData } from 'types/UserData'
+import { UserData } from '../types/UserData.js'
 
 class TestCommand extends Command {
 	id?: string

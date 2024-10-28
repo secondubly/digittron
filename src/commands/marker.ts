@@ -1,10 +1,10 @@
 import { CommandType, PermissionLevel } from '@prisma/client'
-import { DigittronClient } from 'client'
-import { api } from 'helpers/twurple.js'
-import { Logger } from 'lib/client/Logger.js'
-import { Command } from 'lib/structures/Command.js'
-import { secondsToHms } from 'lib/utils'
-import { UserData } from 'types/UserData.js'
+import { DigittronClient } from '../client.js'
+import { api } from '../helpers/twurple.js'
+import { Logger } from '../lib/client/Logger.js'
+import { Command } from '../lib/structures/Command.js'
+import { secondsToHms } from '../lib/utils.js'
+import { UserData } from '../types/UserData.js'
 
 class MarkerCommand extends Command {
 	id?: string | undefined

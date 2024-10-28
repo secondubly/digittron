@@ -1,5 +1,5 @@
 import { ApiClient, HelixUser } from '@twurple/api'
-import { DigittronClient } from '../../client'
+import { DigittronClient } from '../../client.js'
 import { CustomRewardsCache } from '../structures/CustomRewardsCache.js'
 import { ConnectionAdapter, EventSubHttpListener } from '@twurple/eventsub-http'
 import { NgrokAdapter } from '@twurple/eventsub-ngrok'

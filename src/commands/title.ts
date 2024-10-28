@@ -1,9 +1,9 @@
-import { Command } from '../lib/structures/Command'
+import { Command } from '../lib/structures/Command.js'
 import { CommandType, PermissionLevel } from '@prisma/client'
-import { DigittronClient } from 'client'
-import { UserData } from 'types/UserData'
+import { DigittronClient } from '../client.js'
+import { UserData } from '../types/UserData.js'
 import { isNullOrEmpty } from '../lib/utils'
-import { api } from 'helpers/twurple.js'
+import { api } from '../helpers/twurple.js'
 
 class TitleCommand extends Command {
 	id?: string

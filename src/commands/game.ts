@@ -1,10 +1,10 @@
-import { Command } from '../lib/structures/Command'
+import { Command } from '../lib/structures/Command.js'
 import { DigittronClient } from 'client'
-import { UserData } from 'types/UserData'
-import { isNullOrEmpty } from '../lib/utils'
+import { UserData } from '../types/UserData.js'
+import { isNullOrEmpty } from '../lib/utils.js'
 import { ApiClient, HelixGame } from '@twurple/api'
 import { PermissionLevel, CommandType } from '@prisma/client'
-import { api } from 'helpers/twurple.js'
+import { api } from '../helpers/twurple.js'
 
 class GameCommand extends Command {
 	id?: string

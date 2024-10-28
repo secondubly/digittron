@@ -9,10 +9,10 @@ import { poll } from '../commands/poll.js'
 import { Logger } from './client/Logger.js'
 import type { UserData } from 'types/UserData'
 import { marker } from 'commands/marker.js'
-import prisma from 'helpers/prisma.js'
-import { api } from 'helpers/twurple.js'
+import prisma from '../helpers/prisma.js'
+import { api } from '../helpers/twurple.js'
 import { envParseArray } from './utils.js'
-import { getUserRank } from 'helpers/getUserRank.js'
+import { getUserRank } from '../helpers/getUserRank.js'
 
 class Cache {
 	private commands: Record<string, Command> = {}
