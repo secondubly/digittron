@@ -2,8 +2,10 @@
     "name": "digittron",
     "version": "1.0.0",
     "description": "",
-    "main": "index.js",
+    "main": "build/bot.js",
     "scripts": {
+        "start": "tsc && node build/bot.js",
+        "lint": "eslint . --ext .ts",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
@@ -13,12 +15,16 @@
     "devDependencies": {
         "@eslint/js": "^9.28.0",
         "@tsconfig/node22": "^22.0.2",
+        "@types/node": "^22.15.30",
+        "dotenv": "^16.5.0",
         "eslint": "^9.28.0",
         "prettier": "3.5.3",
         "typescript": "^5.8.3",
         "typescript-eslint": "^8.33.1"
     },
     "dependencies": {
-        "@twurple/auth": "^7.3.0"
+        "@twurple/auth": "^7.3.0",
+        "@twurple/chat": "^7.3.0",
+        "redis": "^5.5.6"
     }
 }
