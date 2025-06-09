@@ -2,9 +2,9 @@
     "name": "digittron",
     "version": "1.0.0",
     "description": "",
-    "main": "build/bot.js",
+    "main": "build/main.js",
     "scripts": {
-        "start": "tsc && node build/bot.js",
+        "start": "tsc && node build/main.js",
         "lint": "eslint . --ext .ts",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
