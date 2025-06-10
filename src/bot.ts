@@ -30,10 +30,15 @@ export class Bot {
         })
 
         const botTokenData = JSON.parse(
-            await readFile(resolve(TOKEN_PATH, '113565139.json'), 'utf-8'),
+            await readFile(resolve(TOKEN_PATH, 'bot_token.json'), 'utf-8'),
+        )
+
+        const channelTokenData = JSON.parse(
+            await readFile(resolve(TOKEN_PATH, 'channel_token.json'), 'utf-8'),
         )
 
         await authProvider.addUserForToken(botTokenData, ['chat'])
+        await authProvider.addUserForToken(channelTokenData)
         authProvider.onRefresh(this.handleRefresh)
 
         const chatClient = new ChatClient({
