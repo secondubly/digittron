@@ -29,11 +29,11 @@ export class Bot {
             clientSecret,
         })
 
-        const tokenData = JSON.parse(
+        const botTokenData = JSON.parse(
             await readFile(resolve(TOKEN_PATH, '113565139.json'), 'utf-8'),
         )
 
-        await authProvider.addUserForToken(tokenData, ['chat'])
+        await authProvider.addUserForToken(botTokenData, ['chat'])
         authProvider.onRefresh(this.handleRefresh)
 
         const chatClient = new ChatClient({
