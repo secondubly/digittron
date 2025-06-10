@@ -1,11 +1,17 @@
 import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
 import { ChatClient, ChatMessage } from '@twurple/chat'
-import { stat, mkdir, writeFile, readFile } from 'fs/promises'
 import { resolve } from 'path'
 import { find } from 'linkifyjs'
 import { ApiClient } from '@twurple/api'
+import redis from 'redis'
 
-const TOKEN_PATH = resolve(__dirname, '../src/tokens/')
+const redisClient = await redis
+    .createClient({
+        url: 'redis://localhost:6379',
+    })
+    .on('connect', () => console.log('connected to redis'))
+    .on('error', (err) => console.log('Redis Client Error', err))
+    .connect()
 
 export class Bot {
     authProvider: RefreshingAuthProvider
@@ -29,16 +35,24 @@ export class Bot {
             clientSecret,
         })
 
-        const botTokenData = JSON.parse(
-            await readFile(resolve(TOKEN_PATH, 'bot_token.json'), 'utf-8'),
-        )
+        const botTokenString = await redisClient.get('113565139')
+        if (!botTokenString) {
+            console.log('Could not retrieve bot token!')
+            process.exit(1)
+        }
 
-        const channelTokenData = JSON.parse(
-            await readFile(resolve(TOKEN_PATH, 'channel_token.json'), 'utf-8'),
-        )
+        const botTokenData = JSON.parse(botTokenString) as AccessToken
+
+        const channelTokenString = await redisClient.get('89181064')
+        if (!channelTokenString) {
+            console.log('Could not retrieve streamer token!')
+            process.exit(1)
+        }
+        const channelTokenData = JSON.parse(channelTokenString) as AccessToken
 
         await authProvider.addUserForToken(botTokenData, ['chat'])
         await authProvider.addUserForToken(channelTokenData)
+
         authProvider.onRefresh(this.handleRefresh)
 
         const chatClient = new ChatClient({
@@ -84,22 +98,11 @@ export class Bot {
 
     static async handleRefresh(userId: string, newTokenData: AccessToken) {
         try {
-            await stat(TOKEN_PATH)
-            await writeFile(
-                resolve(TOKEN_PATH, `${userId}.json`),
-                JSON.stringify(newTokenData, null, 4),
-                'utf-8',
-            )
+            redisClient.set(userId, JSON.stringify(newTokenData)).then(() => {
+                console.log(`token refreshed for ${userId}`)
+            })
         } catch (error) {
-            if (this.hasErrorCode(error))
-                if (error.code === 'ENOENT') {
-                    try {
-                        await mkdir(TOKEN_PATH)
-                        console.log('created token directory')
-                    } catch (err) {
-                        console.error((err as Error).message)
-                    }
-                }
+            console.error((error as Error).message)
         }
     }
 
