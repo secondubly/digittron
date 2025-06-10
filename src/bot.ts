@@ -1,21 +1,26 @@
 import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
-import { ChatClient } from '@twurple/chat'
+import { ChatClient, ChatMessage } from '@twurple/chat'
 import { stat, mkdir, writeFile, readFile } from 'fs/promises'
 import { resolve } from 'path'
+import { find } from 'linkifyjs'
+import { ApiClient } from '@twurple/api'
 
 const TOKEN_PATH = resolve(__dirname, '../src/tokens/')
 
 export class Bot {
     authProvider: RefreshingAuthProvider
+    apiClient: ApiClient
     chatClient: ChatClient
     TOKEN_PATH = resolve(__dirname, '../src/tokens/')
 
     private constructor(
         chatClient: ChatClient,
         authProvider: RefreshingAuthProvider,
+        apiClient: ApiClient,
     ) {
         this.chatClient = chatClient
         this.authProvider = authProvider
+        this.apiClient = apiClient
     }
 
     static async init(clientID: string, clientSecret: string): Promise<Bot> {
@@ -36,18 +41,40 @@ export class Bot {
             channels: ['secondubly'],
         })
 
+        const apiClient = new ApiClient({
+            authProvider,
+        })
+
         chatClient.connect()
 
         chatClient.onMessage(
-            async (channel: string, user: string, text: string) => {
+            async (
+                channel: string,
+                user: string,
+                text: string,
+                msg: ChatMessage,
+            ) => {
                 console.log(`${user}: ${text}`)
                 if (text === '!test') {
                     chatClient.say(channel, 'hello')
+                    return
+                } else if (find(text).length > 0) {
+                    // time out users who post links
+                    // REVIEW: should we ignore emails?
+                    if (!msg.channelId) {
+                        // log an error
+                        return
+                    }
+                    apiClient.moderation.banUser(msg.channelId, {
+                        duration: 1,
+                        reason: 'for posting links (temporary)',
+                        user: msg.userInfo.userId,
+                    })
                 }
             },
         )
 
-        return new Bot(chatClient, authProvider)
+        return new Bot(chatClient, authProvider, apiClient)
     }
 
     static async handleRefresh(userId: string, newTokenData: AccessToken) {
