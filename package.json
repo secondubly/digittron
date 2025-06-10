@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "",
     "main": "build/main.js",
+    "type": "module",
     "scripts": {
         "start": "tsc && node build/main.js",
         "lint": "eslint . --ext .ts",
