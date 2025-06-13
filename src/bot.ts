@@ -85,8 +85,29 @@ export class Bot {
             ) => {
                 console.log(`${user}: ${text}`)
                 if (text === '!test') {
-                    chatClient.say(channel, 'hello')
+                    chatClient.say(
+                        channel,
+                        'this is a test from the automated bot system',
+                    )
                     return
+                } else if (text === '!game' || text === '!title') {
+                    if (!msg.channelId) {
+                        // log an error
+                        return
+                    }
+                    const channelInfo =
+                        await apiClient.channels.getChannelInfoById(
+                            msg.channelId,
+                        )
+                    if (!channelInfo) {
+                        return
+                    }
+                    chatClient.say(
+                        channel,
+                        text.includes('game')
+                            ? `@${msg.userInfo.displayName}, game: ${channelInfo.gameName}`
+                            : `@${msg.userInfo.displayName}, title: ${channelInfo.title}`,
+                    )
                 } else if (find(text).length > 0) {
                     if (msg.userInfo.isBroadcaster || msg.userInfo.isMod) {
                         return
