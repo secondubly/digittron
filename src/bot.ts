@@ -1,6 +1,5 @@
 import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
 import { ChatClient, ChatMessage } from '@twurple/chat'
-import { resolve } from 'path'
 import { find } from 'linkifyjs'
 import { ApiClient } from '@twurple/api'
 import redis from 'redis'
@@ -17,7 +16,6 @@ export class Bot {
     authProvider: RefreshingAuthProvider
     apiClient: ApiClient
     chatClient: ChatClient
-    TOKEN_PATH = resolve(__dirname, '../src/tokens/')
 
     private constructor(
         chatClient: ChatClient,
@@ -53,7 +51,19 @@ export class Bot {
         await authProvider.addUserForToken(botTokenData, ['chat'])
         await authProvider.addUserForToken(channelTokenData)
 
-        authProvider.onRefresh(this.handleRefresh)
+        authProvider.onRefresh(
+            async (userId: string, newTokenData: AccessToken) => {
+                try {
+                    redisClient
+                        .set(userId, JSON.stringify(newTokenData))
+                        .then(() => {
+                            console.log(`token refreshed for ${userId}`)
+                        })
+                } catch (error) {
+                    console.error((error as Error).message)
+                }
+            },
+        )
 
         const chatClient = new ChatClient({
             authProvider,
@@ -78,12 +88,15 @@ export class Bot {
                     chatClient.say(channel, 'hello')
                     return
                 } else if (find(text).length > 0) {
-                    // time out users who post links
-                    // REVIEW: should we ignore emails?
+                    if (msg.userInfo.isBroadcaster || msg.userInfo.isMod) {
+                        return
+                    }
                     if (!msg.channelId) {
                         // log an error
                         return
                     }
+                    // timeout users who post links
+                    // REVIEW: should we ignore emails?
                     apiClient.moderation.banUser(msg.channelId, {
                         duration: 1,
                         reason: 'for posting links (temporary)',

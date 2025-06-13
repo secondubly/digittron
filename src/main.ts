@@ -1,7 +1,9 @@
 import * as dotenv from 'dotenv'
-import { resolve } from 'path'
+import { dirname, resolve } from 'path'
 import { Bot } from './bot.js'
+import { fileURLToPath } from 'url'
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: resolve(__dirname, '../.env') })
 
 const CLIENT_ID = process.env.CLIENT_ID
