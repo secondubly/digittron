@@ -1,5 +1,5 @@
 import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
-import { ChatClient, ChatMessage } from '@twurple/chat'
+import { ChatClient, ChatMessage, ChatRaidInfo } from '@twurple/chat'
 import { find } from 'linkifyjs'
 import { ApiClient } from '@twurple/api'
 import redis from 'redis'
@@ -25,6 +25,17 @@ export class Bot {
         this.chatClient = chatClient
         this.authProvider = authProvider
         this.apiClient = apiClient
+
+        authProvider.onRefresh(this.handleRefresh)
+
+        this.chatClient.onRaid(this.handleRaid)
+        this.chatClient.onMessage(this.handleMessage)
+
+        chatClient.onAuthenticationSuccess(() => {
+            console.log("I've successfully connected!")
+        })
+
+        chatClient.connect()
     }
 
     static async init(clientID: string, clientSecret: string): Promise<Bot> {
@@ -51,20 +62,6 @@ export class Bot {
         await authProvider.addUserForToken(botTokenData, ['chat'])
         await authProvider.addUserForToken(channelTokenData)
 
-        authProvider.onRefresh(
-            async (userId: string, newTokenData: AccessToken) => {
-                try {
-                    redisClient
-                        .set(userId, JSON.stringify(newTokenData))
-                        .then(() => {
-                            console.log(`token refreshed for ${userId}`)
-                        })
-                } catch (error) {
-                    console.error((error as Error).message)
-                }
-            },
-        )
-
         const chatClient = new ChatClient({
             authProvider,
             channels: ['secondubly'],
@@ -74,63 +71,10 @@ export class Bot {
             authProvider,
         })
 
-        chatClient.connect()
-
-        chatClient.onMessage(
-            async (
-                channel: string,
-                user: string,
-                text: string,
-                msg: ChatMessage,
-            ) => {
-                console.log(`${user}: ${text}`)
-                if (text === '!test') {
-                    chatClient.say(
-                        channel,
-                        'this is a test from the automated bot system',
-                    )
-                    return
-                } else if (text === '!game' || text === '!title') {
-                    if (!msg.channelId) {
-                        // log an error
-                        return
-                    }
-                    const channelInfo =
-                        await apiClient.channels.getChannelInfoById(
-                            msg.channelId,
-                        )
-                    if (!channelInfo) {
-                        return
-                    }
-                    chatClient.say(
-                        channel,
-                        text.includes('game')
-                            ? `@${msg.userInfo.displayName}, game: ${channelInfo.gameName}`
-                            : `@${msg.userInfo.displayName}, title: ${channelInfo.title}`,
-                    )
-                } else if (find(text).length > 0) {
-                    if (msg.userInfo.isBroadcaster || msg.userInfo.isMod) {
-                        return
-                    }
-                    if (!msg.channelId) {
-                        // log an error
-                        return
-                    }
-                    // timeout users who post links
-                    // REVIEW: should we ignore emails?
-                    apiClient.moderation.banUser(msg.channelId, {
-                        duration: 1,
-                        reason: 'for posting links (temporary)',
-                        user: msg.userInfo.userId,
-                    })
-                }
-            },
-        )
-
         return new Bot(chatClient, authProvider, apiClient)
     }
 
-    static async handleRefresh(userId: string, newTokenData: AccessToken) {
+    private async handleRefresh(userId: string, newTokenData: AccessToken) {
         try {
             redisClient.set(userId, JSON.stringify(newTokenData)).then(() => {
                 console.log(`token refreshed for ${userId}`)
@@ -140,8 +84,79 @@ export class Bot {
         }
     }
 
-    // eslint-disable-next-line
-    static hasErrorCode(error: any): error is { code: string } {
-        return error && typeof error === 'object' && 'code' in error
+    private async handleRaid(
+        channel: string,
+        user: string,
+        raidInfo: ChatRaidInfo,
+    ) {
+        const raidee = raidInfo.displayName
+        const raideeUser = await this.apiClient.users.getUserByName(raidee)
+        const channelUser = await this.apiClient.users.getUserByName(channel)
+
+        if (!raideeUser) {
+            console.warn('Could not retrieve raid user data')
+            return
+        } else if (!channelUser) {
+            console.warn('Could not retrieve channel user data')
+            return
+        }
+
+        // shoutout raider
+        this.apiClient.chat.shoutoutUser(channelUser, raideeUser)
+    }
+
+    private async handleMessage(
+        channel: string,
+        user: string,
+        text: string,
+        msg: ChatMessage,
+    ) {
+        console.log(`${user}: ${text}`)
+        if (text === '!test') {
+            this.chatClient.say(
+                channel,
+                'this is a test from the automated bot system',
+            )
+            return
+        } else if (text === '!game' || text === '!title') {
+            if (!msg.channelId) {
+                // log an error
+                return
+            }
+            const channelInfo =
+                await this.apiClient.channels.getChannelInfoById(msg.channelId)
+            if (!channelInfo) {
+                return
+            }
+
+            this.chatClient.say(
+                channel,
+                text.includes('game')
+                    ? `@${msg.userInfo.displayName}, game: ${channelInfo.gameName}`
+                    : `@${msg.userInfo.displayName}, title: ${channelInfo.title}`,
+            )
+        } else if (text === '!roulette') {
+            const val = Math.floor(Math.random() * 7)
+            if (val === 1) {
+                this.chatClient.say(channel, 'you got hit!')
+            } else {
+                this.chatClient.say(channel, "you're safe!")
+            }
+        } else if (find(text).length > 0) {
+            if (msg.userInfo.isBroadcaster || msg.userInfo.isMod) {
+                return
+            }
+            if (!msg.channelId) {
+                // log an error
+                return
+            }
+            // timeout users who post links
+            // REVIEW: should we ignore emails?
+            this.apiClient.moderation.banUser(msg.channelId, {
+                duration: 1,
+                reason: 'for posting links (temporary)',
+                user: msg.userInfo.userId,
+            })
+        }
     }
 }
