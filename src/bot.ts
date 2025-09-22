@@ -3,13 +3,14 @@ import { ChatClient, ChatMessage, ChatRaidInfo } from '@twurple/chat'
 import { find } from 'linkifyjs'
 import { ApiClient } from '@twurple/api'
 import redis from 'redis'
+import logger from './logger.js'
 
 const redisClient = await redis
     .createClient({
         url: 'redis://localhost:6379',
     })
-    .on('connect', () => console.log('connected to redis'))
-    .on('error', (err) => console.log('Redis Client Error', err))
+    .on('connect', () => logger.info('connected to redis'))
+    .on('error', (err) => logger.error('Redis Client Error', err))
     .connect()
 
 export class Bot {
@@ -32,7 +33,7 @@ export class Bot {
         this.chatClient.onMessage(this.handleMessage)
 
         chatClient.onAuthenticationSuccess(() => {
-            console.log("I've successfully connected!")
+            logger.info("I've successfully connected!")
         })
 
         chatClient.connect()
@@ -46,7 +47,7 @@ export class Bot {
 
         const botTokenString = await redisClient.get('113565139')
         if (!botTokenString) {
-            console.log('Could not retrieve bot token!')
+            logger.error('Could not retrieve bot token!')
             process.exit(1)
         }
 
@@ -54,7 +55,7 @@ export class Bot {
 
         const channelTokenString = await redisClient.get('89181064')
         if (!channelTokenString) {
-            console.log('Could not retrieve streamer token!')
+            logger.error('Could not retrieve streamer token!')
             process.exit(1)
         }
         const channelTokenData = JSON.parse(channelTokenString) as AccessToken
@@ -77,10 +78,10 @@ export class Bot {
     private async handleRefresh(userId: string, newTokenData: AccessToken) {
         try {
             redisClient.set(userId, JSON.stringify(newTokenData)).then(() => {
-                console.log(`token refreshed for ${userId}`)
+                logger.info(`token refreshed for ${userId}`)
             })
         } catch (error) {
-            console.error((error as Error).message)
+            logger.error((error as Error).message)
         }
     }
 
@@ -94,10 +95,10 @@ export class Bot {
         const channelUser = await this.apiClient.users.getUserByName(channel)
 
         if (!raideeUser) {
-            console.warn('Could not retrieve raid user data')
+            logger.warn('Could not retrieve raid user data')
             return
         } else if (!channelUser) {
-            console.warn('Could not retrieve channel user data')
+            logger.warn('Could not retrieve channel user data')
             return
         }
 
@@ -111,7 +112,7 @@ export class Bot {
         text: string,
         msg: ChatMessage,
     ) {
-        console.log(`${user}: ${text}`)
+        logger.info(`${user}: ${text}`)
         if (text === '!test') {
             this.chatClient.say(
                 channel,

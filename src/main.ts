@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv'
 import { dirname, resolve } from 'path'
 import { Bot } from './bot.js'
 import { fileURLToPath } from 'url'
+import logger from './logger.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 dotenv.config({ path: resolve(__dirname, '../.env') })
@@ -24,9 +25,7 @@ const hasUndefined = (obj: object) => {
 const main = async () => {
     if (hasUndefined(config)) {
         // TODO: throw error
-        console.log(
-            'undefined fields found in config file, please check your settings',
-        )
+        logger.error('undefined fields found in config file, please check your settings')
         process.exit(1)
     }
 
