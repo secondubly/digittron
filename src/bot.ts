@@ -1,9 +1,12 @@
 import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
 import { ChatClient, ChatMessage, ChatRaidInfo } from '@twurple/chat'
-import { find } from 'linkifyjs'
+import { find as findUrl } from 'linkifyjs'
 import { ApiClient } from '@twurple/api'
 import redis from 'redis'
 import logger from './logger.js'
+import Enmap from 'enmap'
+import { readdirSync } from 'fs'
+import { Command } from './types.js'
 
 const redisClient = await redis
     .createClient({
@@ -17,6 +20,10 @@ export class Bot {
     authProvider: RefreshingAuthProvider
     apiClient: ApiClient
     chatClient: ChatClient
+    commands: Map<string, Command>
+    cooldown: Enmap<string, number>
+    cooldownAmount = 60 * 1000 // 60 seconds
+    prefix: string
 
     private constructor(
         chatClient: ChatClient,
@@ -26,14 +33,28 @@ export class Bot {
         this.chatClient = chatClient
         this.authProvider = authProvider
         this.apiClient = apiClient
+        this.commands = new Map()
+        this.cooldown = new Enmap({ name: 'cooldowns' })
+        this.prefix = "!"
 
         authProvider.onRefresh(this.handleRefresh)
 
         this.chatClient.onRaid(this.handleRaid)
-        this.chatClient.onMessage(this.handleMessage)
+        this.chatClient.onMessage((channel: string, user: string, text: string, msg: ChatMessage) => {
+            this.handleMessage(channel, user, text, msg)
+        })
 
         chatClient.onAuthenticationSuccess(() => {
             logger.info("I've successfully connected!")
+            const commandFiles = readdirSync('./build/commands')
+                .filter((file) => file.endsWith('.js'))
+            logger.info(`Loading ${commandFiles.length} commands.`)
+
+            commandFiles.forEach(async (file) => {
+                const module = await import(`./commands/${file}`)
+                const command = module.default
+                this.commands.set(command.name, command)
+            })
         })
 
         chatClient.connect()
@@ -113,46 +134,45 @@ export class Bot {
         msg: ChatMessage,
     ) {
         logger.info(`${user}: ${text}`)
-        if (text === '!test') {
-            this.chatClient.say(
-                channel,
-                'this is a test from the automated bot system',
-            )
-            return
-        } else if (text === '!game' || text === '!title') {
-            if (!msg.channelId) {
-                // log an error
-                return
-            }
-            const channelInfo =
-                await this.apiClient.channels.getChannelInfoById(msg.channelId)
-            if (!channelInfo) {
-                return
-            }
 
-            this.chatClient.say(
-                channel,
-                text.includes('game')
-                    ? `@${msg.userInfo.displayName}, game: ${channelInfo.gameName}`
-                    : `@${msg.userInfo.displayName}, title: ${channelInfo.title}`,
-            )
-        } else if (text === '!roulette') {
-            const val = Math.floor(Math.random() * 7)
-            if (val === 1) {
-                this.chatClient.say(channel, 'you got hit!')
-            } else {
-                this.chatClient.say(channel, "you're safe!")
+        if (text.startsWith(this.prefix)) {
+            const message = text.substring(this.prefix.length)
+            const [name, ...args] = message.split(' ')
+
+            const command = this.commands.get(name) || this.commands.values().find((cmd) => cmd.aliases && cmd.aliases.includes(name))
+            if (!command) return
+
+            try {
+                const now = Date.now()
+                if ((!msg.userInfo.isBroadcaster || !msg.userInfo.isMod) && this.cooldown.has(command.name)) {
+                    const expirationTime = this.cooldown.get(command.name)! + this.cooldownAmount
+
+                    if (now < expirationTime) {
+                        logger.warn(`${msg.userInfo.displayName} tried to execute ${command.name} too early.`)
+                        return // still on cooldown
+                    } else {
+                        // remove from cooldown list
+                        this.cooldown.delete(command.name)
+                    }
+                }
+
+                command.execute(this.chatClient, channel, msg, args, this.apiClient)
+                this.cooldown.set(command.name, now)
+
+            } catch (error) {
+                logger.error(error)
             }
-        } else if (find(text).length > 0) {
+        } else if (findUrl(text).length > 0) {
             if (msg.userInfo.isBroadcaster || msg.userInfo.isMod) {
                 return
             }
+
             if (!msg.channelId) {
                 // log an error
                 return
             }
+
             // timeout users who post links
-            // REVIEW: should we ignore emails?
             this.apiClient.moderation.banUser(msg.channelId, {
                 duration: 1,
                 reason: 'for posting links (temporary)',
