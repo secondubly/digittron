@@ -5,9 +5,11 @@
     "main": "build/main.js",
     "type": "module",
     "scripts": {
-        "start": "tsc && node build/main.js",
-        "dev": "tsc && node build/main.js | pino-pretty",
+        "build": "pnpm run clean && tsc",
+        "clean": "rimraf ./build",
+        "dev": "node build/main.js | pino-pretty",
         "lint": "eslint . --ext .ts",
+        "start": "node build/main.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
@@ -31,9 +33,11 @@
         "@twurple/api": "^7.3.0",
         "@twurple/auth": "^7.3.0",
         "@twurple/chat": "^7.3.0",
+        "enmap": "^6.1.3",
         "linkifyjs": "^4.3.1",
         "pino": "^9.11.0",
         "redis": "^5.5.6",
-        "redis-errors": "^1.2.0"
+        "redis-errors": "^1.2.0",
+        "rimraf": "^6.0.1"
     }
 }
