@@ -24,12 +24,13 @@ const hasUndefined = (obj: object) => {
 }
 const main = async () => {
     if (hasUndefined(config)) {
-        // TODO: throw error
         logger.error('undefined fields found in config file, please check your settings')
         process.exit(1)
     }
 
-    Bot.init(CLIENT_ID!, CLIENT_SECRET!)
+    if (CLIENT_ID && CLIENT_SECRET) {
+        Bot.init(CLIENT_ID, CLIENT_SECRET)
+    }
 }
 
 main()
