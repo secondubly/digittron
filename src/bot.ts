@@ -2,7 +2,7 @@ import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
 import { ChatClient, ChatMessage, ChatRaidInfo } from '@twurple/chat'
 import { find as findUrl } from 'linkifyjs'
 import { ApiClient } from '@twurple/api'
-import redis from 'redis'
+import redis, { SocketTimeoutError } from 'redis'
 import logger from './logger.js'
 import { readdirSync } from 'fs'
 import { Command } from './types.js'
@@ -10,7 +10,29 @@ import { getToken } from './lib/utils/token.js'
 
 const redisClient = await redis
     .createClient({
-        url: process.env.REDIS_URL, // TODO: move to .env file
+        socket: {
+            host: 'localhost',
+            port: 6379,
+            reconnectStrategy: (retries, cause) => {
+                if (cause instanceof SocketTimeoutError) {
+                    return false;
+                }
+
+                const maxRetries = 2  // retries 3 times
+                if (retries > maxRetries) {
+                    logger.error('Too many retries. Connection terminated.');
+                    return new Error('Too many retries.');
+                }
+
+                // Generate a random jitter between 0 – 200 ms:
+                const jitter = Math.floor(Math.random() * 200);
+                // Delay is an exponential back off, (times^2) * 50 ms, with a maximum value of 2000 ms:
+                const delay = Math.min(Math.pow(2, retries) * 50, 2000);
+
+                logger.warn(`Retrying connection in ${delay / 1000} seconds (Attempt ${retries + 1} of ${maxRetries + 1})...`)
+                return delay + jitter;
+            }
+        }
     })
     .on('connect', () => logger.info('connected to redis'))
     .on('error', (err) => logger.error('Redis Client Error', err))
@@ -51,7 +73,7 @@ export class Bot {
             logger.info(`Loading ${commandFiles.length} commands.`)
 
             commandFiles.forEach(async (file) => {
-                const module = await import(`./commands/${file}`)
+                const module = await import(`./commands/${file} `)
                 const command = module.default
                 this.commands.set(command.name, command)
             })
@@ -158,7 +180,7 @@ export class Bot {
             const [name, ...args] = message.split(' ')
 
             const command = this.commands.get(name) || this.commands.values().find((cmd) => cmd.aliases && cmd.aliases.includes(name))
-            if (!command) return
+            if (!command || !command.enabled) return
 
             try {
                 const now = Date.now()
@@ -174,7 +196,17 @@ export class Bot {
                     }
                 }
 
-                command.execute(this.chatClient, channel, msg, args, this.apiClient)
+                // TODO: clean this up
+                if (command.name.toLocaleLowerCase() === 'commands') {
+                    // remove disabled commands and the !commands command (it's redundant)
+                    const commandNames = [...this.commands]
+                        .filter(([name, command]) => command.enabled && name !== 'commands')
+                        .map(([name, _command]) => name)
+                    command.execute(this.chatClient, channel, msg, commandNames, this.apiClient)
+                } else {
+                    command.execute(this.chatClient, channel, msg, args, this.apiClient)
+                }
+
                 this.cooldown.set(command.name, now)
 
             } catch (error) {
