@@ -1,6 +1,6 @@
 import { Command } from "../types.js"
 
-const d20: Command = {
+const anniversary: Command = {
     name: 'd20',
     aliases: [],
     async execute(client, channel, msg) {
@@ -9,4 +9,4 @@ const d20: Command = {
         client.say(channel, `${displayName} rolled a ${roll}${roll === 20 ? '! 🎉' : '.'}`)
     }
 }
-export default d20
+export default anniversary
