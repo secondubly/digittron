@@ -15,24 +15,26 @@ const redisClient = await redis
             port: 6379,
             reconnectStrategy: (retries, cause) => {
                 if (cause instanceof SocketTimeoutError) {
-                    return false;
+                    return false
                 }
 
-                const maxRetries = 2  // retries 3 times
+                const maxRetries = 2 // retries 3 times
                 if (retries > maxRetries) {
-                    logger.error('Too many retries. Connection terminated.');
-                    return new Error('Too many retries.');
+                    logger.error('Too many retries. Connection terminated.')
+                    return new Error('Too many retries.')
                 }
 
                 // Generate a random jitter between 0 – 200 ms:
-                const jitter = Math.floor(Math.random() * 200);
+                const jitter = Math.floor(Math.random() * 200)
                 // Delay is an exponential back off, (times^2) * 50 ms, with a maximum value of 2000 ms:
-                const delay = Math.min(Math.pow(2, retries) * 50, 2000);
+                const delay = Math.min(Math.pow(2, retries) * 50, 2000)
 
-                logger.warn(`Retrying connection in ${delay / 1000} seconds (Attempt ${retries + 1} of ${maxRetries + 1})...`)
-                return delay + jitter;
-            }
-        }
+                logger.warn(
+                    `Retrying connection in ${delay / 1000} seconds (Attempt ${retries + 1} of ${maxRetries + 1})...`,
+                )
+                return delay + jitter
+            },
+        },
     })
     .on('connect', () => logger.info('connected to redis'))
     .on('error', (err) => logger.error('Redis Client Error', err))
@@ -57,19 +59,22 @@ export class Bot {
         this.apiClient = apiClient
         this.commands = new Map()
         this.cooldown = new Map()
-        this.prefix = "!"
+        this.prefix = '!'
 
         authProvider.onRefresh(this.handleRefresh)
 
         this.chatClient.onRaid(this.handleRaid)
-        this.chatClient.onMessage((channel: string, user: string, text: string, msg: ChatMessage) => {
-            this.handleMessage(channel, user, text, msg)
-        })
+        this.chatClient.onMessage(
+            (channel: string, user: string, text: string, msg: ChatMessage) => {
+                this.handleMessage(channel, user, text, msg)
+            },
+        )
 
         chatClient.onAuthenticationSuccess(() => {
             logger.info("I've successfully connected!")
-            const commandFiles = readdirSync('./build/commands')
-                .filter((file) => file.endsWith('.js'))
+            const commandFiles = readdirSync('./build/commands').filter(
+                (file) => file.endsWith('.js'),
+            )
             logger.info(`Loading ${commandFiles.length} commands.`)
 
             commandFiles.forEach(async (file) => {
@@ -91,10 +96,18 @@ export class Bot {
         let botTokenString = await redisClient.get(process.env.BOT_ID!)
         if (!botTokenString) {
             try {
-                const botScopes = ["chat:edit", "chat:read", "user:bot", "user:read:chat", "user:write:chat"]
+                const botScopes = [
+                    'chat:edit',
+                    'chat:read',
+                    'user:bot',
+                    'user:read:chat',
+                    'user:write:chat',
+                ]
                 botTokenString = await getToken(process.env.BOT_ID!, botScopes)
                 if (!botTokenString) {
-                    throw Error('Bot access token not found in cache or database.')
+                    throw Error(
+                        'Bot access token not found in cache or database.',
+                    )
                 }
 
                 redisClient.set(process.env.BOT_ID!, botTokenString)
@@ -111,7 +124,9 @@ export class Bot {
             try {
                 channelTokenString = await getToken(process.env.TWITCH_ID!)
                 if (!channelTokenString) {
-                    throw Error('Bot access token not found in cache or database.')
+                    throw Error(
+                        'Bot access token not found in cache or database.',
+                    )
                 }
 
                 redisClient.set(process.env.TWITCH_ID!, channelTokenString)
@@ -131,7 +146,7 @@ export class Bot {
         })
 
         const apiClient = new ApiClient({
-            authProvider
+            authProvider,
         })
 
         return new Bot(chatClient, authProvider, apiClient)
@@ -174,21 +189,30 @@ export class Bot {
         text: string,
         msg: ChatMessage,
     ) {
-
         if (text.startsWith(this.prefix)) {
             const message = text.substring(this.prefix.length)
             const [name, ...args] = message.split(' ')
 
-            const command = this.commands.get(name) || this.commands.values().find((cmd) => cmd.aliases && cmd.aliases.includes(name))
+            const command =
+                this.commands.get(name) ||
+                this.commands
+                    .values()
+                    .find((cmd) => cmd.aliases && cmd.aliases.includes(name))
             if (!command || !command.enabled) return
 
             try {
                 const now = Date.now()
-                if ((!msg.userInfo.isBroadcaster || !msg.userInfo.isMod) && this.cooldown.has(command.name)) {
-                    const expirationTime = this.cooldown.get(command.name)! + this.cooldownAmount
+                if (
+                    (!msg.userInfo.isBroadcaster || !msg.userInfo.isMod) &&
+                    this.cooldown.has(command.name)
+                ) {
+                    const expirationTime =
+                        this.cooldown.get(command.name)! + this.cooldownAmount
 
                     if (now < expirationTime) {
-                        logger.warn(`${msg.userInfo.displayName} tried to execute ${command.name} too early.`)
+                        logger.warn(
+                            `${msg.userInfo.displayName} tried to execute ${command.name} too early.`,
+                        )
                         return // still on cooldown
                     } else {
                         // remove from cooldown list
@@ -200,20 +224,38 @@ export class Bot {
                 if (command.name.toLocaleLowerCase() === 'commands') {
                     // remove disabled commands and the !commands command (it's redundant)
                     const commandNames = [...this.commands]
-                        .filter(([name, command]) => command.enabled && name !== 'commands')
+                        .filter(
+                            ([name, command]) =>
+                                command.enabled && name !== 'commands',
+                        )
                         .map(([name, _command]) => name)
-                    command.execute(this.chatClient, channel, msg, commandNames, this.apiClient)
+                    command.execute(
+                        this.chatClient,
+                        channel,
+                        msg,
+                        commandNames,
+                        this.apiClient,
+                    )
                 } else {
-                    command.execute(this.chatClient, channel, msg, args, this.apiClient)
+                    command.execute(
+                        this.chatClient,
+                        channel,
+                        msg,
+                        args,
+                        this.apiClient,
+                    )
                 }
 
                 this.cooldown.set(command.name, now)
-
             } catch (error) {
                 logger.error(error)
             }
         } else if (findUrl(text).length > 0) {
-            if (msg.userInfo.isBroadcaster || msg.userInfo.isMod || msg.userInfo.userId === process.env.BOT_ID) {
+            if (
+                msg.userInfo.isBroadcaster ||
+                msg.userInfo.isMod ||
+                msg.userInfo.userId === process.env.BOT_ID
+            ) {
                 return
             }
 

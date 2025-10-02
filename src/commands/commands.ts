@@ -1,6 +1,4 @@
-import { Command } from "../types.js"
-import logger from "../logger.js"
-
+import { Command } from '../types.js'
 
 const commands: Command = {
     name: 'commands',
@@ -10,7 +8,7 @@ const commands: Command = {
         const commands = args.slice(0, -1).join(', ')
         const { displayName } = msg.userInfo
         client.say(channel, `@${displayName} available commands: ${commands}`)
-    }
+    },
 }
 
 export default commands
