@@ -5,6 +5,7 @@ import logger from "../logger.js"
 const game: Command = {
     name: 'game',
     aliases: [],
+    enabled: true,
     async execute(client, channel, msg, _args, apiClient) {
         if (!apiClient) {
             logger.error(`api client not found, cannot execute ${this.name} command`)

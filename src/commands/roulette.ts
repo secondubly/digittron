@@ -6,6 +6,7 @@ const roulette: Command = {
     name: 'roulette',
     aliases: [],
     cooldown: 60000, // cooldown in milliseconds
+    enabled: true,
     async execute(client, channel, msg, _args, apiClient) {
         if (!apiClient) {
             logger.error(`api client not found, cannot execute  ${this.name} command`)
