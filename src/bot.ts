@@ -4,13 +4,13 @@ import { find as findUrl } from 'linkifyjs'
 import { ApiClient } from '@twurple/api'
 import redis from 'redis'
 import logger from './logger.js'
-import Enmap from 'enmap'
 import { readdirSync } from 'fs'
 import { Command } from './types.js'
+import { getToken } from './lib/utils/token.js'
 
 const redisClient = await redis
     .createClient({
-        url: 'redis://localhost:6379',
+        url: process.env.REDIS_URL, // TODO: move to .env file
     })
     .on('connect', () => logger.info('connected to redis'))
     .on('error', (err) => logger.error('Redis Client Error', err))
@@ -21,7 +21,7 @@ export class Bot {
     apiClient: ApiClient
     chatClient: ChatClient
     commands: Map<string, Command>
-    cooldown: Enmap<string, number>
+    cooldown: Map<string, number>
     cooldownAmount = 60 * 1000 // 60 seconds
     prefix: string
 
@@ -34,7 +34,7 @@ export class Bot {
         this.authProvider = authProvider
         this.apiClient = apiClient
         this.commands = new Map()
-        this.cooldown = new Enmap({ name: 'cooldowns' })
+        this.cooldown = new Map()
         this.prefix = "!"
 
         authProvider.onRefresh(this.handleRefresh)
@@ -66,22 +66,41 @@ export class Bot {
             clientSecret,
         })
 
-        const botTokenString = await redisClient.get('113565139')
+        let botTokenString = await redisClient.get(process.env.BOT_ID!)
         if (!botTokenString) {
-            logger.error('Could not retrieve bot token!')
-            process.exit(1)
+            try {
+                const botScopes = ["chat:edit", "chat:read", "user:bot", "user:read:chat", "user:write:chat"]
+                botTokenString = await getToken(process.env.BOT_ID!, botScopes)
+                if (!botTokenString) {
+                    throw Error('Bot access token not found in cache or database.')
+                }
+
+                redisClient.set(process.env.BOT_ID!, botTokenString)
+            } catch (error) {
+                logger.error(error)
+                process.exit(1)
+            }
         }
 
-        const botTokenData = JSON.parse(botTokenString) as AccessToken
+        const botAccessToken = JSON.parse(botTokenString) as AccessToken
 
-        const channelTokenString = await redisClient.get('89181064')
+        let channelTokenString = await redisClient.get(process.env.TWITCH_ID!)
         if (!channelTokenString) {
-            logger.error('Could not retrieve streamer token!')
-            process.exit(1)
+            try {
+                channelTokenString = await getToken(process.env.TWITCH_ID!)
+                if (!channelTokenString) {
+                    throw Error('Bot access token not found in cache or database.')
+                }
+
+                redisClient.set(process.env.TWITCH_ID!, channelTokenString)
+            } catch (error) {
+                logger.error(error)
+                process.exit(1)
+            }
         }
         const channelTokenData = JSON.parse(channelTokenString) as AccessToken
 
-        await authProvider.addUserForToken(botTokenData, ['chat'])
+        await authProvider.addUserForToken(botAccessToken, ['chat'])
         await authProvider.addUserForToken(channelTokenData)
 
         const chatClient = new ChatClient({
@@ -90,7 +109,7 @@ export class Bot {
         })
 
         const apiClient = new ApiClient({
-            authProvider,
+            authProvider
         })
 
         return new Bot(chatClient, authProvider, apiClient)
@@ -133,7 +152,6 @@ export class Bot {
         text: string,
         msg: ChatMessage,
     ) {
-        logger.info(`${user}: ${text}`)
 
         if (text.startsWith(this.prefix)) {
             const message = text.substring(this.prefix.length)
@@ -163,7 +181,7 @@ export class Bot {
                 logger.error(error)
             }
         } else if (findUrl(text).length > 0) {
-            if (msg.userInfo.isBroadcaster || msg.userInfo.isMod) {
+            if (msg.userInfo.isBroadcaster || msg.userInfo.isMod || msg.userInfo.userId === process.env.BOT_ID) {
                 return
             }
 
