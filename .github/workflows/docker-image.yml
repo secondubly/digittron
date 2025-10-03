@@ -30,7 +30,7 @@ jobs:
                 envkey_REDIS_PORT: "6379"
 
             - name: Verify .env file
-              run: type .env
+              run: cat .env
 
             - name: Build image
               run: docker compose build
