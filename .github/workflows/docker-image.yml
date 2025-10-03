@@ -27,9 +27,15 @@ jobs:
                   echo "TWITCH_REFRESH_TOKEN=${{ secrets.TWITCH_REFRESH_TOKEN }}" >> .env
                   echo "REDIS_HOST='redis'" >> .env
                   echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> .env
+              shell: powershell
+
+            - name: Verify .env file
+              run: typ .env
+              shell: powershell
 
             - name: Build image
               run: docker compose build
+              shell: powershell
 
             - name: Log in to the Container registry
               uses: docker/login-action@v3
@@ -40,6 +46,7 @@ jobs:
 
             - name: Push image to Github Container Registry
               run: docker compose push
+              shell: powershell
 
             # - name: Extract metadata (tags, labels) for Docker
             #   id: meta
