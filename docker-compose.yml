@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   digittron:
     container_name: bot
