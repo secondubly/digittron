@@ -19,7 +19,6 @@ services:
       - ./sqlite.db:/usr/src/app/sqlite.db
   redis:
     container_name: redis
-    build:
     image: redis:8.2.1
     ports:
       - "6379:6379"
