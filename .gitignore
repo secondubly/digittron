@@ -113,3 +113,4 @@ web_modules/
 # node build files
 build
 sqlite.db
+temp/
