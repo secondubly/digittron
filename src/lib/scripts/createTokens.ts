@@ -1,12 +1,6 @@
 import { MikroORM } from '@mikro-orm/sqlite'
 import config from '../../mikro-orm.config.js'
-import * as dotenv from 'dotenv'
-import { dirname, resolve } from 'path'
-import { fileURLToPath } from 'url'
 import { Token } from '../db/models/token.entity.js'
-
-const __dirname = dirname(fileURLToPath(import.meta.url))
-dotenv.config({ path: resolve(__dirname, '../../../.env') })
 
 try {
     const orm = await MikroORM.init(config)
@@ -24,7 +18,19 @@ try {
         },
     )
 
-    await em.persistAndFlush(twitchToken)
+    const botToken = em.upsert(
+        Token,
+        {
+            id: parseInt(process.env.TWITCH_ID!),
+            accessToken: process.env.BOT_ACCESS_TOKEN!,
+            refreshToken: process.env.BOT_REFRESH_TOKEN!,
+        },
+        {
+            onConflictAction: 'ignore',
+        },
+    )
+
+    await em.persist([twitchToken, botToken]).flush()
     await orm.close(true)
 } catch (error) {
     console.error('Error creating records:', error)
