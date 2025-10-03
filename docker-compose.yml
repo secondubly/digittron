@@ -1,12 +1,27 @@
 version: '3.8'
 services:
+  digittron:
+    container_name: bot
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      redis:
+        condition: service_started
+    environment:
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - BOT_ID=${BOT_ID}
+      - TWITCH_ID=${TWITCH_ID}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+    volumes:
+      - ./sqlite.db:/usr/src/app/sqlite.db
   redis:
     container_name: redis
     image: redis:latest
     ports:
       - "6379:6379"
-    env_file:
-      - .env
 
 volumes:
   redis_data:
