@@ -1,0 +1,41 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build the Docker image
+      run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+
+    - name: Create .env file
+      run: |
+        cat > .env << EOF
+        
+        # Twitch
+        CLIENT_ID=${{ secrets.CLIENT_ID }}
+        CLIENT_SECRET=${{ secrets.CLIENT_SECRET }}
+        BOT_ID=${{ secrets.BOT_ID }}
+        BOT_ACCESS_TOKEN=${{ secrets.BOT_ACCESS_TOKEN }}
+        BOT_REFRESH_TOKEN=${{ secrets.BOT_REFRESH_TOKEN }}
+        TWITCH_ID=${{ secrets.USER_ID }}
+        TWITCH_ACCESS_TOKEN=${{ secrets.TWITCH_ACCESS_TOKEN }}
+        TWITCH_REFRESH_TOKEN=${{ secrets.TWITCH_REFRESH_TOKEN }}
+        REDIS_HOST="redis"
+        REDIS_PORT=${{ secrets.REDIS_PORT
+        
+        EOF
+
+    - name: Deploy
+      run: |
+        cd ${{ github.workspace }}
+        docker compose down
+        docker compose up -d --build
+        docker image prune -f
