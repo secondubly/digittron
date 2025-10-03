@@ -31,11 +31,9 @@ jobs:
 
             - name: Verify .env file
               run: type .env
-              shell: powershell
 
             - name: Build image
               run: docker compose build
-              shell: powershell
 
             - name: Log in to the Container registry
               uses: docker/login-action@v3
@@ -46,7 +44,6 @@ jobs:
 
             - name: Push image to Github Container Registry
               run: docker compose push
-              shell: powershell
 
             # - name: Extract metadata (tags, labels) for Docker
             #   id: meta
