@@ -18,6 +18,9 @@ jobs:
             attestations: write
             id-token: write
         steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
             - name: Log in to the Container registry
               uses: docker/login-action@v3
               with:
@@ -33,9 +36,6 @@ jobs:
             #       tags: |
             #           type=semver,pattern={{version}} # Tag with release version
             #           type=raw,value=latest,enable=${{ github.event_name == 'release' && github.event.action == 'published' }}
-
-            - name: Checkout code
-              uses: actions/checkout@v4
 
             - name: Create .env file
               run: |
@@ -58,7 +58,8 @@ jobs:
               with:
                   context: .
                   push: true
-                  tags: ghcr.io/secondubly/digittron:latest
+                  tags: |
+                      ghcr.io/${{ vars.REPO_OWNER }}/digittron:latest
 
             # - name: Generate artifact attestation
             #   uses: actions/attest-build-provenance@v3
