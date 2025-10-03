@@ -51,13 +51,16 @@ jobs:
                   docker compose up -d --build
                   docker image prune -f
 
-            - name: Push image
-              run: |
-                  docker compose push
+            - name: Build and push Docker image
+              id: push
+              uses: docker/build-push-action@v6
+              with:
+                  context: .
+                  push: true
 
-            # - name: Generate artifact attestation
-            #   uses: actions/attest-build-provenance@v3
-            #   with:
-            #       subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
-            #       subject-digest: ${{ steps.push.outputs.digest }}
-            #       push-to-registry: true
+            - name: Generate artifact attestation
+              uses: actions/attest-build-provenance@v3
+              with:
+                  subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
+                  subject-digest: ${{ steps.push.outputs.digest }}
+                  push-to-registry: true
