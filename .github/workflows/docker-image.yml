@@ -44,19 +44,19 @@ jobs:
                   REDIS_PORT=${{ secrets.REDIS_PORT }}
                   EOF
 
-            - name: Deploy
-              run: |
-                  cd ${{ github.workspace }}
-                  docker compose down
-                  docker compose up -d --build
-                  docker image prune -f
+            # - name: Deploy
+            #   run: |
+            #       cd ${{ github.workspace }}
+            #       docker compose down
+            #       docker compose up -d --build
+            #       docker image prune -f
 
-            - name: Build and push Docker image
-              id: push
+            - name: Build and push
               uses: docker/build-push-action@v6
               with:
                   context: .
                   push: true
+                  tags: secondubly/digittron:latest
 
             - name: Generate artifact attestation
               uses: actions/attest-build-provenance@v3
