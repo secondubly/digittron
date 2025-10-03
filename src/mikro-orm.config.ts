@@ -3,7 +3,10 @@ import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
 
 const config: Options = {
     driver: SqliteDriver,
-    dbName: 'sqlite.db',
+    dbName:
+        process.env.NODE_ENV !== 'production'
+            ? 'sqlite.db'
+            : '/usr/src/app/sqlite.db',
     // folder-based discovery setup, using common filename suffix
     entities: ['build/**/*.entity.js'],
     entitiesTs: ['src/**/*.entity.ts'],
@@ -11,7 +14,7 @@ const config: Options = {
     // check the documentation for their differences: https://mikro-orm.io/docs/metadata-providers
     metadataProvider: TsMorphMetadataProvider,
     // enable debug to log sql queries and discovery information
-    debug: true
+    debug: true,
 }
 
 export default config
