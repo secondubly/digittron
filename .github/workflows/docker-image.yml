@@ -21,22 +21,6 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Log in to the Container registry
-              uses: docker/login-action@v3
-              with:
-                  registry: ${{ env.REGISTRY }}
-                  username: ${{ github.actor }}
-                  password: ${{ secrets.G_TOKEN }}
-
-            # - name: Extract metadata (tags, labels) for Docker
-            #   id: meta
-            #   uses: docker/metadata-action@v5
-            #   with:
-            #       images: ghcr.io/${{ github.repository }}
-            #       tags: |
-            #           type=semver,pattern={{version}} # Tag with release version
-            #           type=raw,value=latest,enable=${{ github.event_name == 'release' && github.event.action == 'published' }}
-
             - name: Create .env file
               run: |
                   cat > .env << EOF
@@ -53,13 +37,27 @@ jobs:
                   REDIS_PORT=${{ secrets.REDIS_PORT }}
                   EOF
 
-            - name: Build and push
-              uses: docker/build-push-action@v6
+            - name: Build image
+              run: docker compose build
+
+            - name: Log in to the Container registry
+              uses: docker/login-action@v3
               with:
-                  context: .
-                  push: true
-                  tags: |
-                      ghcr.io/${{ vars.REPO_OWNER }}/digittron:latest
+                  registry: ${{ env.REGISTRY }}
+                  username: ${{ github.actor }}
+                  password: ${{ secrets.G_TOKEN }}
+
+            - name: Push image to Github Container Registry
+              run: docker compose push
+
+            # - name: Extract metadata (tags, labels) for Docker
+            #   id: meta
+            #   uses: docker/metadata-action@v5
+            #   with:
+            #       images: ghcr.io/${{ github.repository }}
+            #       tags: |
+            #           type=semver,pattern={{version}} # Tag with release version
+            #           type=raw,value=latest,enable=${{ github.event_name == 'release' && github.event.action == 'published' }}
 
             # - name: Generate artifact attestation
             #   uses: actions/attest-build-provenance@v3
