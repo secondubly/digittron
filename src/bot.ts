@@ -11,8 +11,8 @@ import { getToken } from './lib/utils/token.js'
 const redisClient = await redis
     .createClient({
         socket: {
-            host: 'localhost',
-            port: 6379,
+            host: process.env.REDIS_HOST,
+            port: parseInt(process.env.REDIS_PORT!),
             reconnectStrategy: (retries, cause) => {
                 if (cause instanceof SocketTimeoutError) {
                     return false
