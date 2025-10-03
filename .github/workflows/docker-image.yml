@@ -27,7 +27,7 @@ jobs:
                 envkey_TWITCH_ACCESS_TOKEN: ${{ secrets.TWITCH_ACCESS_TOKEN }}
                 envkey_TWITCH_REFRESH_TOKEN: ${{ secrets.TWITCH_REFRESH_TOKEN }}
                 envkey_REDIS_HOST: "redis"
-                envkey_REDIS_PORT: ${{ vars.REDIS_PORT }}
+                envkey_REDIS_PORT: "6379"
 
             - name: Verify .env file
               run: type .env
