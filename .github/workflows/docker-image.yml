@@ -30,7 +30,7 @@ jobs:
               shell: powershell
 
             - name: Verify .env file
-              run: typ .env
+              run: type .env
               shell: powershell
 
             - name: Build image
