@@ -18,6 +18,7 @@ try {
         },
     )
 
+    console.log(`Twitch ID: ${process.env.TWITCH_ID}`)
     const botToken = em.upsert(
         Token,
         {
