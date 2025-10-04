@@ -13,6 +13,8 @@ FROM base AS development
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm run build
+RUN pnpm run db:tables
+RUN pnpm run db:tokens
 
 FROM base AS production
 
