@@ -15,8 +15,6 @@ services:
       - TWITCH_ID=${TWITCH_ID}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
-    volumes:
-      - ./sqlite.db:/usr/src/app/sqlite.db
   redis:
     container_name: redis
     image: redis:8.2.1
