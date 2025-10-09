@@ -1,5 +1,40 @@
-node_modules
+# Ignore Git-related files and directories
 .git
 .gitignore
-*.md
-build
+.github/
+
+# Ignore Node.js specific files and directories
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Ignore common build artifacts and temporary files
+build/
+dist/
+tmp/
+temp/
+*.log
+*.swp
+*.bak
+
+# Ignore environment configuration files
+# .env
+.env.*
+
+# Ignore editor and IDE specific files
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Prettier files
+.prettierignore
+.prettierrc
+
+# eslint files
+eslint.config.mjs
+
+# Extras 
+**/*.md
+Dockerfile
+.dockerignore
+sqlite.db

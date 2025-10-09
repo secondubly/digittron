@@ -13,9 +13,6 @@
     "scripts": {
         "build": "pnpm run clean && tsc",
         "clean": "rimraf ./build",
-        "db:tables": "node build/lib/scripts/createTables.js",
-        "db:tokens": "node build/lib/scripts/createTokens.js",
-        "dev:db": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/lib/scripts/createTables.ts",
         "dev": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts | pino-pretty",
         "lint": "eslint . --ext .ts",
         "start": "node build/main.js",
