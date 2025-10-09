@@ -11,14 +11,14 @@ import { getToken } from './lib/utils/token.js'
 const redisClient = await redis
     .createClient({
         socket: {
-            host: process.env.REDIS_HOST,
-            port: parseInt(process.env.REDIS_PORT!),
+            host: process.env.REDIS_HOST ?? 'localhost',
+            port: parseInt(process.env.REDIS_PORT ?? '6379'),
             reconnectStrategy: (retries, cause) => {
                 if (cause instanceof SocketTimeoutError) {
                     return false
                 }
 
-                const maxRetries = 2 // retries 3 times
+                const maxRetries = 999999999 // retries 3 times
                 if (retries > maxRetries) {
                     logger.error('Too many retries. Connection terminated.')
                     return new Error('Too many retries.')
