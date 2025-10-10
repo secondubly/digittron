@@ -18,7 +18,7 @@ const redisClient = await redis
                     return false
                 }
 
-                const maxRetries = 999999999 // retries 3 times
+                const maxRetries = 2 // retries 3 times
                 if (retries > maxRetries) {
                     logger.error('Too many retries. Connection terminated.')
                     return new Error('Too many retries.')
