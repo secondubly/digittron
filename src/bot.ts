@@ -45,7 +45,8 @@ export class Bot {
     apiClient: ApiClient
     chatClient: ChatClient
     commands: Map<string, Command>
-    cooldown: Map<string, number>
+    cooldownList: Map<string, number>
+    permitList: Map<string, NodeJS.Timeout>
     cooldownAmount = 60 * 1000 // 60 seconds
     prefix: string
 
@@ -58,7 +59,8 @@ export class Bot {
         this.authProvider = authProvider
         this.apiClient = apiClient
         this.commands = new Map()
-        this.cooldown = new Map()
+        this.cooldownList = new Map()
+        this.permitList = new Map()
         this.prefix = '!'
 
         authProvider.onRefresh(this.handleRefresh)
@@ -97,10 +99,41 @@ export class Bot {
         if (!botTokenString) {
             try {
                 const botScopes = [
+                    'bits:read',
+                    'channel:edit:commercial',
+                    'channel:manage:broadcast',
+                    'channel:manage:polls',
+                    'channel:manage:predictions',
+                    'channel:manage:raids',
+                    'channel:manage:redemptions',
+                    'channel:manage:schedule',
+                    'channel:manage:videos',
+                    'channel:moderate',
+                    'channel:read:ads',
+                    'channel:read:editors',
+                    'channel:read:hype_train',
+                    'channel:read:polls',
+                    'channel:read:predictions',
+                    'channel:read:redemptions',
+                    'channel:read:subscriptions',
+                    'channel:read:vips',
                     'chat:edit',
                     'chat:read',
+                    'clips:edit',
+                    'moderator:manage:announcements',
+                    'moderator:manage:banned_users',
+                    'moderator:manage:chat_messages',
+                    'moderator:manage:chat_settings',
+                    'moderator:manage:shoutouts',
+                    'moderator:manage:warnings',
+                    'moderator:read:chat_settings',
+                    'moderator:read:chatters',
+                    'moderator:read:followers',
                     'user:bot',
+                    'user:edit',
                     'user:read:chat',
+                    'user:read:follows',
+                    'user:read:subscriptions',
                     'user:write:chat',
                 ]
                 botTokenString = await getToken(process.env.BOT_ID!, botScopes)
@@ -203,11 +236,13 @@ export class Bot {
             try {
                 const now = Date.now()
                 if (
-                    (!msg.userInfo.isBroadcaster || !msg.userInfo.isMod) &&
-                    this.cooldown.has(command.name)
+                    this.cooldownList.has(command.name) &&
+                    !msg.userInfo.isBroadcaster &&
+                    !msg.userInfo.isMod
                 ) {
                     const expirationTime =
-                        this.cooldown.get(command.name)! + this.cooldownAmount
+                        this.cooldownList.get(command.name)! +
+                        this.cooldownAmount
 
                     if (now < expirationTime) {
                         logger.warn(
@@ -216,7 +251,7 @@ export class Bot {
                         return // still on cooldown
                     } else {
                         // remove from cooldown list
-                        this.cooldown.delete(command.name)
+                        this.cooldownList.delete(command.name)
                     }
                 }
 
@@ -236,6 +271,25 @@ export class Bot {
                         commandNames,
                         this.apiClient,
                     )
+                }
+                if (command.name.toLocaleLowerCase() === 'permit') {
+                    // if username provided
+                    if (args.length > 0) {
+                        // do permit ahead of time
+                        const username = args[0]
+                        const permitId = setTimeout(() => {
+                            this.permitList.delete(username)
+                            logger.info(`Removed ${username} from permit list`)
+                        }, 60000)
+                        this.permitList.set(username, permitId)
+                        command.execute(
+                            this.chatClient,
+                            channel,
+                            msg,
+                            args,
+                            this.apiClient,
+                        )
+                    }
                 } else {
                     command.execute(
                         this.chatClient,
@@ -246,7 +300,7 @@ export class Bot {
                     )
                 }
 
-                this.cooldown.set(command.name, now)
+                this.cooldownList.set(command.name, now)
             } catch (error) {
                 logger.error(error)
             }
@@ -270,6 +324,8 @@ export class Bot {
                 reason: 'for posting links (temporary)',
                 user: msg.userInfo.userId,
             })
+        } else {
+            logger.info(`${user}: ${text}`)
         }
     }
 }
