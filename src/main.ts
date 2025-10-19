@@ -1,5 +1,9 @@
 import { Bot } from './bot.js'
 import logger from './logger.js'
+import dotenv from 'dotenv'
+
+// TODO: only do this in dev enviroments
+dotenv.config()
 
 const CLIENT_ID = process.env.CLIENT_ID
 const CLIENT_SECRET = process.env.CLIENT_SECRET
