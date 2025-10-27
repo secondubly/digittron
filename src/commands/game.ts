@@ -34,6 +34,11 @@ const game: Command = {
                 `@${displayName}, current game: ${channelInfo.gameName}`,
             )
         } else {
+            const { isMod, isBroadcaster } = msg.userInfo
+            if (!isMod && !isBroadcaster) {
+                return
+            }
+
             const gameTitle = args.join()
             const gameData = await apiClient.games.getGamesByNames([gameTitle])
             if (!gameData.length) {
@@ -50,11 +55,6 @@ const game: Command = {
             apiClient.channels.updateChannelInfo(channelId, {
                 gameId: gameData[0].id,
             })
-
-            client.say(
-                channel,
-                `@${displayName} updated game title to: ${gameData[0].name}.`,
-            )
         }
     },
 }
