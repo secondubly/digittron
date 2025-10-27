@@ -1,4 +1,5 @@
 import { ApiClient } from '@twurple/api'
+import { AccessToken } from '@twurple/auth'
 import { ChatClient, ChatMessage } from '@twurple/chat'
 
 export interface Command {
@@ -13,4 +14,8 @@ export interface Command {
         args: string[],
         apiClient?: ApiClient,
     ): Promise<void>
+}
+
+export interface TokenApiResponse {
+    token: AccessToken
 }
