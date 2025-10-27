@@ -6,7 +6,7 @@ const raidmsg: Command = {
     enabled: true,
     async execute(client, channel, msg, _args, _apiClient) {
         const { isMod, isBroadcaster } = msg.userInfo
-        if (!isMod && !isBroadcaster) {
+        if (!(isMod || isBroadcaster)) {
             return
         }
         client.say(
