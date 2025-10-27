@@ -1,12 +1,12 @@
 import { Command } from '../types.js'
 
-const test: Command = {
+const permit: Command = {
     name: 'permit',
     aliases: [],
     enabled: true,
     async execute(client, channel, msg, args, _apiClient) {
         const { isMod, isBroadcaster } = msg.userInfo
-        if (!isMod || !isBroadcaster) {
+        if (!isMod && !isBroadcaster) {
             return
         }
 
@@ -27,4 +27,4 @@ const test: Command = {
     },
 }
 
-export default test
+export default permit
