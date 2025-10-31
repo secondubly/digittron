@@ -8,30 +8,24 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "program": "${workspaceFolder}/build/main.js"
         },
         {
             "type": "node",
             "request": "launch",
             "name": "Launch Program - Dev",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
+            "skipFiles": ["<node_internals>/**"],
             "program": "${workspaceFolder}/src/main.ts",
             "preLaunchTask": "npm: build",
-            "args": [
-                "| pino-pretty",
-            ],
+            "args": ["| pino-pretty"],
             "runtimeArgs": [
                 "--no-warnings=ExperimentalWarning",
                 "--loader",
-                "ts-node/esm",
+                "ts-node/esm"
             ],
             // "outputCapture": "std", // enables pino logging to appear in console
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env.development.local"
         }
     ]
 }
