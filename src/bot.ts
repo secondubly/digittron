@@ -5,13 +5,17 @@ import { ApiClient } from '@twurple/api'
 import redis, { SocketTimeoutError } from 'redis'
 import logger from './logger.js'
 import { readdirSync } from 'fs'
-import { Command } from './types.js'
-import { getToken } from './lib/utils/token.js'
+import { Command, TokenApiResponse } from './types.js'
+import { EventSubWsListener } from '@twurple/eventsub-ws'
+import { EventSubChannelRaidEvent } from '@twurple/eventsub-base'
 
 const redisClient = await redis
     .createClient({
         socket: {
-            host: process.env.REDIS_HOST ?? 'localhost',
+            host:
+                process.env.NODE_ENV === 'development'
+                    ? 'localhost'
+                    : process.env.REDIS_HOST,
             port: parseInt(process.env.REDIS_PORT ?? '6379'),
             reconnectStrategy: (retries, cause) => {
                 if (cause instanceof SocketTimeoutError) {
@@ -40,14 +44,55 @@ const redisClient = await redis
     .on('error', (err) => logger.error('Redis Client Error', err))
     .connect()
 
+const BOT_SCOPES = [
+    'bits:read',
+    'channel:edit:commercial',
+    'channel:manage:broadcast',
+    'channel:manage:polls',
+    'channel:manage:predictions',
+    'channel:manage:raids',
+    'channel:manage:redemptions',
+    'channel:manage:schedule',
+    'channel:manage:videos',
+    'channel:moderate',
+    'channel:read:ads',
+    'channel:read:editors',
+    'channel:read:hype_train',
+    'channel:read:polls',
+    'channel:read:predictions',
+    'channel:read:redemptions',
+    'channel:read:subscriptions',
+    'channel:read:vips',
+    'chat:edit',
+    'chat:read',
+    'clips:edit',
+    'moderator:manage:announcements',
+    'moderator:manage:banned_users',
+    'moderator:manage:chat_messages',
+    'moderator:manage:chat_settings',
+    'moderator:manage:shoutouts',
+    'moderator:manage:warnings',
+    'moderator:read:chat_settings',
+    'moderator:read:chatters',
+    'moderator:read:followers',
+    'user:bot',
+    'user:edit',
+    'user:read:chat',
+    'user:read:follows',
+    'user:read:subscriptions',
+    'user:write:chat',
+]
+
 export class Bot {
     authProvider: RefreshingAuthProvider
     apiClient: ApiClient
+    eventSub: EventSubWsListener
     chatClient: ChatClient
     commands: Map<string, Command>
     cooldownList: Map<string, number>
     permitList: Map<string, NodeJS.Timeout>
     cooldownAmount = 60 * 1000 // 60 seconds
+    broadcasterID: string
     prefix: string
 
     private constructor(
@@ -61,18 +106,19 @@ export class Bot {
         this.commands = new Map()
         this.cooldownList = new Map()
         this.permitList = new Map()
+        this.broadcasterID = process.env.TWITCH_ID ?? ''
         this.prefix = '!'
 
         authProvider.onRefresh(this.handleRefresh)
 
-        this.chatClient.onRaid(this.handleRaid)
+        this.chatClient.onRaid(this.handleIncomingRaid)
         this.chatClient.onMessage(
             (channel: string, user: string, text: string, msg: ChatMessage) => {
                 this.handleMessage(channel, user, text, msg)
             },
         )
 
-        chatClient.onAuthenticationSuccess(() => {
+        this.chatClient.onAuthenticationSuccess(() => {
             logger.info("I've successfully connected!")
             const commandFiles = readdirSync('./build/commands').filter(
                 (file) => file.endsWith('.js'),
@@ -86,7 +132,21 @@ export class Bot {
             })
         })
 
-        chatClient.connect()
+        this.chatClient.connect()
+
+        this.eventSub =
+            process.env.NODE_ENV === 'production'
+                ? new EventSubWsListener({ apiClient: this.apiClient })
+                : new EventSubWsListener({
+                      apiClient: this.apiClient,
+                      url: 'ws://127.0.0.1:8080/ws',
+                  })
+        this.eventSub.start()
+        // REVIEW: should this be here or in onAuthenticationSuccess?
+        this.eventSub.onChannelRaidFrom(
+            this.broadcasterID,
+            this.handleOutgoingRaid,
+        )
     }
 
     static async init(clientID: string, clientSecret: string): Promise<Bot> {
@@ -95,84 +155,83 @@ export class Bot {
             clientSecret,
         })
 
-        let botTokenString = await redisClient.get(process.env.BOT_ID!)
-        if (!botTokenString) {
+        const botTokenString = await redisClient.get(process.env.BOT_ID!)
+        let botAccessToken: AccessToken | undefined =
+            botTokenString !== null
+                ? (JSON.parse(botTokenString) as AccessToken)
+                : undefined
+        if (!botAccessToken) {
             try {
-                const botScopes = [
-                    'bits:read',
-                    'channel:edit:commercial',
-                    'channel:manage:broadcast',
-                    'channel:manage:polls',
-                    'channel:manage:predictions',
-                    'channel:manage:raids',
-                    'channel:manage:redemptions',
-                    'channel:manage:schedule',
-                    'channel:manage:videos',
-                    'channel:moderate',
-                    'channel:read:ads',
-                    'channel:read:editors',
-                    'channel:read:hype_train',
-                    'channel:read:polls',
-                    'channel:read:predictions',
-                    'channel:read:redemptions',
-                    'channel:read:subscriptions',
-                    'channel:read:vips',
-                    'chat:edit',
-                    'chat:read',
-                    'clips:edit',
-                    'moderator:manage:announcements',
-                    'moderator:manage:banned_users',
-                    'moderator:manage:chat_messages',
-                    'moderator:manage:chat_settings',
-                    'moderator:manage:shoutouts',
-                    'moderator:manage:warnings',
-                    'moderator:read:chat_settings',
-                    'moderator:read:chatters',
-                    'moderator:read:followers',
-                    'user:bot',
-                    'user:edit',
-                    'user:read:chat',
-                    'user:read:follows',
-                    'user:read:subscriptions',
-                    'user:write:chat',
-                ]
-                botTokenString = await getToken(process.env.BOT_ID!, botScopes)
-                if (!botTokenString) {
+                const url = `http://localhost:8080/api/token?${new URLSearchParams(
+                    {
+                        id: process.env.BOT_ID || '',
+                        scopes: BOT_SCOPES,
+                    },
+                )}`
+
+                const response = await fetch(url)
+                if (!response.ok) {
                     throw Error(
                         'Bot access token not found in cache or database.',
                     )
                 }
 
-                redisClient.set(process.env.BOT_ID!, botTokenString)
+                const { token } = (await response.json()) as TokenApiResponse
+                botAccessToken = token
+                redisClient.set(
+                    process.env.BOT_ID!,
+                    JSON.stringify(botAccessToken),
+                )
+            } catch (error) {
+                logger.error(error)
+                process.exit(1)
+            }
+        }
+        const broadcasterTokenString = await redisClient.get(
+            process.env.TWITCH_ID!,
+        )
+        let broadcasterAccessToken =
+            broadcasterTokenString !== null
+                ? (JSON.parse(broadcasterTokenString) as AccessToken)
+                : undefined
+        if (!broadcasterAccessToken) {
+            try {
+                const params = new URLSearchParams({
+                    id: process.env.TWITCH_ID || '',
+                }).toString()
+
+                const response = await fetch(
+                    `http://localhost:8080/api/token?${params}`,
+                )
+                if (!response.ok) {
+                    throw new Error(
+                        'Broadcaster access token not found in cache or database',
+                    )
+                }
+
+                const { token } = (await response.json()) as TokenApiResponse
+                broadcasterAccessToken = token
+                redisClient.set(
+                    process.env.TWITCH_ID!,
+                    JSON.stringify(broadcasterAccessToken),
+                )
             } catch (error) {
                 logger.error(error)
                 process.exit(1)
             }
         }
 
-        const botAccessToken = JSON.parse(botTokenString) as AccessToken
+        await authProvider.addUser(
+            parseInt(process.env.BOT_ID!),
+            botAccessToken,
+            ['chat'],
+        )
+        await authProvider.addUser(
+            parseInt(process.env.TWITCH_ID!),
+            broadcasterAccessToken,
+        )
 
-        let channelTokenString = await redisClient.get(process.env.TWITCH_ID!)
-        if (!channelTokenString) {
-            try {
-                channelTokenString = await getToken(process.env.TWITCH_ID!)
-                if (!channelTokenString) {
-                    throw Error(
-                        'Bot access token not found in cache or database.',
-                    )
-                }
-
-                redisClient.set(process.env.TWITCH_ID!, channelTokenString)
-            } catch (error) {
-                logger.error(error)
-                process.exit(1)
-            }
-        }
-        const channelTokenData = JSON.parse(channelTokenString) as AccessToken
-
-        await authProvider.addUserForToken(botAccessToken, ['chat'])
-        await authProvider.addUserForToken(channelTokenData)
-
+        // TODO: move channels array to env file
         const chatClient = new ChatClient({
             authProvider,
             channels: ['secondubly'],
@@ -188,16 +247,18 @@ export class Bot {
     private async handleRefresh(userId: string, newTokenData: AccessToken) {
         try {
             redisClient.set(userId, JSON.stringify(newTokenData)).then(() => {
-                logger.info(`token refreshed for ${userId}`)
+                logger.info(
+                    `token refreshed for ${userId === process.env.BOT_ID ? 'bot' : 'broadcaster'}`,
+                )
             })
         } catch (error) {
             logger.error((error as Error).message)
         }
     }
 
-    private async handleRaid(
+    private async handleIncomingRaid(
         channel: string,
-        user: string,
+        _user: string,
         raidInfo: ChatRaidInfo,
     ) {
         const raidee = raidInfo.displayName
@@ -216,12 +277,30 @@ export class Bot {
         this.apiClient.chat.shoutoutUser(channelUser, raideeUser)
     }
 
+    private async handleOutgoingRaid(event: EventSubChannelRaidEvent) {
+        logger.debug('outgoing raid event triggered')
+        const raidedChannel = event.raidedBroadcasterDisplayName
+        const messages = [
+            `We're raiding @${raidedChannel}!`,
+            `Use this as the raid message: second15RAID second15RAID second15RAID 01010010 01000001 01001001 01000100 00100001 00100001 00100001 second15RAID second15RAID second15RAID`,
+        ]
+
+        for (const message of messages) {
+            this.chatClient.say(event.raidingBroadcasterName, message)
+        }
+    }
+
     private async handleMessage(
         channel: string,
         user: string,
         text: string,
         msg: ChatMessage,
     ) {
+        if (!msg.channelId) {
+            logger.error('message does not contain a channel id.')
+            return
+        }
+
         if (text.startsWith(this.prefix)) {
             const message = text.substring(this.prefix.length)
             const [name, ...args] = message.split(' ')
@@ -310,11 +389,6 @@ export class Bot {
                 msg.userInfo.isMod ||
                 msg.userInfo.userId === process.env.BOT_ID
             ) {
-                return
-            }
-
-            if (!msg.channelId) {
-                // log an error
                 return
             }
 
