@@ -3,6 +3,9 @@
 if [ -f /usr/src/app/.env ]; then
     echo '.env file found'
     export $(grep -v '^#' .env | xargs)
+elif [ -f .env.development.local ]; then
+    echo '.env.development.local file found'
+    export $(grep -v '^#' .env.development.local | xargs)
 fi
 
 DB_FILE="sqlite.db"
