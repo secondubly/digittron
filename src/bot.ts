@@ -8,6 +8,8 @@ import { readdirSync } from 'fs'
 import { Command, TokenApiResponse } from './types.js'
 import { EventSubWsListener } from '@twurple/eventsub-ws'
 import { EventSubChannelRaidEvent } from '@twurple/eventsub-base'
+import { EventSubHttpListener } from '@twurple/eventsub-http'
+import { NgrokAdapter } from '@twurple/eventsub-ngrok'
 
 const redisClient = await redis
     .createClient({
@@ -86,7 +88,7 @@ const BOT_SCOPES = [
 export class Bot {
     authProvider: RefreshingAuthProvider
     apiClient: ApiClient
-    eventSub: EventSubWsListener
+    eventSub: EventSubWsListener | EventSubHttpListener
     chatClient: ChatClient
     commands: Map<string, Command>
     cooldownList: Map<string, number>
@@ -99,6 +101,7 @@ export class Bot {
         chatClient: ChatClient,
         authProvider: RefreshingAuthProvider,
         apiClient: ApiClient,
+        eventSub: EventSubHttpListener | EventSubWsListener,
     ) {
         this.chatClient = chatClient
         this.authProvider = authProvider
@@ -108,9 +111,11 @@ export class Bot {
         this.permitList = new Map()
         this.broadcasterID = process.env.TWITCH_ID ?? ''
         this.prefix = '!'
+        this.eventSub = eventSub
 
         authProvider.onRefresh(this.handleRefresh)
 
+        // handles incoming raids (e.g. people who raid me)
         this.chatClient.onRaid(this.handleIncomingRaid)
         this.chatClient.onMessage(
             (channel: string, user: string, text: string, msg: ChatMessage) => {
@@ -133,20 +138,11 @@ export class Bot {
         })
 
         this.chatClient.connect()
-
-        this.eventSub =
-            process.env.NODE_ENV === 'production'
-                ? new EventSubWsListener({ apiClient: this.apiClient })
-                : new EventSubWsListener({
-                      apiClient: this.apiClient,
-                      url: 'ws://127.0.0.1:8080/ws',
-                  })
-        this.eventSub.start()
-        // REVIEW: should this be here or in onAuthenticationSuccess?
         this.eventSub.onChannelRaidFrom(
             this.broadcasterID,
             this.handleOutgoingRaid,
         )
+        this.eventSub.start()
     }
 
     static async init(clientID: string, clientSecret: string): Promise<Bot> {
@@ -241,7 +237,24 @@ export class Bot {
             authProvider,
         })
 
-        return new Bot(chatClient, authProvider, apiClient)
+        apiClient.eventSub.deleteAllSubscriptions()
+        const eventSub =
+            process.env.NODE_ENV === 'production'
+                ? new EventSubWsListener({ apiClient: apiClient })
+                : new EventSubHttpListener({
+                      apiClient: apiClient,
+                      adapter: new NgrokAdapter({
+                          ngrokConfig: {
+                              authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
+                          },
+                      }),
+                      logger: { minLevel: 'debug' },
+                      secret:
+                          process.env.EVENTSUB_SECRET ??
+                          'thisShouldBeARandomlyGeneratedFixedString',
+                  })
+
+        return new Bot(chatClient, authProvider, apiClient, eventSub)
     }
 
     private async handleRefresh(userId: string, newTokenData: AccessToken) {
@@ -278,7 +291,6 @@ export class Bot {
     }
 
     private async handleOutgoingRaid(event: EventSubChannelRaidEvent) {
-        logger.debug('outgoing raid event triggered')
         const raidedChannel = event.raidedBroadcasterDisplayName
         const messages = [
             `We're raiding @${raidedChannel}!`,
