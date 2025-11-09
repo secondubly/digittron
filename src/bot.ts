@@ -70,13 +70,17 @@ const BOT_SCOPES = [
     'clips:edit',
     'moderator:manage:announcements',
     'moderator:manage:banned_users',
+    'moderator:manage:blocked_terms',
     'moderator:manage:chat_messages',
     'moderator:manage:chat_settings',
     'moderator:manage:shoutouts',
+    'moderator:manage:unban_requests',
     'moderator:manage:warnings',
     'moderator:read:chat_settings',
     'moderator:read:chatters',
     'moderator:read:followers',
+    'moderator:read:moderators',
+    'moderator:read:vips',
     'user:bot',
     'user:edit',
     'user:read:chat',
@@ -158,6 +162,9 @@ export class Bot {
                 : undefined
         if (!botAccessToken) {
             try {
+                logger.info(
+                    'Bot access token not found in cache, checking database...',
+                )
                 const url = `http://localhost:8080/api/token?${new URLSearchParams(
                     {
                         id: process.env.BOT_ID || '',
@@ -192,6 +199,9 @@ export class Bot {
                 : undefined
         if (!broadcasterAccessToken) {
             try {
+                logger.info(
+                    'Broadcaster access token not found in cache, checking database...',
+                )
                 const params = new URLSearchParams({
                     id: process.env.TWITCH_ID || '',
                 }).toString()
@@ -240,7 +250,10 @@ export class Bot {
         apiClient.eventSub.deleteAllSubscriptions()
         const eventSub =
             process.env.NODE_ENV === 'production'
-                ? new EventSubWsListener({ apiClient: apiClient })
+                ? new EventSubWsListener({
+                      apiClient: apiClient,
+                      logger: { minLevel: 'info' },
+                  })
                 : new EventSubHttpListener({
                       apiClient: apiClient,
                       adapter: new NgrokAdapter({
