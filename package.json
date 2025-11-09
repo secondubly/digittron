@@ -49,6 +49,7 @@
         "@twurple/api": "^7.3.0",
         "@twurple/auth": "^7.3.0",
         "@twurple/chat": "^7.3.0",
+        "@twurple/eventsub-http": "^7.4.0",
         "@twurple/eventsub-ws": "^7.4.0",
         "fastify": "^5.6.1",
         "linkifyjs": "^4.3.1",
