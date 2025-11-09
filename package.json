@@ -13,11 +13,11 @@
     "scripts": {
         "build": "pnpm run clean && tsc",
         "clean": "rimraf ./build",
-        "dev": "NODE_ENV=development node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts | pino-pretty",
+        "bot": "NODE_ENV=development node --no-warnings=ExperimentalWarning --loader ts-node/esm src/main.ts | pino-pretty",
         "lint": "eslint . --ext .ts",
         "start": "node build/main.js",
         "server": "node --no-warnings=ExperimentalWarning --loader ts-node/esm src/api/index.ts",
-        "dev:start": "concurrently \"pnpm run server\" \"pnpm run dev\"",
+        "dev": "concurrently -c magenta,#7700cf -n HTTP,BOT \"pnpm:server\" \"pnpm:bot\"",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [],
