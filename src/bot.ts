@@ -7,7 +7,10 @@ import logger from './logger.js'
 import { readdirSync } from 'fs'
 import { Command, TokenApiResponse } from './types.js'
 import { EventSubWsListener } from '@twurple/eventsub-ws'
-import { EventSubChannelRaidEvent } from '@twurple/eventsub-base'
+import {
+    EventSubChannelModerationEvent,
+    EventSubChannelRaidModerationEvent,
+} from '@twurple/eventsub-base'
 import { EventSubHttpListener } from '@twurple/eventsub-http'
 import { NgrokAdapter } from '@twurple/eventsub-ngrok'
 
@@ -47,32 +50,15 @@ const redisClient = await redis
     .connect()
 
 const BOT_SCOPES = [
-    'bits:read',
     'channel:edit:commercial',
-    'channel:manage:broadcast',
-    'channel:manage:polls',
-    'channel:manage:predictions',
-    'channel:manage:raids',
-    'channel:manage:redemptions',
-    'channel:manage:schedule',
-    'channel:manage:videos',
     'channel:moderate',
-    'channel:read:ads',
-    'channel:read:editors',
-    'channel:read:hype_train',
-    'channel:read:polls',
-    'channel:read:predictions',
-    'channel:read:redemptions',
-    'channel:read:subscriptions',
-    'channel:read:vips',
-    'chat:edit',
     'chat:read',
+    'chat:edit',
     'clips:edit',
     'moderator:manage:announcements',
     'moderator:manage:banned_users',
     'moderator:manage:blocked_terms',
     'moderator:manage:chat_messages',
-    'moderator:manage:chat_settings',
     'moderator:manage:shoutouts',
     'moderator:manage:unban_requests',
     'moderator:manage:warnings',
@@ -82,10 +68,7 @@ const BOT_SCOPES = [
     'moderator:read:moderators',
     'moderator:read:vips',
     'user:bot',
-    'user:edit',
     'user:read:chat',
-    'user:read:follows',
-    'user:read:subscriptions',
     'user:write:chat',
 ]
 
@@ -99,6 +82,7 @@ export class Bot {
     permitList: Map<string, NodeJS.Timeout>
     cooldownAmount = 60 * 1000 // 60 seconds
     broadcasterID: string
+    botID: string
     prefix: string
 
     private constructor(
@@ -114,6 +98,7 @@ export class Bot {
         this.cooldownList = new Map()
         this.permitList = new Map()
         this.broadcasterID = process.env.TWITCH_ID ?? ''
+        this.botID = process.env.BOT_ID ?? ''
         this.prefix = '!'
         this.eventSub = eventSub
 
@@ -142,11 +127,16 @@ export class Bot {
         })
 
         this.chatClient.connect()
-        this.eventSub.onChannelRaidFrom(
-            this.broadcasterID,
-            this.handleOutgoingRaid,
-        )
-        this.eventSub.start()
+        try {
+            this.eventSub.onChannelModerate(
+                this.broadcasterID,
+                this.botID,
+                this.handleOutgoingRaid,
+            )
+            this.eventSub.start()
+        } catch (e) {
+            console.error(e)
+        }
     }
 
     static async init(clientID: string, clientSecret: string): Promise<Bot> {
@@ -182,7 +172,7 @@ export class Bot {
                 const { token } = (await response.json()) as TokenApiResponse
                 botAccessToken = token
                 redisClient.set(
-                    process.env.BOT_ID!,
+                    process.env.BOT_ID || '',
                     JSON.stringify(botAccessToken),
                 )
             } catch (error) {
@@ -190,6 +180,11 @@ export class Bot {
                 process.exit(1)
             }
         }
+
+        logger.debug(
+            `Bot Access Token: ${botAccessToken.accessToken} expires in ${botAccessToken.expiresIn}`,
+        )
+
         const broadcasterTokenString = await redisClient.get(
             process.env.TWITCH_ID!,
         )
@@ -204,6 +199,7 @@ export class Bot {
                 )
                 const params = new URLSearchParams({
                     id: process.env.TWITCH_ID || '',
+                    scopes: BOT_SCOPES,
                 }).toString()
 
                 const response = await fetch(
@@ -227,11 +223,16 @@ export class Bot {
             }
         }
 
+        logger.debug(
+            `Broadcaster Access Token: ${broadcasterAccessToken.accessToken} expires in ${broadcasterAccessToken.expiresIn}`,
+        )
+
         await authProvider.addUser(
             parseInt(process.env.BOT_ID!),
             botAccessToken,
             ['chat'],
         )
+
         await authProvider.addUser(
             parseInt(process.env.TWITCH_ID!),
             broadcasterAccessToken,
@@ -247,7 +248,8 @@ export class Bot {
             authProvider,
         })
 
-        apiClient.eventSub.deleteAllSubscriptions()
+        await apiClient.eventSub.deleteAllSubscriptions()
+
         const eventSub =
             process.env.NODE_ENV === 'production'
                 ? new EventSubWsListener({
@@ -303,15 +305,19 @@ export class Bot {
         this.apiClient.chat.shoutoutUser(channelUser, raideeUser)
     }
 
-    private async handleOutgoingRaid(event: EventSubChannelRaidEvent) {
-        const raidedChannel = event.raidedBroadcasterDisplayName
+    private async handleOutgoingRaid(event: EventSubChannelModerationEvent) {
+        if (!(event instanceof EventSubChannelRaidModerationEvent)) {
+            return
+        }
+
+        const raidedChannel = event.userDisplayName
         const messages = [
             `We're raiding @${raidedChannel}!`,
             `Use this as the raid message: second15RAID second15RAID second15RAID 01010010 01000001 01001001 01000100 00100001 00100001 00100001 second15RAID second15RAID second15RAID`,
         ]
 
         for (const message of messages) {
-            this.chatClient.say(event.raidingBroadcasterName, message)
+            this.chatClient.say(this.broadcasterID, message)
         }
     }
 
@@ -412,7 +418,7 @@ export class Bot {
             if (
                 msg.userInfo.isBroadcaster ||
                 msg.userInfo.isMod ||
-                msg.userInfo.userId === process.env.BOT_ID
+                msg.userInfo.userId === this.botID
             ) {
                 return
             }
