@@ -3,6 +3,7 @@ import { Bot } from './bot.js'
 import logger from './logger.js'
 import dotenv from 'dotenv'
 import path from 'path'
+import { connectRedis } from './lib/utils/redis.js'
 
 if (process.env.NODE_ENV === 'production') {
     dotenv.config()
@@ -39,6 +40,7 @@ const startup = () => {
         }
 
         if (CLIENT_ID && CLIENT_SECRET) {
+            connectRedis()
             Bot.init(CLIENT_ID, CLIENT_SECRET)
         }
     } catch (e: unknown) {
