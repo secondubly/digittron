@@ -2,10 +2,10 @@ import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
 import { ChatClient, ChatMessage, ChatRaidInfo } from '@twurple/chat'
 import { find as findUrl } from 'linkifyjs'
 import { ApiClient } from '@twurple/api'
-import redis, { SocketTimeoutError } from 'redis'
+import redisClient from './lib/utils/redis.js'
 import logger from './logger.js'
 import { readdirSync } from 'fs'
-import { Command, TokenApiResponse } from './types.js'
+import { Command } from './types.js'
 import { EventSubWsListener } from '@twurple/eventsub-ws'
 import {
     EventSubChannelModerationEvent,
@@ -13,64 +13,7 @@ import {
 } from '@twurple/eventsub-base'
 import { EventSubHttpListener } from '@twurple/eventsub-http'
 import { NgrokAdapter } from '@twurple/eventsub-ngrok'
-
-const redisClient = await redis
-    .createClient({
-        socket: {
-            host:
-                process.env.NODE_ENV === 'development'
-                    ? 'localhost'
-                    : process.env.REDIS_HOST,
-            port: parseInt(process.env.REDIS_PORT ?? '6379'),
-            reconnectStrategy: (retries, cause) => {
-                if (cause instanceof SocketTimeoutError) {
-                    return false
-                }
-
-                const maxRetries = 2 // retries 3 times
-                if (retries > maxRetries) {
-                    logger.error('Too many retries. Connection terminated.')
-                    return new Error('Too many retries.')
-                }
-
-                // Generate a random jitter between 0 – 200 ms:
-                const jitter = Math.floor(Math.random() * 200)
-                // Delay is an exponential back off, (times^2) * 50 ms, with a maximum value of 2000 ms:
-                const delay = Math.min(Math.pow(2, retries) * 50, 2000)
-
-                logger.warn(
-                    `Retrying connection in ${delay / 1000} seconds (Attempt ${retries + 1} of ${maxRetries + 1})...`,
-                )
-                return delay + jitter
-            },
-        },
-    })
-    .on('connect', () => logger.info('connected to redis'))
-    .on('error', (err) => logger.error('Redis Client Error', err))
-    .connect()
-
-const BOT_SCOPES = [
-    'channel:edit:commercial',
-    'channel:moderate',
-    'chat:read',
-    'chat:edit',
-    'clips:edit',
-    'moderator:manage:announcements',
-    'moderator:manage:banned_users',
-    'moderator:manage:blocked_terms',
-    'moderator:manage:chat_messages',
-    'moderator:manage:shoutouts',
-    'moderator:manage:unban_requests',
-    'moderator:manage:warnings',
-    'moderator:read:chat_settings',
-    'moderator:read:chatters',
-    'moderator:read:followers',
-    'moderator:read:moderators',
-    'moderator:read:vips',
-    'user:bot',
-    'user:read:chat',
-    'user:write:chat',
-]
+import getToken from './lib/utils/utils.js'
 
 export class Bot {
     authProvider: RefreshingAuthProvider
@@ -102,9 +45,9 @@ export class Bot {
         this.prefix = '!'
         this.eventSub = eventSub
 
+        /** setup event handlers */
         authProvider.onRefresh(this.handleRefresh)
 
-        // handles incoming raids (e.g. people who raid me)
         this.chatClient.onRaid(this.handleIncomingRaid)
         this.chatClient.onMessage(
             (channel: string, user: string, text: string, msg: ChatMessage) => {
@@ -126,7 +69,6 @@ export class Bot {
             })
         })
 
-        this.chatClient.connect()
         try {
             this.eventSub.onChannelModerate(
                 this.broadcasterID,
@@ -137,6 +79,8 @@ export class Bot {
         } catch (e) {
             console.error(e)
         }
+
+        this.chatClient.connect()
     }
 
     static async init(clientID: string, clientSecret: string): Promise<Bot> {
@@ -146,35 +90,16 @@ export class Bot {
         })
 
         const botTokenString = await redisClient.get(process.env.BOT_ID!)
-        let botAccessToken: AccessToken | undefined =
+        let botAccessToken: AccessToken | null =
             botTokenString !== null
                 ? (JSON.parse(botTokenString) as AccessToken)
-                : undefined
+                : null
         if (!botAccessToken) {
             try {
                 logger.info(
                     'Bot access token not found in cache, checking database...',
                 )
-                const url = `http://localhost:8080/api/token?${new URLSearchParams(
-                    {
-                        id: process.env.BOT_ID || '',
-                        scopes: BOT_SCOPES,
-                    },
-                )}`
-
-                const response = await fetch(url)
-                if (!response.ok) {
-                    throw Error(
-                        'Bot access token not found in cache or database.',
-                    )
-                }
-
-                const { token } = (await response.json()) as TokenApiResponse
-                botAccessToken = token
-                redisClient.set(
-                    process.env.BOT_ID || '',
-                    JSON.stringify(botAccessToken),
-                )
+                botAccessToken = await getToken('bot')
             } catch (error) {
                 logger.error(error)
                 process.exit(1)
@@ -191,42 +116,22 @@ export class Bot {
         let broadcasterAccessToken =
             broadcasterTokenString !== null
                 ? (JSON.parse(broadcasterTokenString) as AccessToken)
-                : undefined
+                : null
         if (!broadcasterAccessToken) {
-            try {
-                logger.info(
-                    'Broadcaster access token not found in cache, checking database...',
-                )
-                const params = new URLSearchParams({
-                    id: process.env.TWITCH_ID || '',
-                    scopes: BOT_SCOPES,
-                }).toString()
+            logger.info(
+                'Broadcaster access token not found in cache, checking database...',
+            )
 
-                const response = await fetch(
-                    `http://localhost:8080/api/token?${params}`,
-                )
-                if (!response.ok) {
-                    throw new Error(
-                        'Broadcaster access token not found in cache or database',
-                    )
-                }
-
-                const { token } = (await response.json()) as TokenApiResponse
-                broadcasterAccessToken = token
-                redisClient.set(
-                    process.env.TWITCH_ID!,
-                    JSON.stringify(broadcasterAccessToken),
-                )
-            } catch (error) {
-                logger.error(error)
-                process.exit(1)
-            }
+            broadcasterAccessToken = await getToken('user')
         }
 
         logger.debug(
             `Broadcaster Access Token: ${broadcasterAccessToken.accessToken} expires in ${broadcasterAccessToken.expiresIn}`,
         )
 
+        /**
+         * add users to auth provider
+         */
         await authProvider.addUser(
             parseInt(process.env.BOT_ID!),
             botAccessToken,
@@ -238,10 +143,31 @@ export class Bot {
             broadcasterAccessToken,
         )
 
-        // TODO: move channels array to env file
+        const twitchChannels = process.env.CHANNELS
+            ? process.env.CHANNELS.split(',').map((channel) => channel.trim())
+            : []
+
+        /**
+         * setup clients and eventsub
+         */
         const chatClient = new ChatClient({
             authProvider,
-            channels: ['secondubly'],
+            channels: twitchChannels,
+        })
+
+        chatClient.onConnect(() => {
+            logger.info(
+                `connected to ${twitchChannels.length} channels: ${twitchChannels.join(', ')}`,
+            )
+        })
+
+        chatClient.onDisconnect((graceful) => {
+            if (!graceful) {
+                logger.warn("I've been forcibly disconnected!")
+            }
+            logger.info(
+                `I\'ve been ${graceful ? 'gracefully' : 'forcibly'} disconnected!`,
+            )
         })
 
         const apiClient = new ApiClient({
