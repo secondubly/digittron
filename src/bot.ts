@@ -56,11 +56,10 @@ export class Bot {
         )
 
         this.chatClient.onAuthenticationSuccess(() => {
-            logger.info("I've successfully connected!")
             const commandFiles = readdirSync('./build/commands').filter(
                 (file) => file.endsWith('.js'),
             )
-            logger.info(`Loading ${commandFiles.length} commands.`)
+            logger.info(`Loaded ${commandFiles.length} commands.`)
 
             commandFiles.forEach(async (file) => {
                 const module = await import(`./commands/${file} `)
@@ -157,7 +156,7 @@ export class Bot {
 
         chatClient.onConnect(() => {
             logger.info(
-                `connected to ${twitchChannels.length} channels: ${twitchChannels.join(', ')}`,
+                `Connected to ${twitchChannels.length} ${twitchChannels.length === 1 ? 'channel' : 'channels'}: ${twitchChannels.join(', ')}`,
             )
         })
 

@@ -32,7 +32,7 @@ const redisClient: RedisClientType = createClient({
     },
 })
 
-redisClient.on('connect', () => logger.info('connected to redis'))
+redisClient.on('connect', () => logger.info('Connected to redis'))
 redisClient.on('error', (err) => logger.error('Redis Client Error', err))
 
 export const connectRedis = async (): Promise<void> => {

@@ -8,7 +8,7 @@ import { connectRedis } from './lib/utils/redis.js'
 if (process.env.NODE_ENV === 'production') {
     dotenv.config()
 } else {
-    logger.info('running in development mode')
+    logger.info('Running in development mode')
     const __filename = fileURLToPath(import.meta.url)
     const __dirname = path.dirname(__filename)
     dotenv.config({ path: __dirname + '/./../.env.development.local' })
