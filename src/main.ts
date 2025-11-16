@@ -27,18 +27,17 @@ const config = {
 }
 
 const startup = () => {
+    const hasUndefined = (obj: object) => {
+        return Object.values(obj).includes(undefined)
+    }
+
+    if (hasUndefined(config)) {
+        throw new Error(
+            'undefined fields found in config file, please check your settings',
+        )
+    }
+
     try {
-        const hasUndefined = (obj: object) => {
-            return Object.values(obj).includes(undefined)
-        }
-
-        if (hasUndefined(config)) {
-            logger.error(
-                'undefined fields found in config file, please check your settings',
-            )
-            process.exit(1)
-        }
-
         if (CLIENT_ID && CLIENT_SECRET) {
             connectRedis()
             Bot.init(CLIENT_ID, CLIENT_SECRET)
