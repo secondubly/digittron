@@ -1,6 +1,6 @@
 import { ApiClient } from '@twurple/api'
 import { AccessToken } from '@twurple/auth'
-import { ChatClient, ChatMessage } from '@twurple/chat'
+import { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 
 export interface Command {
     name: string
@@ -8,11 +8,9 @@ export interface Command {
     cooldown?: number
     enabled: boolean
     execute(
-        client: ChatClient,
-        channel: string,
-        msg: ChatMessage,
+        event: EventSubChannelChatMessageEvent,
         args: string[],
-        apiClient?: ApiClient,
+        apiClient: ApiClient,
     ): Promise<void>
 }
 

@@ -4,8 +4,12 @@ const test: Command = {
     name: 'test',
     aliases: [],
     enabled: true,
-    async execute(client, channel, _msg, _args, _apiClient) {
-        client.say(channel, 'this is a test of the emergency bot system! 🚨')
+    async execute(event, _args, apiClient) {
+        apiClient.chat.sendChatMessageAsApp(
+            process.env.BOT_ID!,
+            event.broadcasterId,
+            'this is a test of the emergency bot system! 🚨',
+        )
     },
 }
 

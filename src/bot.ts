@@ -1,5 +1,5 @@
 import { AccessToken, RefreshingAuthProvider } from '@twurple/auth'
-import { ChatClient, ChatMessage, ChatRaidInfo } from '@twurple/chat'
+import { ChatClient, ChatRaidInfo } from '@twurple/chat'
 import { find as findUrl } from 'linkifyjs'
 import { ApiClient } from '@twurple/api'
 import redisClient from './lib/utils/redis.js'
@@ -8,6 +8,7 @@ import { readdirSync } from 'fs'
 import { Command } from './types.js'
 import { EventSubWsListener } from '@twurple/eventsub-ws'
 import {
+    EventSubChannelChatMessageEvent,
     EventSubChannelModerationEvent,
     EventSubChannelRaidModerationEvent,
 } from '@twurple/eventsub-base'
@@ -48,12 +49,7 @@ export class Bot {
         /** setup event handlers */
         authProvider.onRefresh(this.handleRefresh)
 
-        this.chatClient.onRaid(this.handleIncomingRaid)
-        this.chatClient.onMessage(
-            (channel: string, user: string, text: string, msg: ChatMessage) => {
-                this.handleMessage(channel, user, text, msg)
-            },
-        )
+        // this.chatClient.onRaid(this.handleIncomingRaid)
 
         this.chatClient.onAuthenticationSuccess(() => {
             const commandFiles = readdirSync('./build/commands').filter(
@@ -72,8 +68,15 @@ export class Bot {
             this.eventSub.onChannelModerate(
                 this.broadcasterID,
                 this.botID,
-                this.handleOutgoingRaid,
+                this.handleOutgoingRaid.bind(this),
             )
+
+            this.eventSub.onChannelChatMessage(
+                this.broadcasterID,
+                this.botID,
+                this.handleMessage.bind(this),
+            )
+
             this.eventSub.start()
         } catch (e) {
             console.error(e)
@@ -242,23 +245,35 @@ export class Bot {
         ]
 
         for (const message of messages) {
-            this.chatClient.say(this.broadcasterID, message)
+            this.apiClient.chat.sendChatMessageAsApp(
+                this.botID,
+                this.broadcasterID,
+                message,
+            )
         }
     }
 
-    private async handleMessage(
-        channel: string,
-        user: string,
-        text: string,
-        msg: ChatMessage,
-    ) {
-        if (!msg.channelId) {
-            logger.error('message does not contain a channel id.')
-            return
+    private async handleMessage(event: EventSubChannelChatMessageEvent) {
+        const authorInfo = await event.getChatter()
+        const isBroadcaster = event.chatterId === this.broadcasterID
+        const isMod = await this.apiClient.moderation.checkUserMod(
+            this.broadcasterID,
+            event.chatterId,
+        )
+        const isBot = event.chatterId === this.botID
+        const channelInfo = await this.apiClient.channels.getChannelInfoById(
+            event.broadcasterId,
+        )
+
+        if (!channelInfo) {
+            logger.warn(
+                `Could not find channel info for broadcaster ${event.broadcasterId}`,
+            )
         }
 
-        if (text.startsWith(this.prefix)) {
-            const message = text.substring(this.prefix.length)
+        let message = event.messageText
+        if (event.messageText.startsWith(this.prefix)) {
+            message = message.substring(this.prefix.length)
             const [name, ...args] = message.split(' ')
 
             const command =
@@ -266,14 +281,15 @@ export class Bot {
                 this.commands
                     .values()
                     .find((cmd) => cmd.aliases && cmd.aliases.includes(name))
+
             if (!command || !command.enabled) return
 
             try {
                 const now = Date.now()
                 if (
                     this.cooldownList.has(command.name) &&
-                    !msg.userInfo.isBroadcaster &&
-                    !msg.userInfo.isMod
+                    !isBroadcaster &&
+                    !isMod
                 ) {
                     const expirationTime =
                         this.cooldownList.get(command.name)! +
@@ -281,7 +297,7 @@ export class Bot {
 
                     if (now < expirationTime) {
                         logger.warn(
-                            `${msg.userInfo.displayName} tried to execute ${command.name} too early.`,
+                            `${authorInfo.displayName} tried to execute ${command.name} too early.`,
                         )
                         return // still on cooldown
                     } else {
@@ -299,15 +315,8 @@ export class Bot {
                                 command.enabled && name !== 'commands',
                         )
                         .map(([name, _command]) => name)
-                    command.execute(
-                        this.chatClient,
-                        channel,
-                        msg,
-                        commandNames,
-                        this.apiClient,
-                    )
-                }
-                if (command.name.toLocaleLowerCase() === 'permit') {
+                    command.execute(event, commandNames, this.apiClient)
+                } else if (command.name.toLocaleLowerCase() === 'permit') {
                     // if username provided
                     if (args.length > 0) {
                         // do permit ahead of time
@@ -317,45 +326,29 @@ export class Bot {
                             logger.info(`Removed ${username} from permit list`)
                         }, 60000)
                         this.permitList.set(username, permitId)
-                        command.execute(
-                            this.chatClient,
-                            channel,
-                            msg,
-                            args,
-                            this.apiClient,
-                        )
+                        command.execute(event, args, this.apiClient)
                     }
                 } else {
-                    command.execute(
-                        this.chatClient,
-                        channel,
-                        msg,
-                        args,
-                        this.apiClient,
-                    )
+                    command.execute(event, args, this.apiClient)
                 }
 
                 this.cooldownList.set(command.name, now)
             } catch (error) {
                 logger.error(error)
             }
-        } else if (findUrl(text).length > 0) {
-            if (
-                msg.userInfo.isBroadcaster ||
-                msg.userInfo.isMod ||
-                msg.userInfo.userId === this.botID
-            ) {
+        } else if (findUrl(event.messageText).length > 0) {
+            if (isBroadcaster || isMod || isBot) {
                 return
             }
 
             // timeout users who post links
-            this.apiClient.moderation.banUser(msg.channelId, {
+            this.apiClient.moderation.banUser(this.broadcasterID, {
                 duration: 1,
                 reason: 'for posting links (temporary)',
-                user: msg.userInfo.userId,
+                user: authorInfo.id,
             })
         } else {
-            logger.info(`${user}: ${text}`)
+            logger.info(`${authorInfo.displayName}: ${message}`)
         }
     }
 }

@@ -4,10 +4,12 @@ const backseat: Command = {
     name: 'backseat',
     aliases: [],
     enabled: true,
-    async execute(client, channel, _args, _apiClient) {
-        client.say(
-            channel,
-            `please do not backseat the streamer! when @${channel} needs help, they will ask for it! thank you!`,
+    async execute(event, _args, apiClient) {
+        const broadcaster = event.broadcasterDisplayName
+        apiClient?.chat.sendChatMessageAsApp(
+            process.env.BOT_ID!,
+            event.broadcasterId,
+            `Please do not backseat the streamer! when @${broadcaster} needs help, they will ask for it! thank you!`,
         )
     },
 }

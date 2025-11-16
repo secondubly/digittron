@@ -5,22 +5,9 @@ const game: Command = {
     name: 'game',
     aliases: [],
     enabled: true,
-    async execute(client, channel, msg, args, apiClient) {
-        if (!apiClient) {
-            logger.error(
-                `api client not found, cannot execute ${this.name} command`,
-            )
-            return
-        }
-        const { channelId } = msg
-        if (!channelId) {
-            logger.warn(
-                'Channel ID not found, is this possibly a private message?',
-            )
-            return
-        }
-
-        const { displayName } = msg.userInfo
+    async execute(event, args, apiClient) {
+        const channelId = event.broadcasterId
+        const displayName = event.chatterDisplayName
         if (args.length === 0) {
             const channelInfo =
                 await apiClient.channels.getChannelInfoById(channelId)
@@ -29,12 +16,17 @@ const game: Command = {
                 return
             }
 
-            client.say(
-                channel,
+            apiClient.chat.sendChatMessageAsApp(
+                process.env.BOT_ID!,
+                event.broadcasterId,
                 `@${displayName}, current game: ${channelInfo.gameName}`,
             )
         } else {
-            const { isMod, isBroadcaster } = msg.userInfo
+            const isMod = await apiClient.moderation.checkUserMod(
+                event.broadcasterId,
+                event.chatterId,
+            )
+            const isBroadcaster = event.chatterId === process.env.TWITCH_ID
             if (!isMod && !isBroadcaster) {
                 return
             }
@@ -45,8 +37,9 @@ const game: Command = {
                 logger.warn(
                     `Could not find any games with the title ${gameTitle}`,
                 )
-                client.say(
-                    channel,
+                apiClient.chat.sendChatMessageAsApp(
+                    process.env.BOT_ID!,
+                    event.broadcasterId,
                     `@${displayName} could not find any games with that title. Please check your input and try again.`,
                 )
                 return

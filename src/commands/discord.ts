@@ -1,13 +1,16 @@
-import { Command } from "../types.js"
-
+import { Command } from '../types.js'
 
 const discord: Command = {
     name: 'discord',
     aliases: [],
     enabled: true,
-    async execute(client, channel, _msg, _args, _apiClient) {
-        client.say(channel, `join the discord here: ${process.env.DISCORD_URL}`)
-    }
+    async execute(event, _args, apiClient) {
+        apiClient.chat.sendChatMessageAsApp(
+            process.env.BOT_ID!,
+            event.broadcasterId,
+            `join the discord here: ${process.env.DISCORD_URL}`,
+        )
+    },
 }
 
 export default discord
