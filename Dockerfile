@@ -1,6 +1,7 @@
-FROM node:jod-slim AS base
+FROM node:krypton-slim AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
+ENV CI=true
 RUN corepack enable
 WORKDIR /usr/src/app
 # needed to create database file
@@ -25,6 +26,6 @@ COPY --from=build /usr/src/app/package.json /usr/src/app/package.json
 COPY --from=build /usr/src/app/tsconfig.json /usr/src/app/tsconfig.json
 
 VOLUME ["/usr/src/app/data"]
-EXPOSE 3000
+EXPOSE 5000
 
 CMD ["pnpm", "start"]
