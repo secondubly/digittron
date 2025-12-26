@@ -74,4 +74,17 @@ docker compose up
 
 ## Bot Commands
 
-Coming Soon
+* `!anniversary` - Prints stream anniversary message
+* `!backseat` - backseating message announcement
+* `!commands` - list all available commands
+* `!d20` - roll a d20
+* `!details` lists a summary of the currently playing game
+* `!discord` - list the discord url
+* `!game` - shows the game (or change the stream game if you're a moderator)
+* `!permit` - allow specified user to post links without being timed out
+* `!raidmsg` - shows the outgoing raid message
+* `!roulette` - I count six shots (okay maybe just one)
+* `!subgoal` - subgoals for the anniversary stream
+* `!test` - test command for mods/broadcaster
+* `!title` - shows the stream title (or changes it if you're a moderator)
+* `!wishlist` - shows throne and steam wishlist
