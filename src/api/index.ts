@@ -1,12 +1,136 @@
-import fastify from "fastify"
+import fastify, {type FastifyBaseLogger, type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify"
+import cors from '@fastify/cors'
+import config from '../mikro-orm.config.js'
+import { MikroORM } from '@mikro-orm/sqlite'
+import fastifySSE from "@fastify/sse"
+import { Token } from '../lib/db/models/token.entity.js'
+import type { AccessToken } from '@twurple/auth'
+import { log } from "@lib/utils/logger.js"
 
-export const init = (port: number) => {
-  console.log(`Iniitializing api on port ${port}`)
-  const server = fastify({ logger: true })
+interface Client {
+    id: number
+    response: FastifyReply
+}
 
+type AudioRequestParams = {
+  twitchId: string
+}
+
+// setup database connection
+const orm = await MikroORM.init(config)
+const em = orm.em.fork()
+let clients: Client[] = []
+
+const twitchAudioMap: Map<string, string> = new Map([
+    ['537326154', '537326154.wav'],
+])
+
+const sendAudioUpdates = (data: string) => {
+    clients.forEach((client) => {
+        client.response.sse.send({
+            event: 'play',
+            data,
+        })
+    })
+}
+
+export const routes = {
+  async getToken(id: string, scopes: string) {
+    const scopesArray = scopes ? scopes.split(',') : undefined
+    const tokensTable = em.getRepository(Token)
+    const token = await tokensTable.findOne({
+        id: parseInt(id),
+    })
+
+    if (!token) {
+        return null
+    }
+
+    let accessToken = undefined
+    if (scopesArray) {
+        accessToken = {
+            accessToken: token.accessToken,
+            refreshToken: token.refreshToken,
+            scope: scopesArray,
+            expiresIn: 0,
+            obtainmentTimestamp: 0,
+        } as AccessToken
+    } else {
+        accessToken = {
+            accessToken: token.accessToken,
+            refreshToken: token.refreshToken,
+            expiresIn: 0,
+            obtainmentTimestamp: 0,
+        } as AccessToken
+    }
+
+    return accessToken
+  },
+  getAudio(id: string) {
+    return twitchAudioMap.get(id)
+  }
+}
+
+export const init = async (port: number) => {
+  console.log(`Iniitializing API on port ${port}`)
+  let server: FastifyInstance
+  if (process.env.NODE_ENV === 'development') {
+    server = fastify({
+        loggerInstance: log.api as FastifyBaseLogger
+    })
+  } else {
+    server = fastify()
+  }
+
+  await server.register(cors, {
+      origin: ['http://localhost:5000', 'http://localhost:5001', 'http://localhost:5173'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  })
+
+  await server.register(fastifySSE)
+
+  // GET /ping - test endpoint
   server.get('/ping', async (_request, _reply) => {
     return 'pong\n'
   })
+
+  // GET /api/audio/:twitchId
+  server.get('/api/audio/:twitchId', async (request: FastifyRequest<{ Params: AudioRequestParams }>, reply) => {
+    const { twitchId } = request.params
+    // TODO: grab filename
+    log.api.info(
+        `Server received playback request for twitch id: ${twitchId}`,
+    )
+    const audioFilename = routes.getAudio(twitchId)
+    if (!audioFilename) {
+        reply
+            .code(404)
+            .send({ error: `Audio file not found for id: ${twitchId}` })
+    } else {
+        sendAudioUpdates(twitchId)
+        reply.code(200).send()
+    }
+  })
+
+  server.get('/events', { sse: true }, async (_request, reply) => {
+      reply.sse.keepAlive()
+      await reply.sse.send({ data: 'Connected' })
+
+      const clientId = Date.now()
+      const newClient: Client = {
+          id: clientId,
+          response: reply,
+      }
+      clients.push(newClient)
+
+      reply.sse.onClose(() => {
+          log.api.info(`SSE Client closed: ${clientId}`)
+          clients = clients.filter((client) => clientId !== client.id)
+      })
+  })
+
+
+
 
   return server.listen({ port }, (err, address) => {
         if (err) {

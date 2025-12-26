@@ -36,7 +36,7 @@ const SSEComponent: React.FC<SSEComponentProps> = ({ audioStateChanger }) => {
   const [connectionState, setConnectionState] = useState('CONNECTING');
 
   useEffect(() => {
-    const es = new EventSource('http://localhost:5000/events');
+    const es = new EventSource('http://localhost:4001/events');
     
     es.onopen = () => {
       console.log('SSE Connection Opened')

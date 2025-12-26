@@ -1,7 +1,8 @@
-import fastify from "fastify"
+import fastify, { type FastifyBaseLogger, type FastifyInstance } from "fastify"
 import fastifyStatic from "@fastify/static"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
+import { log } from "@lib/utils/logger.js"
 
 export const init = (port: number) => {
     console.log(`Initializing web on port ${port}`)
@@ -9,7 +10,14 @@ export const init = (port: number) => {
     const __filename = fileURLToPath(import.meta.url)
     const __dirname = path.dirname(__filename)
     const reactPath = path.join(__dirname, '..', 'web')
-    const server = fastify({ logger: true })
+    let server: FastifyInstance
+    if (process.env.NODE_ENV === 'development') {
+        server = fastify({
+            loggerInstance: log.web as FastifyBaseLogger
+        })
+    } else {
+        server = fastify()
+    }
 
     server.register(fastifyStatic, {
     root: reactPath,

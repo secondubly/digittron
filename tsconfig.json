@@ -4,7 +4,10 @@
     // File Layout
     "rootDir": "./src",
     "outDir": "./build",
-
+    "baseUrl": ".",
+    "paths": {
+      "@lib/*": ["src/lib/*"],
+    },
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "esnext",
@@ -14,16 +17,16 @@
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "esModuleInterop": true,
     "moduleResolution": "bundler",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     // "types": ["node"],
     // and npm install -D @types/node
 
     // Other Outputs
     "sourceMap": true,
     "declaration": true,
-    "declarationMap": true,
 
     // Stricter Typechecking Options
-    "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
 
     // Style Options
@@ -46,5 +49,9 @@
     "skipLibCheck": true,
     "allowJs": true,
   },
-  "include": ["./src/**/*.ts"]
+  "include": ["./src/**/*.ts"],
+  "ts-node": {
+    "esm": true,
+    "transpileOnly": true
+  }
 }
