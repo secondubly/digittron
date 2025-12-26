@@ -11,9 +11,9 @@
         ]
     },
     "scripts": {
-        "bot": "tsx --env-file=.env.development.local src/bot/index.ts",
+        "bot": "tsx watch --env-file=.env src/bot/index.ts",
         "build": "vite build && tsc -p tsconfig.json && tsc-alias",
-        "dev": "concurrently -c magenta,#7700cf -n API,WEB,BOT \"tsx src/api/index.ts\" \"vite\" \"pnpm:bot\"",
+        "dev": "concurrently -c magenta,#7700cf -n API,WEB,BOT \"tsx watch src/api/index.ts\" \"vite\" \"pnpm:bot\"",
         "format": "prettier --write .",
         "lint": "eslint . --ext .ts",
         "test": "echo \"Error: no test specified\" && exit 1",
