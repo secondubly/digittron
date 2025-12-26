@@ -3,6 +3,9 @@ import fastifyStatic from '@fastify/static'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { log } from '@lib/utils/logger.js'
+import { setupShutdownHandler } from '@lib/utils/utils.js'
+
+setupShutdownHandler()
 
 export const init = (port: number) => {
     console.log(`Initializing web on port ${port}`)

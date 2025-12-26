@@ -96,3 +96,17 @@ export const playAudio = async (twitchId: string): Promise<void> => {
         return
     }
 }
+
+export const setupShutdownHandler = () => {
+    const handleShutdown = (graceful: boolean) => {
+        log.app.info(`Shutting down ${graceful ? 'gracefully' : 'forcefully'}.`)
+    }
+
+    process.on('SIGTERM', () => {
+        handleShutdown(true)
+    })
+
+    process.on('SIGINT', () => {
+        handleShutdown(true)
+    })
+}

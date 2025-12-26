@@ -11,6 +11,7 @@ import fastifySSE from '@fastify/sse'
 import { Token } from '../lib/db/models/token.entity.js'
 import type { AccessToken } from '@twurple/auth'
 import { log } from '@lib/utils/logger.js'
+import { setupShutdownHandler } from '@lib/utils/utils.js'
 
 interface Client {
     id: number
@@ -25,14 +26,15 @@ type RequestParams = {
     id: string
 }
 
-// setup database connection
-const orm = await MikroORM.init(config)
-const em = orm.em.fork()
+setupShutdownHandler()
 let clients: Client[] = []
-
 const twitchAudioMap: Map<string, string> = new Map([
     ['537326154', '537326154.wav'],
 ])
+
+// setup database connection
+const orm = await MikroORM.init(config)
+const em = orm.em.fork()
 
 const sendAudioUpdates = (data: string) => {
     clients.forEach((client) => {
