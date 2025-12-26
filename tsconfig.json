@@ -2,17 +2,18 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    // "rootDir": "./src",
-    // "outDir": "./dist",
+    "rootDir": "./src",
+    "outDir": "./build",
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
+    "module": "esnext",
     "target": "esnext",
-    "types": [],
+    "types": ["node"],
     // For nodejs:
-    "lib": ["es2022", "DOM", "DOM.Iterable"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "esModuleInterop": true,
+    "moduleResolution": "bundler",
     // "types": ["node"],
     // and npm install -D @types/node
 
@@ -26,6 +27,8 @@
     "exactOptionalPropertyTypes": true,
 
     // Style Options
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
     // "noImplicitReturns": true,
     // "noImplicitOverride": true,
     // "noUnusedLocals": true,
@@ -41,6 +44,7 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "allowJs": true
-  }
+    "allowJs": true,
+  },
+  "include": ["./src/**/*.ts"]
 }
