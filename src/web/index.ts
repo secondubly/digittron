@@ -1,8 +1,8 @@
-import fastify, { type FastifyBaseLogger, type FastifyInstance } from "fastify"
-import fastifyStatic from "@fastify/static"
-import path from "node:path"
-import { fileURLToPath } from "node:url"
-import { log } from "@lib/utils/logger.js"
+import fastify, { type FastifyBaseLogger, type FastifyInstance } from 'fastify'
+import fastifyStatic from '@fastify/static'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { log } from '@lib/utils/logger.js'
 
 export const init = (port: number) => {
     console.log(`Initializing web on port ${port}`)
@@ -13,19 +13,19 @@ export const init = (port: number) => {
     let server: FastifyInstance
     if (process.env.NODE_ENV === 'development') {
         server = fastify({
-            loggerInstance: log.web as FastifyBaseLogger
+            loggerInstance: log.web as FastifyBaseLogger,
         })
     } else {
         server = fastify()
     }
 
     server.register(fastifyStatic, {
-    root: reactPath,
-    prefix: '/'
+        root: reactPath,
+        prefix: '/',
     })
 
     server.get('/', async (_request, reply) => {
-    return reply.sendFile('index.html')
+        return reply.sendFile('index.html')
     })
 
     server.get('/ping', async (_request, _reply) => {
