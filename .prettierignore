@@ -24,3 +24,6 @@ yarn-error.log
 
 # documentation
 README.md
+
+# Dockerfiles
+docker-compose.yml
