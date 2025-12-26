@@ -2,8 +2,10 @@
 build
 coverage
 
-# custom additions
+# dependencies
 node_modules
+
+# lockfiles
 pnpm-lock.yaml
 
 # TypeScript
@@ -13,6 +15,12 @@ tsconfig.tsbuildinfo
 .prettierrc
 eslint.config.mjs
 tsconfig.json
+
+# env files
+.env*
+npm-debug.log
+yarn-debug.log
+yarn-error.log
 
 # documentation
 README.md
