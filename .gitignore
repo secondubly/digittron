@@ -140,5 +140,5 @@ vite.config.ts.timestamp-*
 
 # build files/folders
 build
-data
+data/sqlite.db
 temp/
