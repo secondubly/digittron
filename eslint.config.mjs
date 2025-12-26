@@ -5,19 +5,19 @@ import tseslint from 'typescript-eslint'
 export default tseslint.config(
     tseslint.configs.recommended,
     {
-        ignores: ['**/build/**']
+        ignores: ['**/build/**'],
     },
     {
         rules: {
-            "no-unused-vars": "off",
-            "@typescript-eslint/no-unused-vars": [
-                "error", // or "error"
+            'no-unused-vars': 'off',
+            '@typescript-eslint/no-unused-vars': [
+                'error', // or "error"
                 {
-                    "argsIgnorePattern": "^_",
-                    "varsIgnorePattern": "^_",
-                    "caughtErrorsIgnorePattern": "^_"
-                }
-            ]
-        }
-    }
+                    argsIgnorePattern: '^_',
+                    varsIgnorePattern: '^_',
+                    caughtErrorsIgnorePattern: '^_',
+                },
+            ],
+        },
+    },
 )
