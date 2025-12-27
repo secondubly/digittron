@@ -24,8 +24,9 @@ COPY --from=dependencies /usr/src/app/node_modules /usr/src/app/node_modules
 COPY --from=build /usr/src/app/build /usr/src/app/build
 COPY --from=build /usr/src/app/data /usr/src/app/data
 COPY --from=build /usr/src/app/package.json /usr/src/app/package.json
+COPY --from=build /usr/src/app/tsconfig.json /usr/src/app/tsconfig.json
 
 VOLUME ["/usr/src/app/data"]
-EXPOSE 5000
+EXPOSE 4000 5000
 
 CMD ["pnpm", "start"]
