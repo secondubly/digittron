@@ -143,15 +143,22 @@ export const init = async (port: number) => {
         return
     })
 
-    // GET /api/audio/:twitchId
+    // GET /api/audio/:id
     server.get(
-        '/api/audio/:twitchId',
+        '/api/audio/:id',
         async (request: FastifyRequest<{ Params: RequestParams }>, reply) => {
             const { id: twitchId } = request.params
+            console.log(request.params)
+            console.log(request.params.id)
             // TODO: grab filename
             log.api.info(
                 `Server received playback request for twitch id: ${twitchId}`,
             )
+
+            if (!twitchId) {
+                reply.code(400).send({ error: 'Invalid request.' })
+            }
+
             const audioFilename = routes.getAudio(twitchId)
             if (!audioFilename) {
                 reply
@@ -181,13 +188,24 @@ export const init = async (port: number) => {
         })
     })
 
-    return server.listen({ port }, (err, address) => {
-        if (err) {
-            console.error(err)
-            process.exit(1)
-        }
-        log.api.info(`API server listening at ${address}`)
-    })
+    if (process.env.NODE_ENV === 'development') {
+        return server.listen({ port }, (err, address) => {
+            if (err) {
+                console.error(err)
+                process.exit(1)
+            }
+            log.api.info(`API server listening at ${address}`)
+        })
+    } else {
+        // if running via docker - we need to listen on all hosts to enable the front end to connect
+        return server.listen({ port, host: '0.0.0.0' }, (err, address) => {
+            if (err) {
+                console.error(err)
+                process.exit(1)
+            }
+            console.log(`Web server listening at ${address}`)
+        })
+    }
 }
 
 if (import.meta.main) {

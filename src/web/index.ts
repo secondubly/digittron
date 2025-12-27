@@ -35,13 +35,24 @@ export const init = (port: number) => {
         return 'pong\n'
     })
 
-    return server.listen({ port }, (err, address) => {
-        if (err) {
-            console.error(err)
-            process.exit(1)
-        }
-        console.log(`Web server listening at ${address}`)
-    })
+    if (process.env.NODE_ENV === 'development') {
+        return server.listen({ port }, (err, address) => {
+            if (err) {
+                console.error(err)
+                process.exit(1)
+            }
+            console.log(`Web server listening at ${address}`)
+        })
+    } else {
+        // if running via docker, listen on all interfaces to enable connection from outside the container
+        return server.listen({ port, host: '0.0.0.0' }, (err, address) => {
+            if (err) {
+                console.error(err)
+                process.exit(1)
+            }
+            console.log(`Web server listening at ${address}`)
+        })
+    }
 }
 
 if (import.meta.main) {
