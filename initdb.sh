@@ -3,7 +3,7 @@
 if [ -f .env.development.local ]; then
     echo '.env.development.local file found'
     export $(grep -v '^#' .env.development.local | xargs)
-elif [ -f /usr/src/app/.env ]; then
+elif [ -f .env ]; then
     echo '.env file found'
     export $(grep -v '^#' .env | xargs)
 fi
@@ -21,7 +21,7 @@ EOF
 }
 
 # Check if database file exists
-if [[ ! -f "$DB_PATH" ]]; then
+if [ ! -f "$DB_PATH" ]; then
     echo "Datbase file not found, initializing..."
     sqlite3 $DB_PATH < "$SCHEMA_PATH"
     echo "Database initialized"
