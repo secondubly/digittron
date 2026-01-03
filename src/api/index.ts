@@ -203,7 +203,7 @@ export const init = async (port: number) => {
                 console.error(err)
                 process.exit(1)
             }
-            console.log(`Web server listening at ${address}`)
+            console.log(`API server listening at ${address}`)
         })
     }
 }
