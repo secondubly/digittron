@@ -202,21 +202,21 @@ export class Bot {
         const eventSub =
             process.env.NODE_ENV === 'development'
                 ? new EventSubHttpListener({
-                      apiClient: apiClient,
-                      adapter: new NgrokAdapter({
-                          ngrokConfig: {
-                              authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
-                          },
-                      }),
-                      logger: { minLevel: 'debug' },
-                      secret:
-                          process.env.EVENTSUB_SECRET ??
-                          'thisShouldBeARandomlyGeneratedFixedString',
-                  })
+                    apiClient: apiClient,
+                    adapter: new NgrokAdapter({
+                        ngrokConfig: {
+                            authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
+                        },
+                    }),
+                    logger: { minLevel: 'debug' },
+                    secret:
+                        process.env.EVENTSUB_SECRET ??
+                        'thisShouldBeARandomlyGeneratedFixedString',
+                })
                 : new EventSubWsListener({
-                      apiClient: apiClient,
-                      logger: { minLevel: 'info' },
-                  })
+                    apiClient: apiClient,
+                    logger: { minLevel: 'info' },
+                })
 
         return new Bot(chatClient, authProvider, apiClient, eventSub)
     }
@@ -227,6 +227,7 @@ export class Bot {
                 log.bot.info(
                     `token refreshed for ${userId === process.env.BOT_ID ? 'bot' : 'broadcaster'}`,
                 )
+                log.bot.debug(`Token Info: ${newTokenData}`)
             })
         } catch (error) {
             log.bot.error((error as Error).message)
@@ -381,18 +382,25 @@ export class Bot {
                 return
             }
 
-            // timeout users who post links
-            this.apiClient.moderation.banUser(this.broadcasterID, {
-                duration: 1,
-                reason: 'for posting links (temporary)',
-                user: authorInfo.id,
-            })
-            this.apiClient.chat.sendChatMessageAsApp(
-                this.botID,
-                this.broadcasterID,
-                `${authorInfo.displayName}, please refrain from posting links!
+            try {
+                // timeout users who post links
+                await this.apiClient.asUser(this.botID, async ctx => {
+                    await ctx.moderation.banUser(this.broadcasterID, {
+                        duration: 1,
+                        reason: 'for posting links (temporary)',
+                        user: authorInfo.id
+                    })
+                })
+
+                this.apiClient.chat.sendChatMessageAsApp(
+                    this.botID,
+                    this.broadcasterID,
+                    `${authorInfo.displayName}, please refrain from posting links!
                 If you want to post a link, ask a mod or the streamer to permit you.`,
-            )
+                )
+            } catch (error) {
+                log.bot.error(error)
+            }
         } else {
             log.bot.info(`${authorInfo.displayName}: ${message}`)
         }
