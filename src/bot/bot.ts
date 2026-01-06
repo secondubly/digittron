@@ -264,15 +264,17 @@ export class Bot {
         const raidedChannel = event.userDisplayName
         const messages = [
             `We're raiding @${raidedChannel}!`,
-            `Use this as the raid message: second15RAID second15RAID second15RAID 01010010 01000001 01001001 01000100 00100001 00100001 00100001 second15RAID second15RAID second15RAID`,
+            `Use this as the raid message: second15Raid 01010010 01000001 01001001 01000100 00100001 00100001 00100001 second15Raid`,
         ]
 
         for (const message of messages) {
-            this.apiClient.chat.sendChatMessageAsApp(
+            await this.apiClient.chat.sendChatMessageAsApp(
                 this.botID,
                 this.broadcasterID,
                 message,
             )
+            // wait a bit before sending the next message
+            await new Promise(resolve => setTimeout(resolve, 1500))
         }
     }
 
