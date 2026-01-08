@@ -2,7 +2,7 @@ import { type AccessToken, RefreshingAuthProvider } from '@twurple/auth'
 import { ChatClient, type ChatRaidInfo } from '@twurple/chat'
 import { find as findUrl } from 'linkifyjs'
 import { log } from '@lib/utils/logger.js'
-import { ApiClient } from '@twurple/api'
+import { ApiClient, HelixUser } from '@twurple/api'
 import redisClient from '@lib/utils/redis.js'
 import { readdirSync } from 'fs'
 import { type Command } from '@lib/bot/types.js'
@@ -53,7 +53,7 @@ export class Bot {
         /** setup event handlers */
         authProvider.onRefresh(this.handleRefresh)
 
-        // this.chatClient.onRaid(this.handleIncomingRaid)
+        this.chatClient.onRaid(this.handleIncomingRaid)
 
         this.chatClient.onAuthenticationSuccess(() => {
             let commandFiles: string[]
@@ -85,23 +85,19 @@ export class Bot {
                 })
         })
 
-        try {
-            this.eventSub.onChannelModerate(
-                this.broadcasterID,
-                this.botID,
-                this.handleOutgoingRaid.bind(this),
-            )
+        this.eventSub.onChannelModerate(
+            this.broadcasterID,
+            this.botID,
+            this.handleOutgoingRaid.bind(this),
+        )
 
-            this.eventSub.onChannelChatMessage(
-                this.broadcasterID,
-                this.botID,
-                this.handleMessage.bind(this),
-            )
+        this.eventSub.onChannelChatMessage(
+            this.broadcasterID,
+            this.botID,
+            this.handleMessage.bind(this),
+        )
 
-            this.eventSub.start()
-        } catch (e) {
-            console.error(e)
-        }
+        this.eventSub.start()
 
         this.chatClient.connect()
     }
@@ -118,14 +114,14 @@ export class Bot {
                 ? (JSON.parse(botTokenString) as AccessToken)
                 : null
         if (!botAccessToken) {
-            try {
-                log.bot.info(
-                    'Bot access token not found in cache, checking database...',
+            log.bot.info(
+                'Bot access token not found in cache, checking database...',
+            )
+            botAccessToken = await getToken('bot')
+            if (!botAccessToken) {
+                throw new ReferenceError(
+                    'Bot access token not found in cache or database.',
                 )
-                botAccessToken = await getToken('bot')
-            } catch (error) {
-                log.bot.error(error)
-                process.exit(1)
             }
         }
 
@@ -185,9 +181,6 @@ export class Bot {
         })
 
         chatClient.onDisconnect((graceful) => {
-            if (!graceful) {
-                log.bot.warn("I've been forcibly disconnected!")
-            }
             log.bot.info(
                 `I\'ve been ${graceful ? 'gracefully' : 'forcibly'} disconnected!`,
             )
@@ -202,39 +195,33 @@ export class Bot {
         const eventSub =
             process.env.NODE_ENV === 'development'
                 ? new EventSubHttpListener({
-                    apiClient: apiClient,
-                    adapter: new NgrokAdapter({
-                        ngrokConfig: {
-                            authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
-                        },
-                    }),
-                    logger: { minLevel: 'debug' },
-                    secret:
-                        process.env.EVENTSUB_SECRET ??
-                        'thisShouldBeARandomlyGeneratedFixedString',
-                })
+                      apiClient: apiClient,
+                      adapter: new NgrokAdapter({
+                          ngrokConfig: {
+                              authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
+                          },
+                      }),
+                      logger: { minLevel: 'debug' },
+                      secret:
+                          process.env.EVENTSUB_SECRET ??
+                          'thisShouldBeARandomlyGeneratedFixedString',
+                  })
                 : new EventSubWsListener({
-                    apiClient: apiClient,
-                    logger: { minLevel: 'info' },
-                })
+                      apiClient: apiClient,
+                      logger: { minLevel: 'info' },
+                  })
 
         return new Bot(chatClient, authProvider, apiClient, eventSub)
     }
 
     private async handleRefresh(userId: string, newTokenData: AccessToken) {
-        try {
-            redisClient.set(userId, JSON.stringify(newTokenData)).then(() => {
-                log.bot.info(
-                    `token refreshed for ${userId === process.env.BOT_ID ? 'bot' : 'broadcaster'}`,
-                )
-                log.bot.debug(`Token Info: ${newTokenData}`)
-            })
-        } catch (error) {
-            log.bot.error((error as Error).message)
-        }
+        await redisClient.set(userId, JSON.stringify(newTokenData))
+        log.bot.info(
+            `Token refreshed for ${userId === process.env.BOT_ID ? 'bot' : 'broadcaster'}`,
+        )
+        log.bot.debug(`Token Info: ${newTokenData}`)
     }
 
-    // @ts-ignore
     private async handleIncomingRaid(
         channel: string,
         _user: string,
@@ -274,8 +261,86 @@ export class Bot {
                 message,
             )
             // wait a bit before sending the next message
-            await new Promise(resolve => setTimeout(resolve, 1500))
+            await new Promise((resolve) => setTimeout(resolve, 1500))
         }
+    }
+
+    // TODO: send automated messages every X minutes
+    private async sendAutoMessage() {}
+
+    private async handleCommands(
+        message: string,
+        event: EventSubChannelChatMessageEvent,
+        authorInfo: HelixUser,
+        isBroadcaster: boolean,
+        isMod: boolean,
+    ) {
+        message = message.substring(this.prefix.length)
+        const [name, ...args] = message.split(' ')
+
+        let command
+        if (this.commands.has(name)) {
+            command = this.commands.get(name)
+        } else {
+            const commandsArray = [...this.commands.values()]
+            command = commandsArray.find(
+                (cmd) => cmd.aliases && cmd.aliases.includes(name),
+            )
+        }
+
+        if (!command || command.enabled === false) return
+
+        // check if command is still in cooldown
+        const now = Date.now()
+        if (this.cooldownList.has(command.name) && !isBroadcaster && !isMod) {
+            const expirationTime =
+                this.cooldownList.get(command.name)! + this.cooldownAmount
+
+            if (now < expirationTime) {
+                log.bot.warn(
+                    `${authorInfo.displayName} tried to execute ${command.name} too early.`,
+                )
+                return
+            } else {
+                this.cooldownList.delete(command.name)
+            }
+        }
+
+        // TODO: clean this up
+        switch (command.name.toLocaleLowerCase()) {
+            case 'commands':
+                const commandNames = [...this.commands]
+                    .filter(
+                        ([name, command]) =>
+                            command.enabled && name !== 'commands',
+                    )
+                    .map(([name, _command]) => name)
+                command.execute(event, commandNames, this.apiClient)
+                break
+            case 'permit':
+                // add to permit list ahead of time
+                const username = args[0]
+                const permitId = setTimeout(() => {
+                    this.permitList.delete(username)
+                    log.bot.info(`Removed ${username} from permit list`)
+                }, 60000)
+                this.permitList.set(username, permitId)
+                command.execute(event, args, this.apiClient)
+                break
+            case 'details':
+                const appAccessToken = await (
+                    await this.authProvider.getAppAccessToken()
+                ).accessToken
+                args.push(appAccessToken)
+                command.execute(event, args, this.apiClient) // repeated
+                break
+            default:
+                command.execute(event, args, this.apiClient)
+                break
+        }
+
+        // add command to cooldown list
+        this.cooldownList.set(command.name, now)
     }
 
     private async handleMessage(event: EventSubChannelChatMessageEvent) {
@@ -303,106 +368,35 @@ export class Bot {
             }
         }
 
-        let message = event.messageText
-        // handle commands
-        // TODO: convert this to a method
+        const message = event.messageText
         if (event.messageText.startsWith(this.prefix)) {
-            message = message.substring(this.prefix.length)
-            const [name, ...args] = message.split(' ')
-
-            let command
-            if (this.commands.has(name)) {
-                command = this.commands.get(name)
-            } else {
-                const commandsArray = [...this.commands.values()]
-                command = commandsArray.find(
-                    (cmd) => cmd.aliases && cmd.aliases.includes(name),
-                )
-            }
-
-            if (!command || command.enabled === false) return
-
-            try {
-                const now = Date.now()
-                if (
-                    this.cooldownList.has(command.name) &&
-                    !isBroadcaster &&
-                    !isMod
-                ) {
-                    const expirationTime =
-                        this.cooldownList.get(command.name)! +
-                        this.cooldownAmount
-
-                    if (now < expirationTime) {
-                        log.bot.warn(
-                            `${authorInfo.displayName} tried to execute ${command.name} too early.`,
-                        )
-                        return
-                    } else {
-                        this.cooldownList.delete(command.name)
-                    }
-                }
-
-                // TODO: clean this up
-                if (command.name.toLocaleLowerCase() === 'commands') {
-                    // remove disabled commands and the !commands command (it's redundant)
-                    const commandNames = [...this.commands]
-                        .filter(
-                            ([name, command]) =>
-                                command.enabled && name !== 'commands',
-                        )
-                        .map(([name, _command]) => name)
-                    command.execute(event, commandNames, this.apiClient)
-                } else if (command.name.toLocaleLowerCase() === 'permit') {
-                    // if username provided
-                    if (args.length > 0) {
-                        // add to permit list ahead of time
-                        const username = args[0]
-                        const permitId = setTimeout(() => {
-                            this.permitList.delete(username)
-                            log.bot.info(`Removed ${username} from permit list`)
-                        }, 60000)
-                        this.permitList.set(username, permitId)
-                        command.execute(event, args, this.apiClient)
-                    }
-                } else {
-                    if (command.name.toLocaleLowerCase() === 'details') {
-                        const appAccessToken = await (
-                            await this.authProvider.getAppAccessToken()
-                        ).accessToken
-                        args.push(appAccessToken)
-                    }
-                    command.execute(event, args, this.apiClient)
-                }
-
-                this.cooldownList.set(command.name, now)
-            } catch (error) {
-                log.bot.error(error)
-            }
+            this.handleCommands(
+                message,
+                event,
+                authorInfo,
+                isBroadcaster,
+                isBot,
+            )
         } else if (findUrl(event.messageText).length > 0) {
             if (isBroadcaster || isMod || isBot) {
                 return
             }
 
-            try {
-                // timeout users who post links
-                await this.apiClient.asUser(this.botID, async ctx => {
-                    await ctx.moderation.banUser(this.broadcasterID, {
-                        duration: 1,
-                        reason: 'for posting links (temporary)',
-                        user: authorInfo.id
-                    })
+            // timeout users who post links
+            await this.apiClient.asUser(this.botID, async (ctx) => {
+                await ctx.moderation.banUser(this.broadcasterID, {
+                    duration: 1,
+                    reason: 'for posting links (temporary)',
+                    user: authorInfo.id,
                 })
+            })
 
-                this.apiClient.chat.sendChatMessageAsApp(
-                    this.botID,
-                    this.broadcasterID,
-                    `${authorInfo.displayName}, please refrain from posting links!
+            this.apiClient.chat.sendChatMessageAsApp(
+                this.botID,
+                this.broadcasterID,
+                `${authorInfo.displayName}, please refrain from posting links!
                 If you want to post a link, ask a mod or the streamer to permit you.`,
-                )
-            } catch (error) {
-                log.bot.error(error)
-            }
+            )
         } else {
             log.bot.info(`${authorInfo.displayName}: ${message}`)
         }

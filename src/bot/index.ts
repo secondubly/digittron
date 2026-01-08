@@ -6,7 +6,7 @@ export const startup = () => {
     const CLIENT_SECRET = process.env.CLIENT_SECRET
 
     if (!CLIENT_ID || !CLIENT_SECRET) {
-        throw new Error(
+        throw new ReferenceError(
             'Client ID and/or Client Secret not found in config file.',
         )
     }
