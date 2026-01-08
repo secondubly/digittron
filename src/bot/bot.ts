@@ -266,7 +266,7 @@ export class Bot {
     }
 
     // TODO: send automated messages every X minutes
-    private async sendAutoMessage() {}
+    // private async sendAutoMessage() {}
 
     private async handleCommands(
         message: string,
