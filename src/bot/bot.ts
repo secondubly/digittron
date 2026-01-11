@@ -195,21 +195,21 @@ export class Bot {
         const eventSub =
             process.env.NODE_ENV === 'development'
                 ? new EventSubHttpListener({
-                      apiClient: apiClient,
-                      adapter: new NgrokAdapter({
-                          ngrokConfig: {
-                              authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
-                          },
-                      }),
-                      logger: { minLevel: 'debug' },
-                      secret:
-                          process.env.EVENTSUB_SECRET ??
-                          'thisShouldBeARandomlyGeneratedFixedString',
-                  })
+                    apiClient: apiClient,
+                    adapter: new NgrokAdapter({
+                        ngrokConfig: {
+                            authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
+                        },
+                    }),
+                    logger: { minLevel: 'debug' },
+                    secret:
+                        process.env.EVENTSUB_SECRET ??
+                        'thisShouldBeARandomlyGeneratedFixedString',
+                })
                 : new EventSubWsListener({
-                      apiClient: apiClient,
-                      logger: { minLevel: 'info' },
-                  })
+                    apiClient: apiClient,
+                    logger: { minLevel: 'info' },
+                })
 
         return new Bot(chatClient, authProvider, apiClient, eventSub)
     }
@@ -219,7 +219,7 @@ export class Bot {
         log.bot.info(
             `Token refreshed for ${userId === process.env.BOT_ID ? 'bot' : 'broadcaster'}`,
         )
-        log.bot.debug(`Token Info: ${newTokenData}`)
+        log.bot.debug(`Token Info: ${JSON.stringify(newTokenData)})`)
     }
 
     private async handleIncomingRaid(
