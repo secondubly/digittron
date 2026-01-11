@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === 'development') {
     })
 } else {
     logger = pino({
-        level: 'debug',
+        level: 'info',
     })
 }
 
