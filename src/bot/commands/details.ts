@@ -75,12 +75,59 @@ const details: Command = {
                 'Could not get a good enough summary for this game, ask the streamer!'
         }
 
-        apiClient.chat.sendChatMessageAsApp(
-            process.env.BOT_ID!,
-            event.broadcasterId,
-            message,
-        )
+        let messages: string[] = []
+        if (message.length > 500) {
+            // strip any newlines before trying to split string
+            message = message.replace(/[\r\n]+/g, ' ')
+            messages = splitStringIntoParts(message)
+        }
+
+        try {
+            if (messages.length) {
+                for (const part of messages) {
+                    await apiClient.chat.sendChatMessageAsApp(
+                        process.env.BOT_ID!,
+                        event.broadcasterId,
+                        part
+                    )
+                    // wait a bit before sending the next message
+                    await new Promise((resolve) => setTimeout(resolve, 1500))
+                }
+            } else {
+                apiClient.chat.sendChatMessageAsApp(
+                    process.env.BOT_ID!,
+                    event.broadcasterId,
+                    message,
+                )
+            }
+
+        } catch (error) {
+            log.bot.error(error)
+        }
     },
+}
+
+const splitStringIntoParts = (text: string, size = 500): string[] => {
+    const words = text.split(' ')
+    const parts: string[] = []
+    let currentBlock = ''
+    for (const word of words) {
+        // get possible block length by adding current block length with the length of a space and the current word
+        const possibleBlockLength = currentBlock.length + (' ' + word).trim().length
+        if (possibleBlockLength <= size) {
+            currentBlock = (currentBlock + ' ' + word).trim()
+        } else {
+            parts.push(currentBlock)
+            currentBlock = word
+        }
+    }
+
+    if (currentBlock.length) {
+        // push any leftover blocks
+        parts.push(currentBlock)
+    }
+
+    return parts
 }
 
 export default details
