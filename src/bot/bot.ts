@@ -1,5 +1,5 @@
 import { type AccessToken, RefreshingAuthProvider } from '@twurple/auth'
-import { ChatClient, type ChatRaidInfo } from '@twurple/chat'
+import { ChatClient } from '@twurple/chat'
 import { find as findUrl } from 'linkifyjs'
 import { log } from '@lib/utils/logger.js'
 import { ApiClient, HelixUser } from '@twurple/api'
@@ -10,6 +10,7 @@ import { EventSubWsListener } from '@twurple/eventsub-ws'
 import {
     EventSubChannelChatMessageEvent,
     type EventSubChannelModerationEvent,
+    EventSubChannelRaidEvent,
     EventSubChannelRaidModerationEvent,
 } from '@twurple/eventsub-base'
 import { EventSubHttpListener } from '@twurple/eventsub-http'
@@ -53,8 +54,6 @@ export class Bot {
         /** setup event handlers */
         authProvider.onRefresh(this.handleRefresh)
 
-        this.chatClient.onRaid(this.handleIncomingRaid)
-
         this.chatClient.onAuthenticationSuccess(() => {
             let commandFiles: string[]
             if (process.env.NODE_ENV === 'development') {
@@ -96,6 +95,9 @@ export class Bot {
             this.botID,
             this.handleMessage.bind(this),
         )
+
+        this.eventSub.onChannelRaidTo(this.broadcasterID, this.handleIncomingRaid)
+
 
         this.eventSub.start()
 
@@ -223,24 +225,28 @@ export class Bot {
     }
 
     private async handleIncomingRaid(
-        channel: string,
-        _user: string,
-        raidInfo: ChatRaidInfo,
+        event: EventSubChannelRaidEvent
     ) {
-        const raidee = raidInfo.displayName
-        const raideeUser = await this.apiClient.users.getUserByName(raidee)
-        const channelUser = await this.apiClient.users.getUserByName(channel)
-
-        if (!raideeUser) {
-            log.bot.warn('Could not retrieve raid user data')
+        // get game info for raidingUser
+        const channelInfo = await this.apiClient.channels.getChannelInfoById(event.raidingBroadcasterId)
+        if (!channelInfo) {
+            log.bot.warn('Could not retrieve channel info for raider')
             return
-        } else if (!channelUser) {
-            log.bot.warn('Could not retrieve channel user data')
+        }
+
+        const gameInfo = await channelInfo.getGame()
+        if (!gameInfo) {
+            log.bot.warn('Could not get game info for raider')
             return
         }
 
         // shoutout raider
-        this.apiClient.chat.shoutoutUser(channelUser, raideeUser)
+        await this.apiClient.asUser(this.botID, async (ctx) => {
+            await ctx.chat.shoutoutUser(this.botID, event.raidingBroadcasterId)
+        })
+
+        const raidMsg = `Everyone say hi to ${event.raidingBroadcasterDisplayName}! They were playing ${gameInfo.name}!`
+        this.apiClient.chat.sendChatMessageAsApp(this.botID, this.broadcasterID, raidMsg)
     }
 
     private async handleOutgoingRaid(event: EventSubChannelModerationEvent) {
@@ -306,7 +312,6 @@ export class Bot {
             }
         }
 
-        // TODO: clean this up
         switch (command.name.toLocaleLowerCase()) {
             case 'commands':
                 const commandNames = [...this.commands]
@@ -364,6 +369,7 @@ export class Bot {
         if (!this.hasSpoken.has(authorInfo.id)) {
             this.hasSpoken.add(authorInfo.id)
             if (this.audioAlertUsers.has(authorInfo.id)) {
+                log.bot.info(`Sending playAudio event for ${authorInfo.displayName} (${authorInfo.id})`)
                 playAudio(authorInfo.id)
             }
         }
