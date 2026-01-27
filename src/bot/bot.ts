@@ -15,7 +15,7 @@ import {
 } from '@twurple/eventsub-base'
 import { EventSubHttpListener } from '@twurple/eventsub-http'
 import { NgrokAdapter } from '@twurple/eventsub-ngrok'
-import { getToken, playAudio } from '@lib/utils/utils.js'
+import { getTwitchToken, playAudio } from '@lib/utils/utils.js'
 
 export class Bot {
     authProvider: RefreshingAuthProvider
@@ -119,7 +119,7 @@ export class Bot {
             log.bot.info(
                 'Bot access token not found in cache, checking database...',
             )
-            botAccessToken = await getToken('bot')
+            botAccessToken = await getTwitchToken('bot')
             if (!botAccessToken) {
                 throw new ReferenceError(
                     'Bot access token not found in cache or database.',
@@ -143,7 +143,7 @@ export class Bot {
                 'Broadcaster access token not found in cache, checking database...',
             )
 
-            broadcasterAccessToken = await getToken('user')
+            broadcasterAccessToken = await getTwitchToken('user')
         }
 
         log.bot.debug(
