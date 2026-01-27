@@ -1,5 +1,6 @@
 import type { AccessToken } from '@twurple/auth'
-import type { TokenApiResponse } from '../bot/types.js'
+import type { TwitchTokenApiResponse } from '../bot/types.js'
+import type { AccessToken as SpotifyAccessToken } from '@spotify/web-api-ts-sdk'
 import redisClient from './redis.js'
 import { log } from './logger.js'
 
@@ -48,7 +49,7 @@ const USER_SCOPES = [
     'user:read:subscriptions',
 ]
 
-export const getToken = async (type: string): Promise<AccessToken> => {
+export const getTwitchToken = async (type: string): Promise<AccessToken> => {
     let params: URLSearchParams
     let url: string = ''
     if (type === 'bot') {
@@ -65,7 +66,6 @@ export const getToken = async (type: string): Promise<AccessToken> => {
             scopes: USER_SCOPES.join(','),
         })
         url = `http://localhost:4000/api/token/${id}?${params.toString()}`
-    } else if (type === 'user') {
     } else {
         throw Error('Invalid token type requested.')
     }
@@ -76,7 +76,7 @@ export const getToken = async (type: string): Promise<AccessToken> => {
         throw Error(`${type} access token not found in cache or database.`)
     }
 
-    const { token } = (await response.json()) as TokenApiResponse
+    const { token } = (await response.json()) as TwitchTokenApiResponse
 
     if (type === 'bot') {
         redisClient.set(process.env.BOT_ID || '', JSON.stringify(token))
@@ -85,6 +85,47 @@ export const getToken = async (type: string): Promise<AccessToken> => {
     }
 
     return token
+}
+
+export const getSpotifyToken = async (
+    twitchId: string,
+): Promise<SpotifyAccessToken | null> => {
+    const spotifyAccessToken = await redisClient.get(`${twitchId}_spotify`)
+
+    if (!spotifyAccessToken) {
+        const url = `http://localhost:4000/api/spotify-token/${twitchId}`
+        const response = await fetch(url)
+
+        if (!response.ok) {
+            log.bot.error(response)
+            throw Error(`Spotify access token not found in cache or database`)
+        }
+
+        const data = (await response.json()) as SpotifyAccessToken
+        if (!data) {
+            return null
+        } else {
+            redisClient.set(`${twitchId}_spotify`, JSON.stringify(data))
+        }
+
+        return data
+    } else {
+        return JSON.parse(spotifyAccessToken) as SpotifyAccessToken
+    }
+}
+
+export const refreshSpotifyToken = async (
+    twitchId: string,
+): Promise<SpotifyAccessToken | null> => {
+    const url = `https://localhost:4000/api/spotify-token/${twitchId}`
+
+    const response = await fetch(url)
+
+    if (!response || response.status !== 200) {
+        return null
+    }
+
+    return (await response.json()) as SpotifyAccessToken
 }
 
 export const playAudio = async (twitchId: string): Promise<void> => {
