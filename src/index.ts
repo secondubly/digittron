@@ -12,10 +12,10 @@ const config = {
 const startup = async () => {
     try {
         setupShutdownHandler()
-        // Spin up cache
-        connectRedis()
         // start up api
-        apiInit(parseInt(config.API_PORT))
+        await apiInit(parseInt(config.API_PORT))
+        // Spin up cache
+        await connectRedis()
         // start bot
         botInit()
         // start frontend
