@@ -5,13 +5,13 @@ import fastify, {
     type FastifyRequest,
 } from 'fastify'
 import cors from '@fastify/cors'
-import config from '../mikro-orm.config.js'
 import { MikroORM } from '@mikro-orm/sqlite'
 import fastifySSE from '@fastify/sse'
 import { Token } from '../lib/db/models/token.entity.js'
 import type { AccessToken } from '@twurple/auth'
 import { log } from '@lib/utils/logger.js'
 import { setupShutdownHandler } from '@lib/utils/utils.js'
+import type { AccessToken as SpotifyAccessToken } from '@spotify/web-api-ts-sdk'
 
 interface Client {
     id: number
@@ -33,7 +33,7 @@ const twitchAudioMap: Map<string, string> = new Map([
 ])
 
 // setup database connection
-const orm = await MikroORM.init(config)
+const orm = await MikroORM.init()
 const em = orm.em.fork()
 
 const sendAudioUpdates = (data: string) => {
@@ -46,40 +46,50 @@ const sendAudioUpdates = (data: string) => {
 }
 
 export const routes = {
-    async getToken(id: string, scopes: string) {
+    async getTwitchToken(id: string, scopes: string) {
         const scopesArray = scopes ? scopes.split(',') : undefined
         const tokensTable = em.getRepository(Token)
 
-        const token = await tokensTable.findOne({
-            id: parseInt(id),
+        const token = await tokensTable.findOne(parseInt(id), {
+            fields: ['twitchAccessToken'],
         })
 
-        if (!token) {
+        if (!token || !token.twitchAccessToken) {
             return null
         }
 
-        let accessToken = undefined
+        let accessToken: AccessToken
         if (scopesArray) {
-            accessToken = {
-                accessToken: token.accessToken,
-                refreshToken: token.refreshToken,
-                scope: scopesArray,
-                expiresIn: 0,
-                obtainmentTimestamp: 0,
-            } as AccessToken
+            accessToken = JSON.parse(token.twitchAccessToken) as AccessToken
+            accessToken.scope = scopesArray
         } else {
-            accessToken = {
-                accessToken: token.accessToken,
-                refreshToken: token.refreshToken,
-                expiresIn: 0,
-                obtainmentTimestamp: 0,
-            } as AccessToken
+            accessToken = JSON.parse(token.twitchAccessToken) as AccessToken
         }
 
         return accessToken
     },
     getAudio(id: string) {
         return twitchAudioMap.get(id)
+    },
+    async getSpotifyToken(id: string): Promise<SpotifyAccessToken | null> {
+        const tokensTable = em.getRepository(Token)
+
+        const token = await tokensTable.findOne(
+            { id: parseInt(id) },
+            {
+                fields: ['spotifyAccessToken'],
+            },
+        )
+
+        if (!token || !token.spotifyAccessToken) {
+            return null
+        }
+
+        const spotifyAccessToken: SpotifyAccessToken = JSON.parse(
+            token.spotifyAccessToken,
+        )
+
+        return spotifyAccessToken
     },
 }
 
@@ -114,7 +124,7 @@ export const init = async (port: number) => {
         const { id } = request.params
         const { scopes } = request.query
 
-        const token = await routes.getToken(id, scopes)
+        const token = await routes.getTwitchToken(id, scopes)
 
         if (!token) {
             reply.code(404).send({ error: 'Token not found' })
@@ -148,8 +158,6 @@ export const init = async (port: number) => {
         '/api/audio/:id',
         async (request: FastifyRequest<{ Params: RequestParams }>, reply) => {
             const { id: twitchId } = request.params
-            console.log(request.params)
-            console.log(request.params.id)
             // TODO: grab filename
             log.api.info(
                 `Server received playback request for twitch id: ${twitchId}`,
@@ -170,6 +178,16 @@ export const init = async (port: number) => {
             }
         },
     )
+
+    server.get<{
+        Params: RequestParams
+    }>('/api/spotify-token/:id', async (request, reply) => {
+        const { id } = request.params
+
+        const token = await routes.getSpotifyToken(id)
+
+        reply.code(200).send(token)
+    })
 
     server.get('/events', { sse: true }, async (_request, reply) => {
         reply.sse.keepAlive()
