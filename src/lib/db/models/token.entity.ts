@@ -6,8 +6,8 @@ export class Token {
     id!: number
 
     @Property()
-    accessToken!: string
+    twitchAccessToken!: string
 
-    @Property()
-    refreshToken!: string
+    @Property({ nullable: true })
+    spotifyAccessToken?: string
 }
