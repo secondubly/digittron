@@ -26,11 +26,9 @@
             "request": "launch",
             "name": "Launch Program - Dev",
             "skipFiles": ["<node_internals>/**"],
-            "runtimeArgs": ["run", "bot"],
-            "program": "${workspaceFolder}/src/main.ts",
-            "preLaunchTask": "npm: build",
-            "args": ["| pino-pretty"],
-            // "outputCapture": "std", // enables pino logging to appear in console
+            "runtimeArgs": ["run", "dev"],
+            "runtimeExecutable": "pnpm",
+            "outputCapture": "std", // enables pino logging to appear in console
             "envFile": "${workspaceFolder}/.env.development.local"
         }
     ]
