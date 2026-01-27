@@ -14,6 +14,6 @@ export interface Command {
     ): Promise<void>
 }
 
-export interface TokenApiResponse {
+export interface TwitchTokenApiResponse {
     token: AccessToken
 }
