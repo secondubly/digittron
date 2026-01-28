@@ -17,8 +17,8 @@ const config: Options = {
     extensions: [Migrator, SeedManager],
     migrations: {
         tableName: 'digittron_migrations',
-        path: './build/lib/db/data/migrations',
-        pathTs: './src/lib/db/data/migrations',
+        path: './build/lib/db/migrations',
+        pathTs: './src/lib/db/migrations',
         glob: '*.{js,ts}',
     },
     seeder: {
