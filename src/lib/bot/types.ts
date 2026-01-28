@@ -1,5 +1,4 @@
 import { ApiClient } from '@twurple/api'
-import type { AccessToken } from '@twurple/auth'
 import { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 
 export interface Command {
@@ -12,8 +11,4 @@ export interface Command {
         args: string[],
         apiClient: ApiClient,
     ): Promise<void>
-}
-
-export interface TwitchTokenApiResponse {
-    token: AccessToken
 }
