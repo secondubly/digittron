@@ -59,12 +59,10 @@ docker compose up
 * `CLIENT_ID`: Twitch application Client ID
 * `CLIENT_SECRET`: Twitch application Client Secret
 * `BOT_ID`: Twitch ID of bot account
-* `BOT_ACCESS_TOKEN`: Twitch bot account access token
-* `BOT_REFRESH_TOKEN`: Twitch bot account refresh token
 * `TWITCH_ID`: Twitch broadcaster/owner account ID
-* `TWITCH_ACCESS_TOKEN`: Twitch broadcaser/owner access token
-* `TWITCH_REFRESH_TOKEN`: Twitch broadcaster/owner refresh token
 * `CHANNELS`: List of twitch channels to connect to (separated by commas)
+* `SPOTIFY_CLIENT_ID`: Spotify application Client ID (Optional)
+* `SPOTIFY_CLIENT_SECRET`: Spotify application client secret (Optional)
 * `REDIS_HOST`: Hostname for your redis instance (in development mode, default is localhost)
 * `REDIS_PORT`: Port for your redis instance (default is 6379)
 * `NODE_ENV`: Whether to run bot in production or development mode
