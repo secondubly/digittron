@@ -90,7 +90,9 @@ export const routes = {
             token.spotifyAccessToken,
         )
 
-        console.log('spotify access token: ', spotifyAccessToken)
+        log.api.debug(
+            `spotify access token: ${JSON.stringify(spotifyAccessToken, null, '\t')}`,
+        )
         return spotifyAccessToken
     },
 }
@@ -240,7 +242,7 @@ export const init = async (port: number) => {
     if (process.env.NODE_ENV === 'development') {
         return server.listen({ port }, (err, address) => {
             if (err) {
-                console.error(err)
+                log.api.error(err)
                 process.exit(1)
             }
             log.api.info(`API server listening at ${address}`)
@@ -249,7 +251,7 @@ export const init = async (port: number) => {
         // if running via docker - we need to listen on all hosts to enable the front end to connect
         return server.listen({ port, host: '0.0.0.0' }, (err, address) => {
             if (err) {
-                console.error(err)
+                log.api.error(err)
                 process.exit(1)
             }
             log.api.info(`API server listening at ${address}`)

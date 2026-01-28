@@ -1,5 +1,6 @@
 import type { Command } from '@lib/bot/types.js'
 import { authFetch } from '@lib/core/fetch.js'
+import { log } from '@lib/utils/logger.js'
 import type { PlaybackState, Track } from '@spotify/web-api-ts-sdk'
 
 const nowplaying: Command = {
@@ -30,12 +31,14 @@ const getNowPlayingTrack = async (): Promise<string | null> => {
     const response = await authFetch(
         'https://api.spotify.com/v1/me/player/currently-playing',
         {
-            headers: {},
+            headers: {
+                Authorization: '',
+            },
         },
     )
 
     if (!response.ok) {
-        console.error('Response', response)
+        log.bot.error(response)
         return null
     }
 

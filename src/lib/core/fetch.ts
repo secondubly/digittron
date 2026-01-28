@@ -61,7 +61,7 @@ const refreshAccessToken = async (): Promise<boolean> => {
 
         return true
     } catch (error) {
-        console.error('Token refresh failed:', error)
+        log.app.error(`Token refresh failed: ${error}`)
         // Redirect to login page or handle logout
         // Example: window.location.href = '/login'; (if in a browser context, adjust for Node.js)
         return false
