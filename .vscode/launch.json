@@ -14,12 +14,22 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch Program - API",
+            "skipFiles": ["<node_internals>/**"],
+            "runtimeArgs": ["run", "api"],
+            "runtimeExecutable": "pnpm",
+            "outputCapture": "std", // enables pino logging to appear in console
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Launch Program - Bot",
             "skipFiles": ["<node_internals>/**"],
             "runtimeArgs": ["run", "bot"],
             "runtimeExecutable": "pnpm",
             "outputCapture": "std", // enables pino logging to appear in console
-            "envFile": "${workspaceFolder}/.env.development.local"
+            "envFile": "${workspaceFolder}/.env"
         },
         {
             "type": "node",
@@ -29,7 +39,7 @@
             "runtimeArgs": ["run", "dev"],
             "runtimeExecutable": "pnpm",
             "outputCapture": "std", // enables pino logging to appear in console
-            "envFile": "${workspaceFolder}/.env.development.local"
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
