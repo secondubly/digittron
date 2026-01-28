@@ -1,5 +1,5 @@
 import type { Command } from '@lib/bot/types.js'
-import { authFetch } from '@lib/core/fetch'
+import { authFetch } from '@lib/core/fetch.js'
 import type { PlaybackState, Track } from '@spotify/web-api-ts-sdk'
 
 const nowplaying: Command = {
