@@ -11,7 +11,8 @@ import { Token } from '../lib/db/models/token.entity.js'
 import type { AccessToken } from '@twurple/auth'
 import { log } from '@lib/utils/logger.js'
 import { setupShutdownHandler } from '@lib/utils/utils.js'
-import type { AccessToken as SpotifyAccessToken } from '@spotify/web-api-ts-sdk'
+import type { SpotifyAccessToken } from '@lib/core/types.js'
+import redisClient from '@lib/utils/redis.js'
 
 interface Client {
     id: number
@@ -89,6 +90,7 @@ export const routes = {
             token.spotifyAccessToken,
         )
 
+        console.log('spotify access token: ', spotifyAccessToken)
         return spotifyAccessToken
     },
 }
@@ -147,7 +149,7 @@ export const init = async (port: number) => {
                 } as AccessToken
             }
 
-            reply.code(200).send({ token: accessToken })
+            reply.code(200).send(accessToken)
         }
 
         return
@@ -183,7 +185,30 @@ export const init = async (port: number) => {
         Params: RequestParams
     }>('/api/spotify-token/:id', async (request, reply) => {
         const { id } = request.params
+        const token = await routes.getSpotifyToken(id)
 
+        if (!token) {
+            reply.code(404).send({ error: 'Token not found' })
+            return
+        } else if (!token.refresh_token) {
+            reply
+                .code(422)
+                .send({ error: 'No refresh token attached to access token' })
+            return
+        }
+
+        if (!redisClient.isOpen) {
+            await redisClient.connect()
+        }
+
+        await redisClient.set(`spotify_${id}`, JSON.stringify(token))
+        reply.code(200).send(token)
+    })
+
+    server.post<{
+        Params: RequestParams
+    }>('/api/spotify-token/:id', async (request, reply) => {
+        const { id } = request.params
         const token = await routes.getSpotifyToken(id)
 
         reply.code(200).send(token)
@@ -221,7 +246,7 @@ export const init = async (port: number) => {
                 console.error(err)
                 process.exit(1)
             }
-            console.log(`API server listening at ${address}`)
+            log.api.info(`API server listening at ${address}`)
         })
     }
 }
