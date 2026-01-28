@@ -1,0 +1,26 @@
+[
+        {
+            "user_id": "",
+            "twitchAccessToken": {
+                "accessToken": "",
+                "refreshToken": "",
+                "obtainmentTimestamp": 0,
+                "expiresIn": 0
+            },
+            "spotifyAccessToken": {
+                "accessToken": null,
+                "refreshToken": null,
+                "expiresIn": null,
+                "tokenType": "Bearer"
+            }
+        },
+        {
+            "bot_id": "",
+            "twitchAccessToken": {
+                "accessToken": "",
+                "refreshToken": "",
+                "obtainmentTimestamp": 0,
+                "expiresIn": 0
+            }
+        }
+]
