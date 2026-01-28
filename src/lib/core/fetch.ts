@@ -1,5 +1,5 @@
 import type { SpotifyAccessToken } from './types.js'
-import redisClient from '@lib/utils/redis'
+import redisClient from '@lib/utils/redis.js'
 import { log } from '@lib/utils/logger.js'
 
 let accessToken: SpotifyAccessToken | null = null
