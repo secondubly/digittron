@@ -8,4 +8,4 @@ elif [ -f .env ]; then
     export $(grep -v '^#' .env | xargs)
 fi
 
-npx mikro-orm-esm schema:fresh --run --seed
+pnpm run mikro-orm schema:fresh --run --seed
