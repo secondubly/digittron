@@ -100,12 +100,6 @@ export const routes = {
 export const init = async (port: number) => {
     log.api.info(`Initializing API on port ${port}`)
 
-    if ((await em.count(Token)) === 0) {
-        log.app.info('Database has no records, seeding required data...')
-        await orm.seeder.seed()
-        log.app.info('Seeding complete.')
-    }
-
     let server: FastifyInstance
     if (process.env.NODE_ENV === 'development') {
         server = fastify({
