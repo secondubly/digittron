@@ -24,8 +24,6 @@ COPY --from=build /usr/src/app/build /usr/src/app/build
 COPY --from=build /usr/src/app/db /usr/src/app/db 
 COPY --from=build /usr/src/app/package.json /usr/src/app/package.json
 COPY --from=build /usr/src/app/tsconfig.json /usr/src/app/tsconfig.json
-COPY --chmod=0755 ./docker-entrypoint.sh /usr/src/app/docker-entrypoint.sh
-ENTRYPOINT ["/usr/src/app/docker-entrypoint.sh"]
 
 VOLUME ["/usr/src/app/db"]
 EXPOSE 4000 5000
