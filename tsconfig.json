@@ -7,6 +7,7 @@
     "baseUrl": ".",
     "paths": {
       "@lib/*": ["src/lib/*"],
+      "@files/*": ["digittron-files/*"]
     },
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
