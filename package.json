@@ -13,7 +13,7 @@
     "scripts": {
         "api": "tsx watch --env-file=.env src/api/index.ts",
         "bot": "tsx watch --env-file=.env src/bot/index.ts",
-        "build": "pnpm run seed && vite build && tsc -p tsconfig.json && tsc-alias",
+        "build": "vite build && tsc -p tsconfig.json && tsc-alias",
         "dev": "concurrently -c magenta,#7700cf -n API,WEB,BOT \"pnpm:api\" \"vite\" \"pnpm:bot\"",
         "format": "prettier --write .",
         "lint": "eslint . --ext .ts",
