@@ -8,4 +8,5 @@ elif [ -f .env ]; then
     export $(grep -v '^#' .env | xargs)
 fi
 
-pnpm run mikro-orm schema:fresh --run --seed
+DB_PATH="db/sqlite.db"
+SEED_FILE="db/seed.exampe.sql"
