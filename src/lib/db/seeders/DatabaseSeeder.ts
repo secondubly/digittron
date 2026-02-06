@@ -1,7 +1,7 @@
 import type { EntityManager } from '@mikro-orm/core'
 import { Seeder } from '@mikro-orm/seeder'
 import { Token } from '../models/token.entity.js'
-import tokens from '@files/data.json' with { type: 'json' }
+import tokens from '../../../../digittron-files/data.json' with { type: 'json' }
 
 export class DatabaseSeeder extends Seeder {
     async run(em: EntityManager): Promise<void> {
