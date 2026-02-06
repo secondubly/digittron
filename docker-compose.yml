@@ -1,6 +1,7 @@
 services:
   digittron:
     container_name: digittron
+    image: ghcr.io/secondubly/digittron:latest
     build:
       context: .
       dockerfile: Dockerfile
