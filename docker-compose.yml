@@ -1,6 +1,6 @@
 services:
   digittron:
-    container_name: bot
+    container_name: digittron
     build:
       context: .
       dockerfile: Dockerfile
