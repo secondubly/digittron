@@ -21,7 +21,7 @@ FROM base AS production
 COPY --from=dependencies /usr/src/app/node_modules /usr/src/app/node_modules
 COPY --from=build /usr/src/app/build /usr/src/app/build
 # copy database
-COPY --from=build /usr/src/app/db /usr/src/app/db 
+COPY --from=build /usr/src/db /usr/src/app/db 
 COPY --from=build /usr/src/app/package.json /usr/src/app/package.json
 COPY --from=build /usr/src/app/tsconfig.json /usr/src/app/tsconfig.json
 
