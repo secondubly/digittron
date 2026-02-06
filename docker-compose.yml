@@ -4,7 +4,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      #image: ghcr.io/secondubly/digittron:latest
+      image: ghcr.io/secondubly/digittron:latest
     depends_on:
       redis:
         condition: service_started
