@@ -12,5 +12,7 @@ SEED_FILE="./db/seed.example.sql"
 if [ ! $DB_PATH ]; then
     echo "database file not found, creating..."
     sqlite3 "$DB_FILE" "VACUUM;"
+else
+    echo "Database file found!"
 fi
 
