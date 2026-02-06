@@ -1,3 +1,5 @@
+#!/usr/bin/env sh
+
 DB_PATH="/usr/src/app/db/sqlite.db"
 
 # Check if the file does not exist
