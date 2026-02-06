@@ -6,7 +6,9 @@
 #     export $(grep -v '^#' .env | xargs)
 # fi
 
+
 export $(grep -v '^#' .env | xargs)
+DB_PATH="./db/sqlite.db"
 
 if [ ! $DB_PATH ]; then
     echo "database file not found, creating..."
