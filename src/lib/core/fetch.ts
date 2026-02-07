@@ -45,10 +45,6 @@ const refreshAccessToken = async (): Promise<boolean> => {
             throw new Error('Could not refresh authorization token')
         }
 
-        redisClient.set(
-            `spotify_${process.env.TWITCH_ID}`,
-            JSON.stringify(data),
-        )
         accessToken = data
         refreshToken = data.refresh_token || null
         // setTokens(data.accessToken, data.refreshToken)
@@ -69,6 +65,18 @@ const refreshAccessToken = async (): Promise<boolean> => {
         isRefreshing = false
     }
 }
+
+// const setTokens = async (newToken: SpotifyAccessToken, newRefreshToken: string) => {
+//     redisClient.set(
+//         `spotify_${process.env.TWITCH_ID}`,
+//         JSON.stringify(newToken),
+//     )
+
+//     accessToken = newToken
+//     refreshToken = newRefreshToken
+
+
+// }
 
 const getSpotifyToken = async (): Promise<SpotifyAccessToken | null> => {
     const twitchId = process.env.TWITCH_ID || '89181064'
@@ -108,7 +116,7 @@ export const authFetch = async (
     }
 
     if (accessToken && options.headers) {
-        ;(options.headers as Record<string, string>)['Authorization'] =
+        ; (options.headers as Record<string, string>)['Authorization'] =
             `Bearer ${accessToken.access_token}`
     }
 
@@ -123,7 +131,7 @@ export const authFetch = async (
         if (refreshed) {
             // Retry the original request with the new token
             if (options.headers) {
-                ;(options.headers as Record<string, string>)['Authorization'] =
+                ; (options.headers as Record<string, string>)['Authorization'] =
                     `Bearer ${accessToken.access_token}`
             }
             response = await fetch(url, options)
