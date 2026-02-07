@@ -46,8 +46,12 @@ const refreshAccessToken = async (): Promise<boolean> => {
         }
 
         accessToken = data
-        refreshToken = data.refresh_token || null
-        // setTokens(data.accessToken, data.refreshToken)
+        refreshToken = data.refresh_token ?? refreshToken
+        // if there is no refresh token present in the request, use the existing one instead
+        if (!data.refresh_token) {
+            data.refresh_token = refreshToken
+        }
+        setTokens(data, data.refresh_token)
 
         // Process queued requests
         while (requestQueue.length > 0) {
@@ -66,17 +70,35 @@ const refreshAccessToken = async (): Promise<boolean> => {
     }
 }
 
-// const setTokens = async (newToken: SpotifyAccessToken, newRefreshToken: string) => {
-//     redisClient.set(
-//         `spotify_${process.env.TWITCH_ID}`,
-//         JSON.stringify(newToken),
-//     )
+const setTokens = async (
+    newToken: SpotifyAccessToken,
+    newRefreshToken: string,
+) => {
+    redisClient.set(
+        `spotify_${process.env.TWITCH_ID}`,
+        JSON.stringify(newToken),
+    )
 
-//     accessToken = newToken
-//     refreshToken = newRefreshToken
+    accessToken = newToken
+    refreshToken = newRefreshToken
 
+    // send post request to API to update db with new token
+    const twitchId = process.env.TWITCH_ID || '89181064'
+    const url = `http://localhost:4000/api/spotify-token`
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: twitchId, access_token: newToken }),
+    })
 
-// }
+    if (!response.ok) {
+        log.bot.error(response.statusText)
+    }
+
+    return
+}
 
 const getSpotifyToken = async (): Promise<SpotifyAccessToken | null> => {
     const twitchId = process.env.TWITCH_ID || '89181064'
@@ -116,7 +138,7 @@ export const authFetch = async (
     }
 
     if (accessToken && options.headers) {
-        ; (options.headers as Record<string, string>)['Authorization'] =
+        ;(options.headers as Record<string, string>)['Authorization'] =
             `Bearer ${accessToken.access_token}`
     }
 
@@ -131,7 +153,7 @@ export const authFetch = async (
         if (refreshed) {
             // Retry the original request with the new token
             if (options.headers) {
-                ; (options.headers as Record<string, string>)['Authorization'] =
+                ;(options.headers as Record<string, string>)['Authorization'] =
                     `Bearer ${accessToken.access_token}`
             }
             response = await fetch(url, options)

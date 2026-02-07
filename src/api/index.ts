@@ -27,6 +27,11 @@ type RequestParams = {
     id: string
 }
 
+interface SpotifyPostBody {
+    id: string
+    access_token: string
+}
+
 setupShutdownHandler()
 let clients: Client[] = []
 const twitchAudioMap: Map<string, string> = new Map([
@@ -105,7 +110,7 @@ export const routes = {
             await em.flush()
         }
         return
-    }
+    },
 }
 
 export const init = async (port: number) => {
@@ -132,6 +137,7 @@ export const init = async (port: number) => {
         return 'pong\n'
     })
 
+    // GET /api/token/{id} - for retrieveing twitch api tokens
     server.get<{
         Params: RequestParams
         Querystring: TokenQueryString
@@ -168,7 +174,7 @@ export const init = async (port: number) => {
         return
     })
 
-    // GET /api/audio/:id
+    // GET /api/audio/:id - for getting audio files for twitch users
     server.get(
         '/api/audio/:id',
         async (request: FastifyRequest<{ Params: RequestParams }>, reply) => {
@@ -194,6 +200,7 @@ export const init = async (port: number) => {
         },
     )
 
+    // GET /api/spotify-token/{id} - get spotify token for provided user id
     server.get<{
         Params: RequestParams
     }>('/api/spotify-token/:id', async (request, reply) => {
@@ -218,13 +225,31 @@ export const init = async (port: number) => {
         reply.code(200).send(token)
     })
 
+    // POST /api/spotify-token - update spotify token for provided user
     server.post<{
-        Params: RequestParams
-    }>('/api/spotify-token/:id', async (request, reply) => {
-        const { id } = request.params
-        const token = await routes.getSpotifyToken(id)
+        Body: SpotifyPostBody
+    }>('/api/spotify-token', async (request, reply) => {
+        const { id, access_token } = request.body
 
-        reply.code(200).send(token)
+        const tokensTable = em.getRepository(Token)
+        const oldToken = await tokensTable.findOne(
+            { id: parseInt(id) },
+            {
+                fields: ['spotifyAccessToken'],
+            },
+        )
+
+        if (!oldToken) {
+            reply.code(404).send({
+                message: 'Could not find token matching given ID',
+            })
+            return
+        }
+
+        oldToken.spotifyAccessToken = access_token
+        em.flush()
+
+        reply.code(200).send({ message: 'spotify token updated successfully' })
     })
 
     server.get('/events', { sse: true }, async (_request, reply) => {
