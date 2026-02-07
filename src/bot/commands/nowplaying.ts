@@ -38,7 +38,7 @@ const getNowPlayingTrack = async (): Promise<string | null> => {
     )
 
     if (!response.ok) {
-        log.bot.error(response)
+        log.bot.error(await response.text())
         return null
     }
 
@@ -50,7 +50,12 @@ const getNowPlayingTrack = async (): Promise<string | null> => {
         if (data.item && data.item.type === 'track') {
             const track = data.item as Track
             const title = track.name
-            const artist = track.album.artists[0].name
+            let artist: string
+            if (track.album.artists.length) {
+                artist = track.album.artists[0].name
+            } else {
+                artist = track.artists[0].name
+            }
             return `“${title}” by ${artist}`
         }
     }
