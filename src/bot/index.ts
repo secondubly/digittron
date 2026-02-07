@@ -1,5 +1,6 @@
 import { connectRedis } from '@lib/utils/redis.js'
 import { Bot } from './bot.js'
+import { log } from '@lib/utils/logger.js'
 
 export const startup = () => {
     const CLIENT_ID = process.env.CLIENT_ID
@@ -11,6 +12,9 @@ export const startup = () => {
         )
     }
 
+    if (process.env.NODE_ENV === 'development') {
+        log.app.info('Running in development mode')
+    }
     Bot.init(CLIENT_ID, CLIENT_SECRET)
 }
 if (import.meta.main) {
