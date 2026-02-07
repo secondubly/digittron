@@ -66,6 +66,7 @@ export class Bot {
                 )
             }
             log.bot.info(`Loaded ${commandFiles.length} commands.`)
+            log.bot.debug(commandFiles)
             Promise.all(
                 commandFiles.map((file) => {
                     return import(`./commands/${file}`)
@@ -96,8 +97,10 @@ export class Bot {
             this.handleMessage.bind(this),
         )
 
-        this.eventSub.onChannelRaidTo(this.broadcasterID, this.handleIncomingRaid)
-
+        this.eventSub.onChannelRaidTo(
+            this.broadcasterID,
+            this.handleIncomingRaid,
+        )
 
         this.eventSub.start()
 
@@ -197,21 +200,21 @@ export class Bot {
         const eventSub =
             process.env.NODE_ENV === 'development'
                 ? new EventSubHttpListener({
-                    apiClient: apiClient,
-                    adapter: new NgrokAdapter({
-                        ngrokConfig: {
-                            authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
-                        },
-                    }),
-                    logger: { minLevel: 'debug' },
-                    secret:
-                        process.env.EVENTSUB_SECRET ??
-                        'thisShouldBeARandomlyGeneratedFixedString',
-                })
+                      apiClient: apiClient,
+                      adapter: new NgrokAdapter({
+                          ngrokConfig: {
+                              authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
+                          },
+                      }),
+                      logger: { minLevel: 'debug' },
+                      secret:
+                          process.env.EVENTSUB_SECRET ??
+                          'thisShouldBeARandomlyGeneratedFixedString',
+                  })
                 : new EventSubWsListener({
-                    apiClient: apiClient,
-                    logger: { minLevel: 'info' },
-                })
+                      apiClient: apiClient,
+                      logger: { minLevel: 'info' },
+                  })
 
         return new Bot(chatClient, authProvider, apiClient, eventSub)
     }
@@ -224,11 +227,11 @@ export class Bot {
         log.bot.debug(`Token Info: ${JSON.stringify(newTokenData)})`)
     }
 
-    private async handleIncomingRaid(
-        event: EventSubChannelRaidEvent
-    ) {
+    private async handleIncomingRaid(event: EventSubChannelRaidEvent) {
         // get game info for raidingUser
-        const channelInfo = await this.apiClient.channels.getChannelInfoById(event.raidingBroadcasterId)
+        const channelInfo = await this.apiClient.channels.getChannelInfoById(
+            event.raidingBroadcasterId,
+        )
         if (!channelInfo) {
             log.bot.warn('Could not retrieve channel info for raider')
             return
@@ -246,7 +249,11 @@ export class Bot {
         })
 
         const raidMsg = `Everyone say hi to ${event.raidingBroadcasterDisplayName}! They were playing ${gameInfo.name}!`
-        this.apiClient.chat.sendChatMessageAsApp(this.botID, this.broadcasterID, raidMsg)
+        this.apiClient.chat.sendChatMessageAsApp(
+            this.botID,
+            this.broadcasterID,
+            raidMsg,
+        )
     }
 
     private async handleOutgoingRaid(event: EventSubChannelModerationEvent) {
@@ -369,7 +376,9 @@ export class Bot {
         if (!this.hasSpoken.has(authorInfo.id)) {
             this.hasSpoken.add(authorInfo.id)
             if (this.audioAlertUsers.has(authorInfo.id)) {
-                log.bot.info(`Sending playAudio event for ${authorInfo.displayName} (${authorInfo.id})`)
+                log.bot.info(
+                    `Sending playAudio event for ${authorInfo.displayName} (${authorInfo.id})`,
+                )
                 playAudio(authorInfo.id)
             }
         }
