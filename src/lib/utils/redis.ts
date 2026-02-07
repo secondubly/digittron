@@ -3,10 +3,7 @@ import { createClient, type RedisClientType, SocketTimeoutError } from 'redis'
 
 const redisClient: RedisClientType = createClient({
     socket: {
-        host:
-            process.env.NODE_ENV === 'development'
-                ? 'localhost'
-                : process.env.REDIS_HOST,
+        host: process.env.REDIS_HOST,
         port: parseInt(process.env.REDIS_PORT ?? '6379'),
         reconnectStrategy: (retries, cause) => {
             if (cause instanceof SocketTimeoutError) {
