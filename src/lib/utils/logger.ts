@@ -12,6 +12,7 @@ if (process.env.NODE_ENV === 'development') {
                 ignore: 'pid,hostname',
             },
         },
+        level: 'debug',
     })
 } else {
     logger = pino({
