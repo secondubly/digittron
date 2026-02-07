@@ -39,6 +39,9 @@
             "runtimeArgs": ["run", "dev"],
             "runtimeExecutable": "pnpm",
             "outputCapture": "std", // enables pino logging to appear in console
+            "env": {
+                "NODE_ENV": "development"
+            },
             "envFile": "${workspaceFolder}/.env"
         }
     ]
