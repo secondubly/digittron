@@ -95,6 +95,17 @@ export const routes = {
         )
         return spotifyAccessToken
     },
+
+    async setSpotifyToken(id: string, token: SpotifyAccessToken) {
+        const tokensTable = em.getRepository(Token)
+
+        const oldToken = await tokensTable.findOne(parseInt(id))
+        if (oldToken) {
+            oldToken.spotifyAccessToken = JSON.stringify(token)
+            await em.flush()
+        }
+        return
+    }
 }
 
 export const init = async (port: number) => {
