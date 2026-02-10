@@ -40,6 +40,9 @@ const getNowPlayingTrack = async (): Promise<string | null> => {
     if (!response.ok) {
         log.bot.error(await response.text())
         return null
+    } else if (response.status === 204) {
+        // if there is no content, return null
+        return null
     }
 
     const body = await response.json()
