@@ -413,8 +413,6 @@ export class Bot {
                 `${authorInfo.displayName}, please refrain from posting links!
                 If you want to post a link, ask a mod or the streamer to permit you.`,
             )
-        } else {
-            log.bot.info(`${authorInfo.displayName}: ${message}`)
         }
     }
 }
