@@ -200,21 +200,21 @@ export class Bot {
         const eventSub =
             process.env.NODE_ENV === 'development'
                 ? new EventSubHttpListener({
-                    apiClient: apiClient,
-                    adapter: new NgrokAdapter({
-                        ngrokConfig: {
-                            authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
-                        },
-                    }),
-                    logger: { minLevel: 'debug' },
-                    secret:
-                        process.env.EVENTSUB_SECRET ??
-                        'thisShouldBeARandomlyGeneratedFixedString',
-                })
+                      apiClient: apiClient,
+                      adapter: new NgrokAdapter({
+                          ngrokConfig: {
+                              authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
+                          },
+                      }),
+                      logger: { minLevel: 'debug' },
+                      secret:
+                          process.env.EVENTSUB_SECRET ??
+                          'thisShouldBeARandomlyGeneratedFixedString',
+                  })
                 : new EventSubWsListener({
-                    apiClient: apiClient,
-                    logger: { minLevel: 'info' },
-                })
+                      apiClient: apiClient,
+                      logger: { minLevel: 'info' },
+                  })
 
         return new Bot(chatClient, authProvider, apiClient, eventSub)
     }
@@ -330,8 +330,17 @@ export class Bot {
                 command.execute(event, commandNames, this.apiClient)
                 break
             case 'permit':
+                // if not a broadcaster or mod, do nothing
+                if (!isMod && !isBroadcaster) {
+                    return
+                }
+
                 // add to permit list ahead of time
-                const username = args[0]
+                let username = args[0]
+                if (username.startsWith('@')) {
+                    username = username.slice(1)
+                    args[0] = username
+                }
                 const permitId = setTimeout(() => {
                     this.permitList.delete(username)
                     log.bot.info(`Removed ${username} from permit list`)
@@ -394,7 +403,12 @@ export class Bot {
                 isBot,
             )
         } else if (findUrl(event.messageText).length > 0) {
-            if (isBroadcaster || isMod || isBot) {
+            if (
+                isBroadcaster ||
+                isMod ||
+                isBot ||
+                this.permitList.has(authorInfo.displayName)
+            ) {
                 return
             }
 

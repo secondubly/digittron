@@ -10,6 +10,7 @@ const permit: Command = {
             event.chatterId,
         )
         const isBroadcaster = event.chatterId === process.env.TWITCH_ID
+        // by this point this shouldn't fire but just in case, we have a second check
         if (!isMod && !isBroadcaster) {
             return
         }
