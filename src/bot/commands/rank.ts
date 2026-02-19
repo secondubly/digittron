@@ -19,7 +19,7 @@ const DEADLOCK_RANKS = new Map<number, string>([
 const rank: Command = {
     name: 'rank',
     aliases: [],
-    enabled: false,
+    enabled: true,
     async execute(event, _args, apiClient) {
         const account_id = process.env.STEAM_ID || '89010416'
         const response = await fetch(
