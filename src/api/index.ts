@@ -38,7 +38,7 @@ interface SpotifyPostBody {
 setupShutdownHandler()
 let clients: Client[] = []
 const twitchAudioMap: Map<string, string> = new Map([
-    ['537326154', '537326154.wav'],
+    ['537326154', '537326154.mp3'],
 ])
 
 // setup database connection
@@ -134,7 +134,12 @@ export const init = async (port: number) => {
 
     await server.register(cors, {
         origin: (origin, cb) => {
-            if (!origin || /localhost:5000/.test(origin) || /localhost:5001/.test(origin) || /192.168.1.\d+/.test(origin)) {
+            if (
+                !origin ||
+                /localhost:5000/.test(origin) ||
+                /localhost:5001/.test(origin) ||
+                /192.168.1.\d+/.test(origin)
+            ) {
                 cb(null, true)
                 return
             }
@@ -145,7 +150,7 @@ export const init = async (port: number) => {
     })
 
     await server.register(FastifyStatic, {
-        root: web
+        root: web,
     })
 
     await server.register(fastifySSE)
