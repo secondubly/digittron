@@ -19,7 +19,7 @@ import { getTwitchToken, playAudio } from '@lib/utils/utils.js'
 
 export class Bot {
     authProvider: RefreshingAuthProvider
-    audioAlertUsers: Map<string, string>
+    audioAlertUsers: Set<string>
     apiClient: ApiClient
     botID: string
     broadcasterID: string
@@ -42,7 +42,7 @@ export class Bot {
         this.authProvider = authProvider
         this.apiClient = apiClient
         this.commands = new Map()
-        this.audioAlertUsers = new Map()
+        this.audioAlertUsers = new Set(['89181064', '537326154']) // remove 89181064 after testing
         this.cooldownList = new Map()
         this.permitList = new Map()
         this.broadcasterID = process.env.TWITCH_ID ?? ''
