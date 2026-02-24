@@ -14,8 +14,9 @@ export default defineConfig({
         proxy: {
             // custom proxy rules for dev server, allows shorthand for fetch requests
             '/events': {
-                target: 'http://localhost:4000/events',
+                target: 'http://localhost:4000',
                 changeOrigin: true,
+                secure: false,
             },
         },
     },
