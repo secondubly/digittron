@@ -36,7 +36,7 @@ export default function MyApp() {
         const [connectionState, setConnectionState] = useState('CONNECTING')
 
         useEffect(() => {
-            const es = new EventSource('http://localhost:4000/events')
+            const es = new EventSource('/events')
 
             es.onopen = () => {
                 console.log('SSE Connection Opened')

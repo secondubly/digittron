@@ -13,8 +13,8 @@ export default defineConfig({
         port: 5000, // dev server will run on port 5000
         proxy: {
             // custom proxy rules for dev server, allows shorthand for fetch requests
-            '/api': {
-                target: 'http://localhost:4000',
+            '/events': {
+                target: 'http://localhost:4000/events',
                 changeOrigin: true,
             },
         },
