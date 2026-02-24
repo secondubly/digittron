@@ -33,19 +33,15 @@ export default function MyApp() {
     const SSEComponent: React.FC<SSEComponentProps> = ({
         audioStateChanger,
     }) => {
-        const [connectionState, setConnectionState] = useState('CONNECTING')
-
         useEffect(() => {
             const es = new EventSource('/events')
 
             es.onopen = () => {
                 console.log('SSE Connection Opened')
-                setConnectionState('OPEN')
             }
 
             es.onerror = (err) => {
                 console.error('Event Source Error: ', err)
-                setConnectionState('ERROR')
                 es.close()
             }
 
@@ -69,7 +65,6 @@ export default function MyApp() {
 
         return (
             <div>
-                <p>Connection state: {connectionState}</p>
             </div>
         )
     }
