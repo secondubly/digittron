@@ -19,13 +19,21 @@ export default function MyApp() {
                 audioRef.current.autoplay = true
                 audioRef.current.load() // Load the new source
                 audioRef.current.play()
+                
+                // if (playPromise !== undefined) {
+                //     playPromise.then(_ => {
+                //         console.log('playing audio')
+                //     }).catch(error => {
+                //         console.error(error)
+                //     })
+                // }
             }
         }, [audioUrl]) // run whenever audio url changes
 
         return (
             <div>
                 {/* controls=false for custom controls */}
-                <audio ref={audioRef} controls={false} muted />
+                <audio ref={audioRef} controls={false} />
             </div>
         )
     }
@@ -53,7 +61,8 @@ export default function MyApp() {
             es.addEventListener('play', (event) => {
                 const filename = JSON.parse(event.data)
                 console.log('Play event received for id:', filename)
-                const audioString = `/audio/${filename}.wav`
+                const audioString = `/audio/${filename}.mp3`
+                console.log('audio state changer updating')
                 audioStateChanger(audioString)
             })
 
