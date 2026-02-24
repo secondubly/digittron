@@ -86,7 +86,7 @@ export const getTwitchToken = async (type: string): Promise<AccessToken> => {
 }
 
 export const playAudio = async (twitchId: string): Promise<void> => {
-    const url = `https://localhost:5000/api/audio/${twitchId}`
+    const url = `http://localhost:4000/api/audio/${twitchId}`
     const response = await fetch(url)
 
     if (!response.ok) {
