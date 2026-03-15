@@ -1,89 +1,14 @@
-import { useEffect, useState, useRef } from 'react'
+// import { useEffect, useState, useRef } from 'react'
+import { NavbarMinimal } from "./components/navbar/Navbar"
 
 export default function MyApp() {
-    interface Props {
-        audioUrl: string | null
-    }
-
-    interface SSEComponentProps {
-        audioStateChanger: React.Dispatch<React.SetStateAction<string | null>>
-    }
-
-    const AudioPlayer = ({ audioUrl }: Props) => {
-        const audioRef = useRef<HTMLAudioElement>(null)
-
-        useEffect(() => {
-            if (audioUrl && audioRef.current) {
-                audioRef.current.src = audioUrl // Set the source programmatically
-                audioRef.current.volume = 0.5
-                audioRef.current.autoplay = true
-                audioRef.current.load() // Load the new source
-                audioRef.current.play()
-                
-                // if (playPromise !== undefined) {
-                //     playPromise.then(_ => {
-                //         console.log('playing audio')
-                //     }).catch(error => {
-                //         console.error(error)
-                //     })
-                // }
-            }
-        }, [audioUrl]) // run whenever audio url changes
-
-        return (
-            <div>
-                {/* controls=false for custom controls */}
-                <audio ref={audioRef} controls={false} />
-            </div>
-        )
-    }
-
-    const SSEComponent: React.FC<SSEComponentProps> = ({
-        audioStateChanger,
-    }) => {
-        useEffect(() => {
-            const es = new EventSource('/events')
-
-            es.onopen = () => {
-                console.log('SSE Connection Opened')
-            }
-
-            es.onerror = (err) => {
-                console.error('Event Source Error: ', err)
-                es.close()
-            }
-
-            es.onmessage = (e) => {
-                const data = JSON.parse(e.data)
-                console.log('Generic Message Received:', data)
-            }
-
-            es.addEventListener('play', (event) => {
-                const filename = JSON.parse(event.data)
-                console.log('Play event received for id:', filename)
-                const audioString = `/audio/${filename}.mp3`
-                console.log('audio state changer updating')
-                audioStateChanger(audioString)
-            })
-
-            return () => {
-                es.close()
-                console.log('SSE Connection closed')
-            }
-        }, [])
-
-        return (
-            <div>
-            </div>
-        )
-    }
-
-    const [audioUrl, setAudioURL] = useState<string | null>(null)
+    // const [audioUrl, setAudioURL] = useState<string | null>(null)
 
     return (
         <div>
-            <AudioPlayer audioUrl={audioUrl} />
-            <SSEComponent audioStateChanger={setAudioURL} />
+            <NavbarMinimal />
+            {/* <AudioPlayer audioUrl={audioUrl} />
+            <SSEComponent audioStateChanger={setAudioURL} /> */}
         </div>
     )
 }
