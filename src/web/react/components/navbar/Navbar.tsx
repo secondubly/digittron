@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import {
   IconHome2,
+  IconSunHigh,
+  IconMoon
 } from '@tabler/icons-react';
-import { ActionIcon, Stack, Tooltip, UnstyledButton } from '@mantine/core';
+import { ActionIcon, Stack, Tooltip, UnstyledButton, useMantineTheme } from '@mantine/core';
 // @ts-expect-error false positive error
 import classes from './Navbar.module.css'
 import * as Icons from '../icons'
@@ -60,6 +62,8 @@ export function NavbarMinimal({ colorScheme, toggleColorScheme }: ThemeProps) {
     />
   ));
 
+  const theme = useMantineTheme();
+
   return (
     <nav className={classes.navbar}>
       <div className={classes.navbarMain}>
@@ -69,8 +73,9 @@ export function NavbarMinimal({ colorScheme, toggleColorScheme }: ThemeProps) {
       </div>
 
       <Stack justify="center" align='center' gap={0}>
-        <ActionIcon onClick={toggleColorScheme} className='theme-toggle'>
-          {colorScheme === 'dark' ? <Icons.DarkIcon /> : <Icons.LightIcon />}
+        <ActionIcon variant='transparent' size='md' color='orange' radius='sm' onClick={toggleColorScheme} style={{ width: '3.125rem', height: '3.125rem' }}>
+          {colorScheme === 'dark' ? <IconMoon color={theme.colors.indigo[0]} size={20} /> : 
+            <IconSunHigh color={theme.colors.yellow[6]} size={20} />}
         </ActionIcon>
         {/* @ts-expect-error false positive error */}
         <NavbarLink icon={Icons.LogoutIcon} label="Logout" />
