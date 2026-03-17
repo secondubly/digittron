@@ -3,28 +3,76 @@ import { createTheme } from '@mantine/core';
 const theme = createTheme({
   colors: {
     dark: [
-      '#C9C9C9',
-      '#b8b8b8',
-      '#828282',
-      '#696969',
-      '#424242',
-      '#3b3b3b',
-      '#2e2e2e',
-      '#242424',
-      '#1f1f1f',
-      '#141414'
+      '#fff',
+      '#7b92c7',
+      '#4765aa',
+      '#2f4371',
+      '#27375c',
+      '#1c2a4a',
+      '#151e33',
+      '#0e1626',
+      '#0a101d',
+      '#060b15'
     ],
     gray: [
-      '#f8f9fa',
-      '#f1f3f5',
-      '#e9ecef',
-      '#dee2e6',
-      '#ced4da',
-      '#adb5bd',
-      '#868e96',
-      '#495057',
-      '#343a40',
-      '#212529'
+      '#e3e7f1',
+      '#d8ddeb',
+      '#ced4e5',
+      '#c3cadf',
+      '#b8c1d9',
+      '#b8c1d9',
+      '#7b8cb8',
+      '#4b5c8b',
+      '#2a334d',
+      '#090b10'
+    ],
+    blue: [
+      '#d1deeb',
+      '#aecce7',
+      '#8bb9e2',
+      '#68a6de',
+      '#4393d9',
+      '#4393d9',
+      '#1473bb',
+      '#005187',
+      '#003052',
+      '#000e1c'
+    ],
+    green: [
+      '#dafbe1',
+      '#aceebb',
+      '#6fdd8b',
+      '#4ac26b',
+      '#2da44e',
+      '#1a7f37',
+      '#116329',
+      '#044f1e',
+      '#003d16',
+      '#002d11'
+    ],
+    yellow: [
+      '#f7f1e5',
+      '#faeacd',
+      '#fce3b5',
+      '#fddd9d',
+      '#fed687',
+      '#ffd685',
+      '#ffb82d',
+      '#ce8906',
+      '#744d03',
+      '#191102'
+    ],
+    orange: [
+      '#fff1e5',
+      '#ffd8b5',
+      '#ffb77c',
+      '#fb8f44',
+      '#e16f24',
+      '#bc4c00',
+      '#953800',
+      '#762c00',
+      '#5c2200',
+      '#471700'
     ],
     red: [
       '#fff5f5',
@@ -86,18 +134,6 @@ const theme = createTheme({
       '#3b5bdb',
       '#364fc7'
     ],
-    blue: [
-      '#e7f5ff',
-      '#d0ebff',
-      '#a5d8ff',
-      '#74c0fc',
-      '#4dabf7',
-      '#339af0',
-      '#228be6',
-      '#1c7ed6',
-      '#1971c2',
-      '#1864ab'
-    ],
     cyan: [
       '#e3fafc',
       '#c5f6fa',
@@ -122,18 +158,6 @@ const theme = createTheme({
       '#099268',
       '#087f5b'
     ],
-    green: [
-      '#ebfbee',
-      '#d3f9d8',
-      '#b2f2bb',
-      '#8ce99a',
-      '#69db7c',
-      '#51cf66',
-      '#40c057',
-      '#37b24d',
-      '#2f9e44',
-      '#2b8a3e'
-    ],
     lime: [
       '#f4fce3',
       '#e9fac8',
@@ -145,96 +169,74 @@ const theme = createTheme({
       '#74b816',
       '#66a80f',
       '#5c940d'
-    ],
-    yellow: [
-      '#fff9db',
-      '#fff3bf',
-      '#ffec99',
-      '#ffe066',
-      '#ffd43b',
-      '#fcc419',
-      '#fab005',
-      '#f59f00',
-      '#f08c00',
-      '#e67700'
-    ],
-    orange: [
-      '#fff4e6',
-      '#ffe8cc',
-      '#ffd8a8',
-      '#ffc078',
-      '#ffa94d',
-      '#ff922b',
-      '#fd7e14',
-      '#f76707',
-      '#e8590c',
-      '#d9480f'
     ]
   },
-  primaryColor: 'indigo',
+  primaryColor: 'yellow',
   primaryShade: {
     light: 6,
-    dark: 8
+    dark: 5
   },
-  white: '#fff',
-  black: '#000',
+  white: '#ffffff',
+  black: '#24292f',
+  autoContrast: true,
+  luminanceThreshold: 0.3,
   defaultGradient: {
     from: 'blue',
-    to: 'cyan',
+    to: 'gray',
     deg: 45
   },
   fontFamily: 'Lato',
-  fontFamilyMonospace: 'Fira Code',
+  fontFamilyMonospace: 'Roboto Mono',
   headings: {
-    fontFamily: 'Raleway',
-    fontWeight: '700',
+    fontFamily: 'Rubik',
+    fontWeight: '600',
     sizes: {
       h1: {
         fontSize: '2.125rem',
         lineHeight: '1.3',
-        fontWeight: '700'
+        fontWeight: '300'
       },
       h2: {
         fontSize: '1.625rem',
         lineHeight: '1.35',
-        fontWeight: '700'
+        fontWeight: '300'
       },
       h3: {
         fontSize: '1.375rem',
         lineHeight: '1.4',
-        fontWeight: '700'
+        fontWeight: '300'
       },
       h4: {
         fontSize: '1.125rem',
         lineHeight: '1.45',
-        fontWeight: '700'
+        fontWeight: '500'
       },
       h5: {
         fontSize: '1rem',
         lineHeight: '1.5',
-        fontWeight: '700'
+        fontWeight: '400'
       },
       h6: {
         fontSize: '0.875rem',
         lineHeight: '1.5',
-        fontWeight: '700'
+        fontWeight: '400'
       }
     }
   },
   scale: 1,
   radius: {
-    xs: '0.125rem',
-    sm: '0.25rem',
-    md: '0.5rem',
-    lg: '1rem',
-    xl: '2rem'
+    xs: 'calc(0.125rem * var(--mantine-scale))',
+    sm: 'calc(0.25rem * var(--mantine-scale))',
+    md: 'calc(0.5rem * var(--mantine-scale))',
+    lg: 'calc(1rem * var(--mantine-scale))',
+    xl: 'calc(2rem * var(--mantine-scale))'
   },
   spacing: {
-    xs: '0.625rem',
-    sm: '0.75rem',
-    md: '1rem',
-    lg: '1.25rem',
-    xl: '2rem'
+    xs: 'calc(0.625rem * var(--mantine-scale))',
+    sm: 'calc(0.75rem * var(--mantine-scale))',
+    md: 'calc(1rem * var(--mantine-scale))',
+    lg: 'calc(1.25rem * var(--mantine-scale))',
+    xl: 'calc(2rem * var(--mantine-scale))'
   },
   defaultRadius: 'md',
   breakpoints: {
@@ -245,9 +247,7 @@ const theme = createTheme({
     xl: '88em'
   },
   fontSmoothing: true,
-  focusRing: 'auto',
-  components: {
-  }
+  focusRing: 'auto'
 });
 
 export default theme;
