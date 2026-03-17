@@ -68,7 +68,7 @@ export function NavbarMinimal({ colorScheme, toggleColorScheme }: ThemeProps) {
         </Stack>
       </div>
 
-      <Stack justify="center" gap={0}>
+      <Stack justify="center" align='center' gap={0}>
         <ActionIcon onClick={toggleColorScheme} className='theme-toggle'>
           {colorScheme === 'dark' ? <Icons.DarkIcon /> : <Icons.LightIcon />}
         </ActionIcon>
