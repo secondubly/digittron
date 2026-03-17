@@ -47,7 +47,7 @@
     "skipLibCheck": true,
     "allowJs": true,
   },
-  "include": ["./src/**/*.ts", "src/lib/db/data.ts"],
+  "include": ["./src/**/*.ts", "src/lib/db/data.ts", "src/web/react/types/typings.d.ts"],
   "ts-node": {
     "esm": true,
     "transpileOnly": true
