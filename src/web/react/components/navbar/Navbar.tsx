@@ -2,9 +2,7 @@ import { useState } from 'react';
 import {
   IconHome2,
   IconSunHigh,
-  IconMoon,
-  IconLogin2,
-  IconLogout2
+  IconMoon
 } from '@tabler/icons-react';
 import { ActionIcon, Stack, Tooltip, UnstyledButton, useMantineTheme } from '@mantine/core';
 // @ts-expect-error false positive error

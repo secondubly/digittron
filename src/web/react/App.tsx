@@ -1,10 +1,11 @@
 // import { useEffect, useState, useRef } from 'react'
 import { NavbarMinimal } from "./components/navbar/Navbar"
-import { useMantineColorScheme, useComputedColorScheme, AppShell, Burger, Group, Stack } from "@mantine/core"
+import { useMantineColorScheme, useComputedColorScheme, AppShell, Burger, Group, Stack, ActionIcon, useMantineTheme } from "@mantine/core"
 import { useDisclosure, useMediaQuery} from '@mantine/hooks'
 import AppRoutes from "./Router"
 import { NavLink } from "react-router-dom";
 import classes from './styles/AppShell.module.css';
+import { IconMoon, IconSunHigh } from "@tabler/icons-react";
 
 export default function MyApp() {
     // const [audioUrl, setAudioURL] = useState<string | null>(null)
@@ -18,6 +19,7 @@ export default function MyApp() {
     const [opened, { toggle }] = useDisclosure()
     const isMediumScreenOrLarger = useMediaQuery('(min-width: 62em)')
 
+    const theme = useMantineTheme();
     return ( 
         <AppShell
             header={{ height: 60, collapsed: isMediumScreenOrLarger }}
@@ -29,8 +31,12 @@ export default function MyApp() {
             }}
         >
             <AppShell.Header hiddenFrom="md">
-                <Group h="100%" px="md">
+                <Group h="100%" px="md" justify="space-between">
                     <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
+                    <ActionIcon size='md' color='orange' radius='sm' onClick={toggleColorScheme} className='theme-toggle' style={{ width: '3.125rem', height: '3.125rem', background: 'transparent' }}>
+                        {computedColorScheme === 'dark' ? <IconMoon color={theme.colors.indigo[0]} size={20} /> : 
+                        <IconSunHigh color={theme.colors.yellow[6]} size={20} />}
+                    </ActionIcon>
                 </Group>
             </AppShell.Header>
 
