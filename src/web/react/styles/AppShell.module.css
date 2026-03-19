@@ -1,5 +1,7 @@
 .main {
-    margin-left: '100em';
+    padding-inline-start: calc(
+        var(--app-shell-navbar-offset, 0rem) + var(--app-shell-padding)
+    );
 }
 
 @media (min-width: 48em) {
