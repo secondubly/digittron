@@ -72,8 +72,8 @@ export function NavbarMinimal({ colorScheme, toggleColorScheme }: ThemeProps) {
         </Stack>
       </div>
 
-      <Stack justify="center" align='center' gap={0}>
-        <ActionIcon variant='transparent' size='md' color='orange' radius='sm' onClick={toggleColorScheme} style={{ width: '3.125rem', height: '3.125rem' }}>
+      <Stack justify="center" align='center' gap={'--mantine-spacing-md'}>
+        <ActionIcon size='md' color='orange' radius='sm' onClick={toggleColorScheme} className='theme-toggle' style={{ width: '3.125rem', height: '3.125rem', background: 'transparent' }}>
           {colorScheme === 'dark' ? <IconMoon color={theme.colors.indigo[0]} size={20} /> : 
             <IconSunHigh color={theme.colors.yellow[6]} size={20} />}
         </ActionIcon>

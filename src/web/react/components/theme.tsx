@@ -1,6 +1,6 @@
-import { createTheme } from '@mantine/core';
+import { AppShellMain, AppShellNavbar, createTheme } from '@mantine/core';
 
-const theme = createTheme({
+const theme: MantineThemeOverride = createTheme({
   colors: {
     dark: [
       '#fff',
@@ -185,39 +185,39 @@ const theme = createTheme({
     to: 'gray',
     deg: 45
   },
-  fontFamily: 'Lato',
+  fontFamily: 'Rubik',
   fontFamilyMonospace: 'Roboto Mono',
   headings: {
     fontFamily: 'Rubik',
     fontWeight: '600',
     sizes: {
       h1: {
-        fontSize: '2.125rem',
+        fontSize: 'calc(2.125rem * var(--mantine-scale))',
         lineHeight: '1.3',
         fontWeight: '300'
       },
       h2: {
-        fontSize: '1.625rem',
+        fontSize: 'calc(1.625rem * var(--mantine-scale))',
         lineHeight: '1.35',
         fontWeight: '300'
       },
       h3: {
-        fontSize: '1.375rem',
+        fontSize: 'calc(1.375rem * var(--mantine-scale))',
         lineHeight: '1.4',
         fontWeight: '300'
       },
       h4: {
-        fontSize: '1.125rem',
+        fontSize: 'calc(1.125rem * var(--mantine-scale))',
         lineHeight: '1.45',
         fontWeight: '500'
       },
       h5: {
-        fontSize: '1rem',
+        fontSize: 'calc(1rem * var(--mantine-scale))',
         lineHeight: '1.5',
         fontWeight: '400'
       },
       h6: {
-        fontSize: '0.875rem',
+        fontSize: 'calc(0.875rem * var(--mantine-scale))',
         lineHeight: '1.5',
         fontWeight: '400'
       }
@@ -247,7 +247,8 @@ const theme = createTheme({
     xl: '88em'
   },
   fontSmoothing: true,
-  focusRing: 'auto'
+  focusRing: 'auto',
+  components: {}
 });
 
 export default theme;

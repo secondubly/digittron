@@ -1,0 +1,12 @@
+.main {
+    margin-left: '100em';
+}
+
+@media (min-width: 48em) {
+    .main {
+        margin-left: '100em';
+    }
+    .nav {
+        width: 'fit-content';
+    }
+}
