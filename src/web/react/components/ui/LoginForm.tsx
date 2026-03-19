@@ -3,21 +3,49 @@ import { Stack,  PasswordInput, TextInput, ActionIcon, Modal, Button } from "@ma
 import { useForm } from "@mantine/form";
 import { IconLogin2, IconLogout2 } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
-const LoginForm: React.FC = () => {
+import type { Token } from '../../types/TokenInterface'
+
+
+interface Props {
+    setToken: (token: Token) => void
+    removeToken: () => void
+    isLoggedIn: boolean
+}
+interface Credentials {
+    username: string
+    password: string
+}
+const LoginForm: React.FC<Props> = ({ setToken, removeToken, isLoggedIn }) => {
     const [opened, { open, close }] = useDisclosure(false);
-    const form = useForm({
+    const form = useForm<Credentials>({
     mode: 'uncontrolled',
     initialValues: {
         username: '',
         password: ''
     }
     });
-    const isLoggedIn = false
 
+    const loginUser = (credentials: Credentials) => {
+        return fetch('http://localhost:4000/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(credentials)
+        }).then(data => data.json())
+    }
+
+    const handleSubmit = async (values: Credentials) => {
+        const token = await loginUser(values)
+        console.log(token)
+        setToken(token)
+    }
+
+    
     return (
         <>
             <Modal opened={opened} onClose={close} title='Login to your Account' centered>
-                <form onSubmit={form.onSubmit((values) => console.log(values))}>
+                <form onSubmit={form.onSubmit(handleSubmit)}>
                     <Stack                     
                     gap='md'
                     h='fit-content'>
@@ -34,12 +62,12 @@ const LoginForm: React.FC = () => {
                             {...form.getInputProps('')}
                         />
 
-                        <Button type="submit" w='fit-content' style={{'align-self': 'flex-end'}}>Submit</Button>
+                        <Button type="submit" w='fit-content' style={{'alignSelf': 'flex-end'}}>Submit</Button>
                     </Stack>
             </form>
             </Modal>
 
-            <ActionIcon size='xl' radius='sm' onClick={open}>
+            <ActionIcon size='xl' radius='sm' onClick={isLoggedIn ? open : removeToken}>
             { isLoggedIn ? <IconLogout2 /> : <IconLogin2 /> }
             </ActionIcon>
         </>

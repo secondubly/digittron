@@ -297,6 +297,13 @@ export const init = async (port: number) => {
         })
     })
 
+    // POST /login - handle dashboard login
+    server.post('/login', (_request, reply) => {
+        reply.send({
+            token: 'test123',
+        })
+    })
+
     if (process.env.NODE_ENV === 'development') {
         log.api.info('API server running in development mode')
         return server.listen({ port }, (err, address) => {

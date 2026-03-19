@@ -10,6 +10,7 @@ import classes from './Navbar.module.css'
 import * as Icons from '../icons'
 import { Link } from 'react-router-dom'
 import LoginForm from '../ui/LoginForm';
+import type { Token } from '../../types/TokenInterface'
 
 interface NavbarLinkProps {
   id: number,
@@ -23,6 +24,9 @@ interface NavbarLinkProps {
 interface ThemeProps {
   colorScheme: string,
   toggleColorScheme: () => void
+  setToken: (token: Token) => void
+  removeToken: () => void
+  isLoggedIn: boolean
 }
 
 function NavbarLink({ icon: Icon, label, active, onClick, path }: NavbarLinkProps) {
@@ -50,7 +54,7 @@ const route_icons = [
   { id: 4, icon: Icons.ModerationIcon, label: 'Moderation', path: '/moderation'},
 ];
 
-export function NavbarMinimal({ colorScheme, toggleColorScheme }: ThemeProps) {
+export function NavbarMinimal({ colorScheme, toggleColorScheme, setToken, removeToken, isLoggedIn }: ThemeProps) {
   const [active, setActive] = useState(0);
 
 
@@ -79,7 +83,7 @@ export function NavbarMinimal({ colorScheme, toggleColorScheme }: ThemeProps) {
           {colorScheme === 'dark' ? <IconMoon color={theme.colors.indigo[0]} size={20} /> : 
             <IconSunHigh color={theme.colors.yellow[6]} size={20} />}
         </ActionIcon>
-        <LoginForm />
+        <LoginForm setToken={setToken} isLoggedIn={isLoggedIn} removeToken={removeToken}/>
       </Stack>
     </nav>
   );

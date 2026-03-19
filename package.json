@@ -21,7 +21,8 @@
         "seed": "mikro-orm-esm seeder:run",
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node build/index.js",
-        "web": "vite"
+        "web": "vite",
+        "web:dev": "concurrently -c magenta,#7700cf -n API,WEB \"pnpm:api\" \"vite\""
     },
     "keywords": [],
     "author": "",

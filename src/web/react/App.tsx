@@ -6,6 +6,7 @@ import AppRoutes from "./Router"
 import { NavLink } from "react-router-dom";
 import classes from './styles/AppShell.module.css';
 import { IconMoon, IconSunHigh } from "@tabler/icons-react";
+import useToken from './components/logic/UseToken'
 
 export default function MyApp() {
     // const [audioUrl, setAudioURL] = useState<string | null>(null)
@@ -18,6 +19,9 @@ export default function MyApp() {
     }
     const [opened, { toggle }] = useDisclosure()
     const isMediumScreenOrLarger = useMediaQuery('(min-width: 62em)')
+    const { token, setToken, removeToken } = useToken()
+
+    const isLoggedIn = !token ? true : false
 
     const theme = useMantineTheme();
     return ( 
@@ -42,7 +46,11 @@ export default function MyApp() {
 
             <AppShell.Navbar>
                 <AppShell.Section visibleFrom="md">
-                    <NavbarMinimal colorScheme={computedColorScheme} toggleColorScheme={toggleColorScheme} />
+                    <NavbarMinimal colorScheme={computedColorScheme} 
+                    toggleColorScheme={toggleColorScheme} 
+                    setToken={setToken}
+                    removeToken={removeToken}
+                    isLoggedIn={isLoggedIn}/>
                 </AppShell.Section>
                 <Stack
                     bg="var(--mantine-color-body)"
