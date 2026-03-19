@@ -2,13 +2,16 @@ import { useState } from 'react';
 import {
   IconHome2,
   IconSunHigh,
-  IconMoon
+  IconMoon,
+  IconLogin2,
+  IconLogout2
 } from '@tabler/icons-react';
 import { ActionIcon, Stack, Tooltip, UnstyledButton, useMantineTheme } from '@mantine/core';
 // @ts-expect-error false positive error
 import classes from './Navbar.module.css'
 import * as Icons from '../icons'
 import { Link } from 'react-router-dom'
+import LoginForm from '../ui/LoginForm';
 
 interface NavbarLinkProps {
   id: number,
@@ -25,6 +28,7 @@ interface ThemeProps {
 }
 
 function NavbarLink({ icon: Icon, label, active, onClick, path }: NavbarLinkProps) {
+
   return (
     <Tooltip label={label} position="right" transitionProps={{ duration: 0 }}>
       <Link to={path}>
@@ -63,8 +67,8 @@ export function NavbarMinimal({ colorScheme, toggleColorScheme }: ThemeProps) {
   ));
 
   const theme = useMantineTheme();
-
   return (
+    
     <nav className={classes.navbar}>
       <div className={classes.navbarMain}>
         <Stack justify="center" gap={0}>
@@ -77,8 +81,7 @@ export function NavbarMinimal({ colorScheme, toggleColorScheme }: ThemeProps) {
           {colorScheme === 'dark' ? <IconMoon color={theme.colors.indigo[0]} size={20} /> : 
             <IconSunHigh color={theme.colors.yellow[6]} size={20} />}
         </ActionIcon>
-        {/* @ts-expect-error false positive error */}
-        <NavbarLink icon={Icons.LogoutIcon} label="Logout" />
+        <LoginForm />
       </Stack>
     </nav>
   );
