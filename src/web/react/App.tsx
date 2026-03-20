@@ -4,6 +4,7 @@ import { useMantineColorScheme, useComputedColorScheme, AppShell, Burger, Group,
 import { useDisclosure, useMediaQuery} from '@mantine/hooks'
 import AppRoutes from "./Router"
 import { NavLink } from "react-router-dom";
+// @ts-expect-error false positive error
 import classes from './styles/AppShell.module.css';
 import { IconMoon, IconSunHigh } from "@tabler/icons-react";
 import useToken from './components/logic/UseToken'

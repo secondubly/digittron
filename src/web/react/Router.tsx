@@ -2,12 +2,17 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Commands from './pages/Commands'
+import ProtectedRoute from "./components/protected_routes/ProtectedRoutes";
 
-const AppRoutes: React.FC = () => {
+const AppRoutes = () => {
     return (
         <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/commands" element={<Commands />} />
+            <Route path="/commands" element={
+                <ProtectedRoute>
+                    <Commands />
+                </ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
         </Routes>
     )

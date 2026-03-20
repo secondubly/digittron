@@ -1,0 +1,16 @@
+import { Navigate } from 'react-router-dom';
+import { ReactNode } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+
+interface Props {
+    children: ReactNode
+}
+
+export default function ProtectedRoute({ children }: Props) {
+  const { isAuthenticated } = useAuth()
+  if (!isAuthenticated) {
+    return <Navigate to="/home" replace />;
+  }
+
+  return children;
+}

@@ -1,9 +1,12 @@
 import React from "react";
 import { Stack,  PasswordInput, TextInput, ActionIcon, Modal, Button } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { notifications } from '@mantine/notifications'
 import { IconLogin2, IconLogout2 } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
-import type { Token } from '../../types/TokenInterface'
+import type { Credentials, Token } from '../../types/loginTypes'
+import { useNavigate } from "react-router-dom";
+
 
 
 interface Props {
@@ -11,12 +14,9 @@ interface Props {
     removeToken: () => void
     isLoggedIn: boolean
 }
-interface Credentials {
-    username: string
-    password: string
-}
 const LoginForm: React.FC<Props> = ({ setToken, removeToken, isLoggedIn }) => {
     const [opened, { open, close }] = useDisclosure(false);
+    const navigate = useNavigate()
     const form = useForm<Credentials>({
     mode: 'uncontrolled',
     initialValues: {
@@ -37,8 +37,19 @@ const LoginForm: React.FC<Props> = ({ setToken, removeToken, isLoggedIn }) => {
 
     const handleSubmit = async (values: Credentials) => {
         const token = await loginUser(values)
+        if (token) {
+            close()
+        }
         console.log(token)
         setToken(token)
+    }
+
+    const handleLogout = () => {
+        removeToken()
+        navigate('/home')
+        notifications.show({
+            message: 'You have successfully logged out.'
+        })
     }
 
     
@@ -67,7 +78,7 @@ const LoginForm: React.FC<Props> = ({ setToken, removeToken, isLoggedIn }) => {
             </form>
             </Modal>
 
-            <ActionIcon size='xl' radius='sm' onClick={isLoggedIn ? open : removeToken}>
+            <ActionIcon size='xl' radius='sm' onClick={isLoggedIn ? open : handleLogout}>
             { isLoggedIn ? <IconLogout2 /> : <IconLogin2 /> }
             </ActionIcon>
         </>

@@ -10,7 +10,7 @@ import classes from './Navbar.module.css'
 import * as Icons from '../icons'
 import { Link } from 'react-router-dom'
 import LoginForm from '../ui/LoginForm';
-import type { Token } from '../../types/TokenInterface'
+import type { Token } from '../../types/loginTypes'
 
 interface NavbarLinkProps {
   id: number,
