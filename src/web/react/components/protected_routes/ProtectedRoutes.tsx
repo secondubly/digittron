@@ -9,7 +9,7 @@ interface Props {
 export default function ProtectedRoute({ children }: Props) {
   const { isAuthenticated } = useAuth()
   if (!isAuthenticated) {
-    return <Navigate to="/home" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;
