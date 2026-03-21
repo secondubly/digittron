@@ -10,7 +10,7 @@ export default function useToken() {
         }
 
         const userToken = JSON.parse(tokenString) as Token
-        const token = userToken.token
+        const token = userToken.accessToken
 
         if (!token) {
             return null
@@ -34,7 +34,7 @@ export default function useToken() {
 
     const saveToken = (userToken: Token) => {
         localStorage.setItem('token', JSON.stringify(userToken))
-        setToken(userToken.token)
+        setToken(userToken.accessToken)
     }
 
     const removeToken = () => {
