@@ -8,9 +8,8 @@ import { ActionIcon, Stack, Tooltip, UnstyledButton, useMantineTheme } from '@ma
 // @ts-expect-error false positive error
 import classes from './Navbar.module.css'
 import * as Icons from '../icons'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import LoginForm from '../ui/LoginForm';
-import type { Token } from '../../types/loginTypes'
 
 interface NavbarLinkProps {
   id: number,
@@ -27,7 +26,6 @@ interface ThemeProps {
 }
 
 function NavbarLink({ icon: Icon, label, active, onClick, path }: NavbarLinkProps) {
-
   return (
     <Tooltip label={label} position="right" transitionProps={{ duration: 0 }}>
       <Link to={path}>
@@ -44,6 +42,7 @@ function NavbarLink({ icon: Icon, label, active, onClick, path }: NavbarLinkProp
   );
 }
 
+
 const route_icons = [
   { id: 1, icon: Icons.HomeIcon, label: 'Home', path: '/' },
   { id: 2, icon: Icons.CommandsIcon, label: 'Commands', path: '/commands' },
@@ -51,16 +50,18 @@ const route_icons = [
   { id: 4, icon: Icons.ModerationIcon, label: 'Moderation', path: '/moderation'},
 ];
 
-export function NavbarMinimal({ colorScheme, toggleColorScheme }: ThemeProps) {
-  const [active, setActive] = useState(0);
-
-  const links = route_icons.map((link, index) => (
+export function Navbar({ colorScheme, toggleColorScheme }: ThemeProps) {
+  const [_path, setPath] = useState('/')
+  const location = useLocation()
+  const links = route_icons.map((link, _index) => (
     // @ts-expect-error false positive error
     <NavbarLink
     {...link}
       key={link.label}
-      active={index === active}
-      onClick={() => setActive(index)}
+      active={location.pathname === link.path}
+      onClick={() => {
+        setPath(link.path)
+      }}
     />
   ));
 
