@@ -83,7 +83,7 @@ export function NavbarMinimal({ colorScheme, toggleColorScheme, setToken, remove
           {colorScheme === 'dark' ? <IconMoon color={theme.colors.indigo[0]} size={20} /> : 
             <IconSunHigh color={theme.colors.yellow[6]} size={20} />}
         </ActionIcon>
-        <LoginForm setToken={setToken} isLoggedIn={isLoggedIn} removeToken={removeToken}/>
+        <LoginForm />
       </Stack>
     </nav>
   );
