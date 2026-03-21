@@ -48,10 +48,7 @@ export default function MyApp() {
             <AppShell.Navbar>
                 <AppShell.Section visibleFrom="md">
                     <NavbarMinimal colorScheme={computedColorScheme} 
-                    toggleColorScheme={toggleColorScheme} 
-                    setToken={setToken}
-                    removeToken={removeToken}
-                    isLoggedIn={isLoggedIn}/>
+                    toggleColorScheme={toggleColorScheme} />
                 </AppShell.Section>
                 <Stack
                     bg="var(--mantine-color-body)"
