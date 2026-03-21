@@ -4,18 +4,21 @@ import fastify, {
     type FastifyReply,
     type FastifyRequest,
 } from 'fastify'
+import fCookie from '@fastify/cookie'
 import cors from '@fastify/cors'
+import fjwt, { type FastifyJWT } from '@fastify/jwt'
 import FastifyStatic from '@fastify/static'
-import { MikroORM } from '@mikro-orm/sqlite'
+import { MikroORM, RequestContext } from '@mikro-orm/sqlite'
 import fastifySSE from '@fastify/sse'
 import { Token } from '../lib/db/models/token.entity.js'
 import type { AccessToken } from '@twurple/auth'
 import { log } from '@lib/utils/logger.js'
-import { setupShutdownHandler } from '@lib/utils/utils.js'
 import type { SpotifyAccessToken } from '@lib/core/types.js'
 import redisClient from '@lib/utils/redis.js'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import { userRoutes } from './modules/user/user.route.js'
+import { userSchemas } from './modules/user/user.schema.js'
 
 interface Client {
     id: number
@@ -35,7 +38,6 @@ interface SpotifyPostBody {
     access_token: string
 }
 
-setupShutdownHandler()
 let clients: Client[] = []
 const twitchAudioMap: Map<string, string> = new Map([
     ['537326154', '537326154.mp3'],
@@ -43,7 +45,6 @@ const twitchAudioMap: Map<string, string> = new Map([
 
 // setup database connection
 const orm = await MikroORM.init()
-const em = orm.em.fork()
 
 const sendAudioUpdates = (data: string) => {
     clients.forEach((client) => {
@@ -57,9 +58,72 @@ const sendAudioUpdates = (data: string) => {
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const web = path.join(__dirname, '..', '..', 'build', 'web')
+const listeners = ['SIGINT', 'SIGTERM']
+let server: FastifyInstance
 
-export const routes = {
+if (process.env.NODE_ENV === 'development') {
+    server = fastify({
+        loggerInstance: log.api as FastifyBaseLogger,
+    })
+} else {
+    server = fastify()
+}
+
+// create a new RequestContext for every incoming request
+server.addHook('onRequest', (_request, _reply, done) => {
+    RequestContext.create(orm.em, done)
+})
+
+// shut down connection on app close
+server.addHook('onClose', async () => {
+    await orm.close()
+})
+
+server.addHook('preHandler', (req, _res, next) => {
+    // add jwt token to requests
+    req.jwt = server.jwt
+    return next()
+})
+
+server.decorate(
+    'authenticate',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+        const token = request.cookies.access_token
+
+        if (!token) {
+            return reply
+                .status(401)
+                .send({ message: 'Authentication required' })
+        }
+
+        const decoded = request.jwt.verify<FastifyJWT['user']>(token)
+        request.user = decoded
+    },
+)
+
+await server.register(fCookie, {
+    secret: 'some-secret-key',
+    hook: 'preHandler',
+})
+
+// register routes
+await server.register(userRoutes, { prefix: 'api/users' })
+for (const schema of [...userSchemas]) {
+    server.addSchema(schema)
+}
+
+await server.register(fjwt, {
+    secret:
+        process.env.JWT_TOKEN ||
+        'This_Should_Be_A_Unique_Randomly_Geneated_String',
+})
+
+const routes = {
     async getTwitchToken(id: string, scopes: string) {
+        const em = RequestContext.getEntityManager()
+        if (!em) {
+            throw new Error('Could not retrieve entity manager')
+        }
         const scopesArray = scopes ? scopes.split(',') : undefined
         const tokensTable = em.getRepository(Token)
 
@@ -85,6 +149,10 @@ export const routes = {
         return twitchAudioMap.get(id)
     },
     async getSpotifyToken(id: string): Promise<SpotifyAccessToken | null> {
+        const em = RequestContext.getEntityManager()
+        if (!em) {
+            throw new Error('Could not retrieve entity manager')
+        }
         const tokensTable = em.getRepository(Token)
 
         const token = await tokensTable.findOne(
@@ -109,6 +177,10 @@ export const routes = {
     },
 
     async setSpotifyToken(id: string, token: SpotifyAccessToken) {
+        const em = RequestContext.getEntityManager()
+        if (!em) {
+            throw new Error('Could not retrieve entity manager')
+        }
         const tokensTable = em.getRepository(Token)
 
         const oldToken = await tokensTable.findOne(parseInt(id))
@@ -120,17 +192,16 @@ export const routes = {
     },
 }
 
+// handle shutdowns
+listeners.forEach((signal) => {
+    process.on(signal, async () => {
+        await server.close()
+        process.exit(0)
+    })
+})
+
 export const init = async (port: number) => {
     log.api.info(`Initializing API on port ${port}`)
-
-    let server: FastifyInstance
-    if (process.env.NODE_ENV === 'development') {
-        server = fastify({
-            loggerInstance: log.api as FastifyBaseLogger,
-        })
-    } else {
-        server = fastify()
-    }
 
     await server.register(cors, {
         origin: (origin, cb) => {
@@ -258,6 +329,10 @@ export const init = async (port: number) => {
     }>('/api/spotify-token', async (request, reply) => {
         const { id, access_token } = request.body
 
+        const em = RequestContext.getEntityManager()
+        if (!em) {
+            throw new Error('Could not retrieve entity manager')
+        }
         const tokensTable = em.getRepository(Token)
         const oldToken = await tokensTable.findOne(
             { id: parseInt(id) },
@@ -294,13 +369,6 @@ export const init = async (port: number) => {
         reply.sse.onClose(() => {
             log.api.info(`SSE Client closed: ${clientId}`)
             clients = clients.filter((client) => clientId !== client.id)
-        })
-    })
-
-    // POST /login - handle dashboard login
-    server.post('/login', (_request, reply) => {
-        reply.send({
-            token: 'test123',
         })
     })
 
