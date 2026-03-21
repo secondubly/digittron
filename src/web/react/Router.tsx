@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Commands from './pages/Commands'
+import Register from './pages/Register'
 import ProtectedRoute from "./components/protected_routes/ProtectedRoutes";
 
 const AppRoutes = () => {
@@ -13,6 +14,7 @@ const AppRoutes = () => {
                     <Commands />
                 </ProtectedRoute>
             } />
+            <Route path="/register" element={<Register />} />
             <Route path="*" element={<NotFound />} />
         </Routes>
     )
