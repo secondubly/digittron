@@ -38,7 +38,7 @@ const LoginForm = () => {
 
     const handleLogout = () => {
         logout()
-        navigate('/home')
+        navigate('/')
         notifications.show({
             message: 'You have successfully logged out.'
         })
