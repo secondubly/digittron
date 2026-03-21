@@ -51,6 +51,7 @@ const route_icons = [
 ];
 
 export function Navbar({ colorScheme, toggleColorScheme }: ThemeProps) {
+  // TODO: clean this up
   const [_path, setPath] = useState('/')
   const location = useLocation()
   const links = route_icons.map((link, _index) => (
