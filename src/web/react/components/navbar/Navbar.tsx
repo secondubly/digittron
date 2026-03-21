@@ -24,9 +24,6 @@ interface NavbarLinkProps {
 interface ThemeProps {
   colorScheme: string,
   toggleColorScheme: () => void
-  setToken: (token: Token) => void
-  removeToken: () => void
-  isLoggedIn: boolean
 }
 
 function NavbarLink({ icon: Icon, label, active, onClick, path }: NavbarLinkProps) {
@@ -54,9 +51,8 @@ const route_icons = [
   { id: 4, icon: Icons.ModerationIcon, label: 'Moderation', path: '/moderation'},
 ];
 
-export function NavbarMinimal({ colorScheme, toggleColorScheme, setToken, removeToken, isLoggedIn }: ThemeProps) {
+export function NavbarMinimal({ colorScheme, toggleColorScheme }: ThemeProps) {
   const [active, setActive] = useState(0);
-
 
   const links = route_icons.map((link, index) => (
     // @ts-expect-error false positive error
