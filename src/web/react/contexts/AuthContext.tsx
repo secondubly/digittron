@@ -1,6 +1,6 @@
 import React, { createContext, type ReactNode, useContext, useState } from 'react';
 import useToken from '../components/logic/UseToken';
-import type { Credentials } from '../types/loginTypes';
+import type { Credentials, Token } from '../types/loginTypes';
 
 interface AuthContextType {
     token: string | null
@@ -17,23 +17,23 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState(null);
 
   const login = async (credentials: Credentials) => {
-    // Login logic here
-    const response = await fetch('http://localhost:8080/login', {
+    const response = await fetch('http://localhost:4000/api/users/login', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+          'Content-Type': 'application/json'
       },
       body: JSON.stringify(credentials)
-    });
+    })
 
-    if (!response.ok) {
-      throw new Error('Login failed');
+    if (response.status === 401) {
+        throw new Error('Invalid username or password')
+    } else if (!response.ok) {
+        throw new Error
     }
 
-    const data = await response.json();
-    setToken(data);
-    // Optionally decode token to set user info
-    return data;
+    const data = await response.json() as Token
+    setToken(data)
+    return data
   };
 
   const logout = () => {
