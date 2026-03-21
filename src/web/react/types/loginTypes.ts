@@ -1,5 +1,5 @@
 export interface Token {
-    token: string | null
+    accessToken: string | null
 }
 
 export interface Credentials {
