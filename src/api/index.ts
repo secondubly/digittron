@@ -218,6 +218,8 @@ export const init = async (port: number) => {
             cb(new Error('Not allowed'), false)
         },
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true, // TODO: set condition to only use in development
     })
 
     await server.register(FastifyStatic, {

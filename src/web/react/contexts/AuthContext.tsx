@@ -19,6 +19,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = async (credentials: Credentials) => {
     const response = await fetch('http://localhost:4000/api/users/login', {
       method: 'POST',
+      credentials: 'include', // TODO: set condition to only use in development
       headers: {
           'Content-Type': 'application/json'
       },
@@ -36,9 +37,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return data
   };
 
-  const logout = () => {
-    removeToken();
-    setUser(null);
+  const logout = async () => {
+    const response = await fetch('http://localhost:4000/api/users/logout', {
+      method: 'DELETE',
+      credentials: 'include'
+    })
+
+    if (!response.ok) {
+      throw new Error('An error occurred while logging out.')
+    } else {
+      removeToken();
+      setUser(null);
+      return
+    }
   };
 
   const value = {

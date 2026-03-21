@@ -36,8 +36,8 @@ const LoginForm = () => {
         }
     }
 
-    const handleLogout = () => {
-        logout()
+    const handleLogout = async () => {
+        await logout()
         navigate('/')
         notifications.show({
             message: 'You have successfully logged out.'

@@ -70,7 +70,9 @@ export async function login(
         path: '/',
         httpOnly: true,
         secure: true,
+        sameSite: 'none', // TODO: set condition to only use in development
     })
+
     return { accessToken: token }
 }
 
