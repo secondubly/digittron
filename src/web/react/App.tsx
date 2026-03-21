@@ -1,5 +1,5 @@
 // import { useEffect, useState, useRef } from 'react'
-import { NavbarMinimal } from "./components/navbar/Navbar"
+import { Navbar } from "./components/navbar/Navbar"
 import { useMantineColorScheme, useComputedColorScheme, AppShell, Burger, Group, Stack, ActionIcon, useMantineTheme } from "@mantine/core"
 import { useDisclosure, useMediaQuery} from '@mantine/hooks'
 import AppRoutes from "./Router"
@@ -7,7 +7,6 @@ import { NavLink } from "react-router-dom";
 // @ts-expect-error false positive error
 import classes from './styles/AppShell.module.css';
 import { IconMoon, IconSunHigh } from "@tabler/icons-react";
-import useToken from './components/logic/UseToken'
 
 export default function MyApp() {
     // const [audioUrl, setAudioURL] = useState<string | null>(null)
@@ -20,9 +19,6 @@ export default function MyApp() {
     }
     const [opened, { toggle }] = useDisclosure()
     const isMediumScreenOrLarger = useMediaQuery('(min-width: 62em)')
-    const { token, setToken, removeToken } = useToken()
-
-    const isLoggedIn = !token ? true : false
 
     const theme = useMantineTheme();
     return ( 
@@ -47,7 +43,7 @@ export default function MyApp() {
 
             <AppShell.Navbar>
                 <AppShell.Section visibleFrom="md">
-                    <NavbarMinimal colorScheme={computedColorScheme} 
+                    <Navbar colorScheme={computedColorScheme} 
                     toggleColorScheme={toggleColorScheme} />
                 </AppShell.Section>
                 <Stack
