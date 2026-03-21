@@ -43,6 +43,16 @@
                 "NODE_ENV": "development"
             },
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program - Web",
+            "skipFiles": ["<node_internals>/**"],
+            "runtimeArgs": ["run", "web:dev"],
+            "runtimeExecutable": "pnpm",
+            "outputCapture": "std", // enables pino logging to appear in console
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
