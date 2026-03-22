@@ -4,6 +4,7 @@ const permit: Command = {
     name: 'permit',
     aliases: [],
     enabled: true,
+    description: 'Allows specified user to post links',
     async execute(event, args, apiClient) {
         const isMod = await apiClient.moderation.checkUserMod(
             event.broadcasterId,

@@ -4,6 +4,7 @@ const anniversary: Command = {
     name: 'd20',
     aliases: [],
     enabled: true,
+    description: 'Roll a d20',
     async execute(event, _args, apiClient) {
         const displayName = event.chatterDisplayName
         const roll = Math.floor(Math.random() * 20 + 1)

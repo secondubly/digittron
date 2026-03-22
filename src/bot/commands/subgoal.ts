@@ -4,6 +4,7 @@ const subgoal: Command = {
     name: 'subgoal',
     aliases: [],
     enabled: false,
+    description: 'list of subscriber goals during the subathon',
     async execute(event, _args, apiClient) {
         apiClient.chat.sendChatMessageAsApp(
             process.env.BOT_ID!,

@@ -4,6 +4,7 @@ const anniversary: Command = {
     name: 'anniversary',
     aliases: ['anni'],
     enabled: false,
+    description: 'Anniversary stream information',
     async execute(event, _args, apiClient) {
         const broadcaster = event.broadcasterDisplayName
         apiClient.chat.sendChatMessageAsApp(

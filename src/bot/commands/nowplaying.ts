@@ -7,6 +7,7 @@ const nowplaying: Command = {
     name: 'nowplaying',
     aliases: ['np', 'playing'],
     enabled: true,
+    description: 'Shows artist and titel of currently playing song',
     async execute(event, _args, apiClient) {
         const { chatterDisplayName: displayName } = event
         const response = await getNowPlayingTrack()

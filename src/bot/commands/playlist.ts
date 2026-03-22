@@ -4,6 +4,7 @@ const playlist: Command = {
     name: 'playlist',
     aliases: [],
     enabled: true,
+    description: 'Get the streamer’s playlist',
     async execute(event, _args, apiClient) {
         apiClient.chat.sendChatMessageAsApp(
             process.env.BOT_ID!,

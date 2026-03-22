@@ -4,6 +4,7 @@ const discord: Command = {
     name: 'discord',
     aliases: [],
     enabled: true,
+    description: 'the stream discord url',
     async execute(event, _args, apiClient) {
         apiClient.chat.sendChatMessageAsApp(
             process.env.BOT_ID!,

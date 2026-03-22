@@ -5,6 +5,7 @@ const roulette: Command = {
     aliases: [],
     cooldown: 60000, // cooldown in milliseconds
     enabled: true,
+    description: 'play russian roulette! good luck!',
     async execute(event, _args, apiClient) {
         const bullet = Math.floor(Math.random() * 6 + 1)
 

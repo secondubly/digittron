@@ -4,6 +4,8 @@ const title: Command = {
     name: 'title',
     aliases: [],
     enabled: true,
+    description:
+        'Show stream title (for viwers) or change stream title (for moderators and up)',
     async execute(event, args, apiClient) {
         const channelInfo = await apiClient.channels.getChannelInfoById(
             event.broadcasterId,

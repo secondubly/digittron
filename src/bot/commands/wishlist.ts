@@ -4,6 +4,7 @@ const wishlist: Command = {
     name: 'wishlist',
     aliases: [],
     enabled: true,
+    description: 'Stream wishlist links',
     async execute(event, _args, apiClient) {
         apiClient.chat.sendChatMessageAsApp(
             process.env.BOT_ID!,

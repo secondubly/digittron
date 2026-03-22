@@ -1,10 +1,19 @@
 import { ApiClient } from '@twurple/api'
 import { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 
+export enum Role {
+    Broadcaster = 'Broadcaster',
+    Moderator = 'Moderator',
+    Subscriber = 'Subscriber',
+    VIP = 'VIP',
+    Viewer = 'Viewer',
+}
+
 export interface Command {
     name: string
     aliases: string[]
     cooldown?: number
+    description?: string
     enabled: boolean
     execute(
         event: EventSubChannelChatMessageEvent,
@@ -14,7 +23,7 @@ export interface Command {
 }
 
 // REF: used for https://api.deadlock-api.com/docs
-export type MMRHistory = {
+export interface MMRHistory {
     account_id: number
     match_id: number
     start_time: number

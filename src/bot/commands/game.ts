@@ -5,6 +5,8 @@ const game: Command = {
     name: 'game',
     aliases: [],
     enabled: true,
+    description:
+        'Show currently streaming game (for viewers) OR change the current game.',
     async execute(event, args, apiClient) {
         const channelId = event.broadcasterId
         const displayName = event.chatterDisplayName

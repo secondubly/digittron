@@ -5,6 +5,7 @@ const details: Command = {
     name: 'details',
     aliases: [],
     enabled: true,
+    description: 'Description of currently streaming game',
     async execute(event, args, apiClient) {
         if (args.length === 0) {
             log.bot.error(
@@ -88,7 +89,7 @@ const details: Command = {
                     await apiClient.chat.sendChatMessageAsApp(
                         process.env.BOT_ID!,
                         event.broadcasterId,
-                        part
+                        part,
                     )
                     // wait a bit before sending the next message
                     await new Promise((resolve) => setTimeout(resolve, 1500))
@@ -100,7 +101,6 @@ const details: Command = {
                     message,
                 )
             }
-
         } catch (error) {
             log.bot.error(error)
         }
@@ -113,7 +113,8 @@ const splitStringIntoParts = (text: string, size = 500): string[] => {
     let currentBlock = ''
     for (const word of words) {
         // get possible block length by adding current block length with the length of a space and the current word
-        const possibleBlockLength = currentBlock.length + (' ' + word).trim().length
+        const possibleBlockLength =
+            currentBlock.length + (' ' + word).trim().length
         if (possibleBlockLength <= size) {
             currentBlock = (currentBlock + ' ' + word).trim()
         } else {

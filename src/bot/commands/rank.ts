@@ -20,6 +20,7 @@ const rank: Command = {
     name: 'rank',
     aliases: [],
     enabled: true,
+    description: 'Show Daedlock rank',
     async execute(event, _args, apiClient) {
         const account_id = process.env.STEAM_ID || '89010416'
         const response = await fetch(
