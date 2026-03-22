@@ -15,6 +15,7 @@ export interface Command {
     cooldown?: number
     description?: string
     enabled: boolean
+    permissions?: Role[]
     execute(
         event: EventSubChannelChatMessageEvent,
         args: string[],
