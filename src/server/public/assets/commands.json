@@ -1,0 +1,148 @@
+[
+   {
+      "name":"anniversary",
+      "aliases":[
+         "anni"
+      ],
+      "enabled":false,
+      "description":"Anniversary stream information"
+   },
+   {
+      "name":"backseat",
+      "aliases":[
+         
+      ],
+      "enabled":true,
+      "description":"Warning about backseating"
+   },
+   {
+      "name":"blind",
+      "aliases":[],
+      "enabled":true,
+      "description":"Explanation of blind playthroughs"
+   },
+   {
+      "name":"commands",
+      "aliases":[
+         "help"
+      ],
+      "enabled":true,
+      "description":"Lists all available commands"
+   },
+   {
+      "name":"d20",
+      "aliases":[
+         
+      ],
+      "enabled":true,
+      "description":"Roll a d20"
+   },
+   {
+      "name":"details",
+      "aliases":[
+         
+      ],
+      "enabled":true,
+      "description":"Description of currently streaming game"
+   },
+   {
+      "name":"discord",
+      "aliases":[
+         
+      ],
+      "enabled":true,
+      "description":"the stream discord url"
+   },
+   {
+      "name":"game",
+      "aliases":[
+         
+      ],
+      "enabled":true,
+      "description":"Show currently streaming game (for viewers) OR change the current game."
+   },
+   {
+      "name":"nowplaying",
+      "aliases":[
+         "np",
+         "playing"
+      ],
+      "enabled":true,
+      "description":"Shows artist and title of currently playing song"
+   },
+   {
+      "name":"permit",
+      "aliases":[
+         
+      ],
+      "enabled":true,
+      "description":"Allows specified user to post links"
+   },
+   {
+      "name":"playlist",
+      "aliases":[
+         
+      ],
+      "enabled":true,
+      "description":"Get the streamer’s playlist"
+   },
+   {
+      "name":"raidmsg",
+      "aliases":[
+         
+      ],
+      "enabled":true,
+      "description":"The channel’s raid message"
+   },
+   {
+      "name":"rank",
+      "aliases":[
+         
+      ],
+      "enabled":true,
+      "description":"Show Daedlock rank"
+   },
+   {
+      "name":"roulette",
+      "aliases":[
+         
+      ],
+      "enabled":true,
+      "description":"Play russian roulette! good luck!"
+   },
+   {
+      "name":"subgoal",
+      "aliases":[
+         
+      ],
+      "enabled":false,
+      "description":"List of subscriber goals during the subathon"
+   },
+   {
+      "name":"test",
+      "aliases":[
+         
+      ],
+      "enabled":true,
+      "description":"Sample command triggerable only by the broadcaster.",
+      "permissions":[
+         "Broadcaster"
+      ]
+   },
+   {
+      "name":"title",
+      "aliases":[
+         
+      ],
+      "enabled":true,
+      "description":"Show stream title (for viewers) or change stream title (for moderators and up)"
+   },
+   {
+      "name":"wishlist",
+      "aliases":[
+         
+      ],
+      "enabled":true,
+      "description":"Stream wishlist links"
+   }
+]
