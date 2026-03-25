@@ -8,9 +8,10 @@ export const autoConfig = (): FastifyStaticOptions => {
         'build',
         'web',
     )
+
     return {
         root: dirPath,
-        prefix: `/web`,
+        prefix: `/`,
     }
 }
 
