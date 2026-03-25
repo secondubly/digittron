@@ -1,40 +1,35 @@
-import { z } from 'zod'
-import { buildJsonSchemas } from 'fastify-zod'
+import { type Static, Type } from 'typebox'
 
 // registration schema (only useable by admin)
-const createUserSchema = z.object({
-    username: z.string().min(1),
-    password: z.string().min(6),
-})
-
-export type CreateUserInput = z.infer<typeof createUserSchema>
-
-const createUserResponseSchema = z.object({
-    id: z.string(),
-    username: z.string(),
-})
-
-const loginSchema = z.object({
-    username: z.string({
-        required_error: 'Username is required',
-        invalid_type_error: 'Username must be a string',
-    }),
-    password: z.string().min(6),
-})
-
-export type LoginUserInput = z.infer<typeof loginSchema>
-const loginResponseSchema = z.object({
-    accessToken: z.string(),
-})
-
-export const { schemas: userSchemas, $ref } = buildJsonSchemas(
+export const createUserSchema = Type.Object(
     {
-        createUserSchema,
-        createUserResponseSchema,
-        loginSchema,
-        loginResponseSchema,
+        username: Type.String({
+            minLength: 1,
+        }),
+        password: Type.String({
+            minLength: 6,
+        }),
     },
-    {
-        $id: 'userSchemas',
-    },
+    { $id: 'CreateUserSchema' },
 )
+
+export const createUserResponseSchema = Type.Object(
+    {
+        id: Type.String(),
+        username: Type.String(),
+    },
+    { $id: 'CreateUserResponseSchema' },
+)
+
+export const loginSchema = Type.Object({
+    username: Type.String(),
+    password: Type.String({
+        minLength: 6,
+    }),
+})
+
+export type CreateUserInput = Static<typeof createUserSchema>
+export type LoginUserInput = Static<typeof loginSchema>
+export const loginResponseSchema = Type.Object({
+    accessToken: Type.String(),
+})

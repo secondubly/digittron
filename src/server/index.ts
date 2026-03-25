@@ -2,7 +2,7 @@ import Fastify from 'fastify'
 import fp from 'fastify-plugin'
 import closeWithGrace from 'close-with-grace'
 import bootstrap from './build'
-import type { ZodTypeProvider } from 'fastify-type-provider-zod'
+import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
 function getLoggerOptions() {
     if (process.stdout.isTTY || process.env.NODE_ENV === 'development') {
         return {
@@ -29,13 +29,7 @@ const server = Fastify({
     http: {
         headersTimeout: 15_000,
     },
-    ajv: {
-        customOptions: {
-            coerceTypes: 'array', // change type of data to match type keyword
-            removeAdditional: 'all', // Remove additional body properties
-        },
-    },
-}).withTypeProvider<ZodTypeProvider>()
+}).withTypeProvider<TypeBoxTypeProvider>()
 
 async function init() {
     server.register(fp(bootstrap))

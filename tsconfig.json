@@ -16,6 +16,7 @@
     "types": ["node"],
     // For nodejs:
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "removeComments": true,
     "esModuleInterop": true,
     "moduleResolution": "bundler",
     "experimentalDecorators": true,

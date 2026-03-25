@@ -1,34 +1,20 @@
-import { buildJsonSchemas } from 'fastify-zod'
-import { z } from 'zod'
+import { type Static, Type } from 'typebox'
 
-const twitchParamsSchema = z.object({
-    id: z.string({
-        required_error: 'ID is required',
-    }),
+export const twitchParamsSchema = Type.Object({
+    id: Type.String(),
 })
 
-const twitchTokenQuerySchema = z.object({
-    scopes: z.string().optional(),
+export const twitchTokenQuerySchema = Type.Object({
+    scopes: Type.Optional(Type.String()),
 })
 
-const twitchTokenResponseSchema = z.object({
-    accessToken: z.string(),
-    refreshToken: z.string().optional(),
-    scope: z.array(z.string()),
-    expiresIn: z.number().optional(),
-    obtainmentTimestamp: z.number(),
+export const twitchTokenResponseSchema = Type.Object({
+    accessToken: Type.String(),
+    refreshToken: Type.Optional(Type.String()),
+    scope: Type.Array(Type.String()),
+    expiresIn: Type.Optional(Type.Number()),
+    obtainmentTimestamp: Type.Optional(Type.Number()),
 })
 
-export type TwitchTokenInputParams = z.infer<typeof twitchParamsSchema>
-export type TwitchTokenQuery = z.infer<typeof twitchTokenQuerySchema>
-
-export const { schemas: twitchTokenSchemas, $ref } = buildJsonSchemas(
-    {
-        twitchParamsSchema,
-        twitchTokenQuerySchema,
-        twitchTokenResponseSchema,
-    },
-    {
-        $id: 'TwitchSchemas',
-    },
-)
+export type TwitchTokenInputParams = Static<typeof twitchParamsSchema>
+export type TwitchTokenQuery = Static<typeof twitchTokenQuerySchema>

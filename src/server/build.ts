@@ -5,29 +5,23 @@ import type {
     FastifyInstance,
     FastifyPluginOptions,
 } from 'fastify'
-import {
-    serializerCompiler,
-    validatorCompiler,
-} from 'fastify-type-provider-zod'
 
 export default async function bootstrap(
     fastify: FastifyInstance,
     opts: FastifyPluginOptions,
 ) {
     /**
-     * load external plugins because the database
+     * load external plugins first because the server may need them immediately
      */
     await fastify.register(fastifyAutoload, {
         dir: path.join(import.meta.dirname, 'plugins/external'),
         options: { ...opts },
     })
 
-    /**
-     * we are using Zod for our schema validation, so we need to provide
-     * the proper validator and serializer for them
-     */
-    fastify.setValidatorCompiler(validatorCompiler)
-    fastify.setSerializerCompiler(serializerCompiler)
+    await fastify.register(fastifyAutoload, {
+        dir: path.join(import.meta.dirname, 'plugins/server'),
+        options: { ...opts },
+    })
 
     fastify.register(fastifyAutoload, {
         dir: path.join(import.meta.dirname, 'routes'),

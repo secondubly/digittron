@@ -1,46 +1,29 @@
-import { buildJsonSchemas } from 'fastify-zod'
-import { z } from 'zod'
+import { type Static, Type } from 'typebox'
 
-const getTokenParamsSchema = z.object({
-    id: z.string({
-        required_error: 'ID is required',
-    }),
+export const getTokenParamsSchema = Type.Object({
+    id: Type.String(),
 })
 
-const updateTokenParamsSchema = z.object({
-    id: z.string({
-        required_error: 'ID is required',
-    }),
+export const updateTokenParamsSchema = Type.Object({
+    id: Type.String(),
 })
 
-const updateTokenBodySchema = z.object({
-    access_token: z.string(),
-    token_type: z.literal('Bearer'),
-    expires_in: z.number(),
-    refresh_token: z.string().optional(),
-    scope: z.array(z.string()),
+export const updateTokenBodySchema = Type.Object({
+    access_token: Type.String(),
+    token_type: Type.Literal('Bearer'),
+    expires_in: Type.Number(),
+    refresh_token: Type.String(),
+    scope: Type.Array(Type.String()),
 })
 
-const getTokenResponseSchema = z.object({
-    access_token: z.string(),
-    token_type: z.literal('Bearer'),
-    expires_in: z.number(),
-    refresh_token: z.string().optional(),
-    scope: z.array(z.string()),
+export const getTokenResponseSchema = Type.Object({
+    access_token: Type.String(),
+    token_type: Type.Literal('Bearer'),
+    expires_in: Type.Number(),
+    refresh_token: Type.Optional(Type.String()),
+    scope: Type.Array(Type.String()),
 })
 
-export type getTokenParams = z.infer<typeof getTokenParamsSchema>
-export type UpdateTokenParams = z.infer<typeof updateTokenParamsSchema>
-export type UpdateTokenInput = z.infer<typeof updateTokenBodySchema>
-
-export const { schemas: spotifySchemas, $ref } = buildJsonSchemas(
-    {
-        getTokenParamsSchema,
-        updateTokenParamsSchema,
-        updateTokenBodySchema,
-        getTokenResponseSchema,
-    },
-    {
-        $id: 'SpotifySchemas',
-    },
-)
+export type getTokenParams = Static<typeof getTokenParamsSchema>
+export type UpdateTokenParams = Static<typeof updateTokenParamsSchema>
+export type UpdateTokenInput = Static<typeof updateTokenBodySchema>
