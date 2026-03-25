@@ -1,6 +1,10 @@
 import type { FastifyPluginAsync } from 'fastify'
-import { $ref } from '../../../schemas/twitch.js'
 import { getTwitchToken } from '../../../controllers/twitch.js'
+import {
+    twitchParamsSchema,
+    twitchTokenQuerySchema,
+    twitchTokenResponseSchema,
+} from 'src/server/schemas/twitch.js'
 
 const plugin: FastifyPluginAsync = async (fastify) => {
     // GET /token - get Twitch token
@@ -8,10 +12,10 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         '/token',
         {
             schema: {
-                params: $ref('twitchParamsSchema'),
-                querystring: $ref('twitchTokenQuerySchema'),
+                params: twitchParamsSchema,
+                querystring: twitchTokenQuerySchema,
                 response: {
-                    200: $ref('twitchTokenResponseSchema'),
+                    200: twitchTokenResponseSchema,
                 },
             },
         },

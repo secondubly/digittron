@@ -1,6 +1,11 @@
 import type { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify'
-import { $ref } from '../../../schemas/user.js'
-import { createUser, login } from '../../../controllers/user.js'
+import { createUser, login, logout } from '../../../controllers/user.js'
+import {
+    createUserResponseSchema,
+    createUserSchema,
+    loginResponseSchema,
+    loginSchema,
+} from 'src/server/schemas/user.js'
 
 const plugin: FastifyPluginAsync = async (fastify) => {
     fastify.get('/', (_req: FastifyRequest, reply: FastifyReply) => {
@@ -12,9 +17,9 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         '/register',
         {
             schema: {
-                body: $ref('createUserSchema'),
+                body: createUserSchema,
                 response: {
-                    201: $ref('createUserResponseSchema'),
+                    201: createUserResponseSchema,
                 },
             },
         },
@@ -26,16 +31,16 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         '/login',
         {
             schema: {
-                body: $ref('loginSchema'),
+                body: loginSchema,
                 response: {
-                    201: $ref('loginResponseSchema'),
+                    201: loginResponseSchema,
                 },
             },
         },
         login,
     )
     // DELETE /logout - log out (only for authenticated users)
-    // fastify.delete('/logout', { preHandler: [fastify.authenticate] }, logout)
+    fastify.delete('/logout', { preHandler: [fastify.authenticate] }, logout)
     fastify.log.info('user routes registered')
 }
 

@@ -1,18 +1,23 @@
 import type { FastifyPluginAsync } from 'fastify'
-import { $ref } from '../../../schemas/spotify.js'
 import {
     getSpotifyToken,
     putSpotifyToken,
 } from '../../../controllers/spotify.js'
+import {
+    getTokenParamsSchema,
+    getTokenResponseSchema,
+    updateTokenBodySchema,
+    updateTokenParamsSchema,
+} from 'src/server/schemas/spotify.js'
 
 const plugin: FastifyPluginAsync = async (fastify) => {
     fastify.get(
         '/token',
         {
             schema: {
-                params: $ref('getTokenParamsSchema'),
+                params: getTokenParamsSchema,
                 response: {
-                    200: $ref('getTokenResponseSchema'),
+                    200: getTokenResponseSchema,
                 },
             },
         },
@@ -23,8 +28,8 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         '/token',
         {
             schema: {
-                params: $ref('updateTokenParamsSchema'),
-                body: $ref('updateTokenBodySchema'),
+                params: updateTokenParamsSchema,
+                body: updateTokenBodySchema,
             },
         },
         putSpotifyToken,

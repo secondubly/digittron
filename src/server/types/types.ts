@@ -1,4 +1,5 @@
 import type { JWT } from '@fastify/jwt'
+import type { MikroORM } from '@mikro-orm/core'
 import type { FastifyReply, preHandlerAsyncHookHandler } from 'fastify'
 
 declare module 'fastify' {
@@ -7,6 +8,7 @@ declare module 'fastify' {
     }
     export interface FastifyInstance {
         authenticate: preHandlerAsyncHookHandler
+        orm: MikroORM
     }
 }
 
