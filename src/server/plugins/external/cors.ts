@@ -6,6 +6,7 @@ export const autoConfig: FastifyCorsOptions = {
             !origin ||
             /localhost:5000/.test(origin) ||
             /localhost:5001/.test(origin) ||
+            /localhost:4000/.test(origin) ||
             /192.168.1.\d+/.test(origin)
         ) {
             cb(null, true)
