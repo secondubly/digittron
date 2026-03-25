@@ -1,5 +1,5 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import type { CreateUserInput, LoginUserInput } from './user.schema'
+import type { CreateUserInput, LoginUserInput } from '../schemas/user'
 import bcrypt from 'bcrypt'
 import { RequestContext } from '@mikro-orm/core'
 import { User } from '@lib/db/models/user.entity'

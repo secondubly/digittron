@@ -1,4 +1,4 @@
-import { init as apiInit } from './api/index.js'
+// import { init as apiInit } from './server/index.js'
 import { init as webInit } from './web/index.js'
 import { startup as botInit } from './bot/index.js'
 import { connectRedis } from '@lib/utils/redis.js'
@@ -13,7 +13,7 @@ const startup = async () => {
     try {
         setupShutdownHandler()
         // start up api
-        await apiInit(parseInt(config.API_PORT))
+        // await apiInit(parseInt(config.API_PORT))
         // Spin up cache
         await connectRedis()
         // start bot

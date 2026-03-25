@@ -1,15 +1,14 @@
-import { log } from '@lib/utils/logger'
-import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import { $ref } from './user.schema'
-import { createUser, login, logout } from './user.controller'
+import type { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify'
+import { $ref } from '../../../schemas/user.js'
+import { createUser, login } from '../../../controllers/user.js'
 
-export async function userRoutes(app: FastifyInstance) {
-    app.get('/', (_req: FastifyRequest, reply: FastifyReply) => {
+const plugin: FastifyPluginAsync = async (fastify) => {
+    fastify.get('/', (_req: FastifyRequest, reply: FastifyReply) => {
         reply.send({ message: '/ route hit' })
     })
 
     // POST /register - create new accounts
-    app.post(
+    fastify.post(
         '/register',
         {
             schema: {
@@ -23,7 +22,7 @@ export async function userRoutes(app: FastifyInstance) {
     )
 
     // POST /login - log in to dashboard
-    app.post(
+    fastify.post(
         '/login',
         {
             schema: {
@@ -36,6 +35,8 @@ export async function userRoutes(app: FastifyInstance) {
         login,
     )
     // DELETE /logout - log out (only for authenticated users)
-    app.delete('/logout', { preHandler: [app.authenticate] }, logout)
-    log.api.info('user routes registered')
+    // fastify.delete('/logout', { preHandler: [fastify.authenticate] }, logout)
+    fastify.log.info('user routes registered')
 }
+
+export default plugin

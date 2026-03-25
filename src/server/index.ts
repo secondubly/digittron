@@ -1,0 +1,80 @@
+import Fastify from 'fastify'
+import fp from 'fastify-plugin'
+import closeWithGrace from 'close-with-grace'
+import bootstrap from './build'
+import type { ZodTypeProvider } from 'fastify-type-provider-zod'
+function getLoggerOptions() {
+    if (process.stdout.isTTY || process.env.NODE_ENV === 'development') {
+        return {
+            level: 'debug',
+            transport: {
+                target: 'pino-pretty',
+                options: {
+                    translateTime: 'HH:mm:ss Z',
+                    ignore: 'pid,hostname',
+                },
+            },
+        }
+    }
+
+    return { level: process.env.LOG_LEVEL ?? 'silent' }
+}
+
+const server = Fastify({
+    logger: getLoggerOptions(),
+    // these are recommended values based on best practices
+    connectionTimeout: 120_000,
+    requestTimeout: 60_000,
+    keepAliveTimeout: 10_000,
+    http: {
+        headersTimeout: 15_000,
+    },
+    ajv: {
+        customOptions: {
+            coerceTypes: 'array', // change type of data to match type keyword
+            removeAdditional: 'all', // Remove additional body properties
+        },
+    },
+}).withTypeProvider<ZodTypeProvider>()
+
+async function init() {
+    server.register(fp(bootstrap))
+
+    closeWithGrace(
+        {
+            delay:
+                (process.env.FASTIFY_CLOSE_GRACE_DELAY as unknown as number) ??
+                500,
+        },
+        async ({ err }) => {
+            if (err != null) {
+                server.log.error(err)
+            }
+
+            await server.close()
+        },
+    )
+
+    await server.ready()
+
+    try {
+        if (process.stdout.isTTY) {
+            server.log.info('Server running in development mode')
+            server.listen({
+                port: (process.env.API_PORT as unknown as number) ?? 4001,
+            })
+        } else {
+            server.listen({
+                port: (process.env.API_PORT as unknown as number) ?? 4001,
+                host: '0.0.0.0',
+            })
+        }
+    } catch (err) {
+        server.log.error(err)
+        process.exit(1)
+    }
+}
+
+if (import.meta.main) {
+    init()
+}

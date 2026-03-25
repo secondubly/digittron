@@ -19,7 +19,7 @@ export default function useToken() {
         try {
             const decoded = jwtDecode(token)
             const currentTime = Date.now() / 1000 // convert to seconds
-            if (decoded?.exp < currentTime) {
+            if (decoded.exp && decoded.exp < currentTime) {
                 localStorage.removeItem('token')
                 return null
             }
