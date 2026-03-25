@@ -69,8 +69,8 @@ export async function login(
     reply.setCookie('access_token', token, {
         path: '/',
         httpOnly: true,
-        secure: true,
-        sameSite: 'none', // TODO: set condition to only use in development
+        secure: false, // TODO: set this to true when deploying to production
+        sameSite: 'none', // REVIEW: this should only be set in development
     })
 
     return { accessToken: token }
