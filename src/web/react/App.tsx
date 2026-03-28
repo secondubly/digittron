@@ -60,7 +60,7 @@ export default function MyApp() {
                 </Stack>
             </AppShell.Navbar>
 
-            <AppShell.Main ml={{ s: 0, md: '10em'}}>
+            <AppShell.Main ml={{ s: 0, md: 'calc(18.75rem * var(--mantine-scale))'}}>
                 <AppRoutes />
             </AppShell.Main>
         </AppShell>
