@@ -1,13 +1,12 @@
-import { describe, expect, test } from 'vitest'
+import test from 'node:test'
+import assert from 'node:assert'
 import { build } from '../helper.js'
 
-describe('GET /ping returns “pong”', async () => {
-    test('Should have response status 200', async () => {
-        const server = await build()
-        const response = await server.inject({
-            method: 'GET',
-            url: '/health',
-        })
-        expect(response.statusCode).toBe(200)
+test('/healthcheck should have response status 200', async (t) => {
+    const server = await build(t)
+    const response = await server.inject({
+        method: 'GET',
+        url: '/health',
     })
+    assert.deepStrictEqual(response.statusCode, 200)
 })

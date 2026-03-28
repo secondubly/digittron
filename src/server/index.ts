@@ -45,6 +45,7 @@ async function init() {
                 server.log.error(err)
             }
 
+            await server.orm.close()
             await server.close()
         },
     )

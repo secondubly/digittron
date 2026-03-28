@@ -19,7 +19,7 @@
         "lint": "eslint . --ext .ts",
         "mikro-orm": "mikro-orm-esm",
         "seed": "mikro-orm-esm seeder:run",
-        "test": "vitest run --pool=forks --root=./",
+        "test": "node --import tsx --test \"./tests/**/*.test.ts\"",
         "start": "node build/index.js",
         "web": "vite",
         "web:dev": "concurrently -c magenta,#7700cf -n API,WEB \"pnpm:api\" \"vite\""
@@ -85,6 +85,8 @@
         "eslint": "^9.39.2",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-prettier": "^5.5.4",
+        "glob": "^13.0.6",
+        "glob-bin": "^1.1.0",
         "igdb-api-node": "^6.0.5",
         "postcss": "^8.5.8",
         "postcss-preset-mantine": "^1.18.0",
@@ -95,8 +97,6 @@
         "tsx": "^4.21.0",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.50.1",
-        "vite": "^7.3.0",
-        "vite-tsconfig-paths": "^6.1.1",
-        "vitest": "^4.1.0"
+        "vite": "^7.3.0"
     }
 }

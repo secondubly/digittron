@@ -1,7 +1,15 @@
-import Fastify from 'fastify'
+import Fastify, { preHandlerAsyncHookHandler } from 'fastify'
+import type { MikroORM } from '@mikro-orm/core'
 import bootstrap from '../src/server/build.js'
 import fp from 'fastify-plugin'
 import { TestContext } from 'node:test'
+
+declare module 'fastify' {
+    interface FastifyInstance {
+        authenticate: preHandlerAsyncHookHandler
+        orm: MikroORM
+    }
+}
 
 export function config() {
     return {
@@ -16,7 +24,10 @@ export async function build(t?: TestContext) {
     await server.ready()
 
     if (t) {
-        t.after(() => server.close())
+        t.after(() => {
+            server.orm.close()
+            server.close()
+        })
     }
 
     return server

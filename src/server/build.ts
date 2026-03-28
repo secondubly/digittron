@@ -10,6 +10,7 @@ export default async function bootstrap(
     fastify: FastifyInstance,
     opts: FastifyPluginOptions,
 ) {
+    delete opts.skipOverride
     /**
      * load external plugins first because the server may need them immediately
      */

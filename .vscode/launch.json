@@ -53,6 +53,16 @@
             "runtimeExecutable": "pnpm",
             "outputCapture": "std", // enables pino logging to appear in console
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Program - Testing",
+            "skipFiles": ["<node_internals>/**"],
+            "runtimeArgs": ["run", "test"],
+            "runtimeExecutable": "pnpm",
+            "outputCapture": "std", // enables pino logging to appear in console
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }
