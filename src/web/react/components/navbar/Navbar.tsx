@@ -1,11 +1,10 @@
 import {
   IconAdjustments,
-  IconCalendarStats,
-  IconFileAnalytics,
+  IconConfettiFilled,
   IconGauge,
   IconLock,
-  IconNotes,
-  IconPresentationAnalytics,
+  IconMusicBolt,
+  IconTerminal2,
 } from '@tabler/icons-react';
 import { Code, Group, ScrollArea } from '@mantine/core';
 import { LinksGroup } from './navbar-group/NavbarLinksGroup';
@@ -14,37 +13,29 @@ import { Logo } from './Logo';
 import classes from './Navbar.module.css';
 
 const mockdata = [
+  // TODO: if you're logged out, dashboard should take you to login
+  // otherwise dashboard should auto load when you load the page
   { label: 'Dashboard', icon: IconGauge },
+  // {
+  //   label: 'Dashboard',
+  //   icon: IconGauge,
+  //   links: [
+  //     { label: 'Logs', link: '/' },
+  //     { label: 'Chat Moderation', link: '/' },
+  //   ],
+  // },
   {
-    label: 'Market news',
-    icon: IconNotes,
-    initiallyOpened: true,
-    links: [
-      { label: 'Overview', link: '/' },
-      { label: 'Forecasts', link: '/' },
-      { label: 'Outlook', link: '/' },
-      { label: 'Real time', link: '/' },
-    ],
+    label: 'Giveaways',
+    icon: IconConfettiFilled,
   },
-  {
-    label: 'Releases',
-    icon: IconCalendarStats,
-    links: [
-      { label: 'Upcoming releases', link: '/' },
-      { label: 'Previous releases', link: '/' },
-      { label: 'Releases schedule', link: '/' },
-    ],
-  },
-  { label: 'Analytics', icon: IconPresentationAnalytics },
-  { label: 'Contracts', icon: IconFileAnalytics },
+  { label: 'Commands', icon: IconTerminal2 },
+  { label: 'Song Requests', icon: IconMusicBolt },
   { label: 'Settings', icon: IconAdjustments },
   {
     label: 'Security',
     icon: IconLock,
     links: [
-      { label: 'Enable 2FA', link: '/' },
       { label: 'Change password', link: '/' },
-      { label: 'Recovery codes', link: '/' },
     ],
   },
 ];
