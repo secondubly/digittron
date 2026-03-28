@@ -143,3 +143,5 @@ build
 db/sqlite.db
 temp/
 src/**/data.json
+
+.DS_STORE
