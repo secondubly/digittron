@@ -3,11 +3,6 @@
     gap: 2rem;
 }
 
-.navbar-container {
-    flex: 0 1 auto;
-    height: 100vh;
-}
-
 .content {
     flex: 1 1 auto;
 }
@@ -318,6 +313,24 @@
             background-color: var(--mantine-color-default-hover);
         }
     }
+}
+
+/* Navbar */
+.navbar {
+    background-color: light-dark(
+        var(--mantine-color-white),
+        var(--mantine-color-dark-6)
+    );
+    height: 100%;
+    width: calc(18.75rem * var(--mantine-scale));
+    padding: var(--mantine-spacing-md);
+    padding-bottom: 0;
+}
+
+.mantine-AppShell-section {
+    height: inherit;
+    display: flex;
+    flex-direction: column;
 }
 
 /* NavLink */

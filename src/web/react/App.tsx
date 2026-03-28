@@ -41,10 +41,9 @@ export default function MyApp() {
                 </Group>
             </AppShell.Header>
 
-            <AppShell.Navbar>
+            <AppShell.Navbar className={'navbar'}>
                 <AppShell.Section visibleFrom="md">
-                    <Navbar colorScheme={computedColorScheme} 
-                    toggleColorScheme={toggleColorScheme} />
+                    <Navbar />
                 </AppShell.Section>
                 <Stack
                     bg="var(--mantine-color-body)"

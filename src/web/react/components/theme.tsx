@@ -1,4 +1,4 @@
-import { AppShellMain, AppShellNavbar, createTheme } from '@mantine/core';
+import { createTheme, type MantineThemeOverride } from '@mantine/core';
 
 const theme: MantineThemeOverride = createTheme({
   colors: {

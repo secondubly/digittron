@@ -1,88 +1,73 @@
-import { useState } from 'react';
 import {
-  IconHome2,
-  IconSunHigh,
-  IconMoon
+  IconAdjustments,
+  IconCalendarStats,
+  IconFileAnalytics,
+  IconGauge,
+  IconLock,
+  IconNotes,
+  IconPresentationAnalytics,
 } from '@tabler/icons-react';
-import { ActionIcon, Stack, Tooltip, UnstyledButton, useMantineTheme } from '@mantine/core';
-// @ts-expect-error false positive error
-import classes from './Navbar.module.css'
-import * as Icons from '../icons'
-import { Link, useLocation } from 'react-router-dom'
-import LoginForm from '../ui/LoginForm';
+import { Code, Group, ScrollArea } from '@mantine/core';
+import { LinksGroup } from './navbar-group/NavbarLinksGroup';
+import { UserButton } from './user-button/UserButton';
+import { Logo } from './Logo';
+import classes from './Navbar.module.css';
 
-interface NavbarLinkProps {
-  id: number,
-  icon: typeof IconHome2;
-  label: string;
-  active?: boolean;
-  onClick?: () => void;
-  path: string
-}
-
-interface ThemeProps {
-  colorScheme: string,
-  toggleColorScheme: () => void
-}
-
-function NavbarLink({ icon: Icon, label, active, onClick, path }: NavbarLinkProps) {
-  return (
-    <Tooltip label={label} position="right" transitionProps={{ duration: 0 }}>
-      <Link to={path}>
-        <UnstyledButton
-          onClick={onClick}
-          className={classes.link}
-          data-active={active || undefined}
-          aria-label={label}
-        >
-            <Icon size={20} stroke={1.5} />
-        </UnstyledButton>
-      </Link>
-    </Tooltip>
-  );
-}
-
-
-const route_icons = [
-  { id: 1, icon: Icons.HomeIcon, label: 'Home', path: '/' },
-  { id: 2, icon: Icons.CommandsIcon, label: 'Commands', path: '/commands' },
-  { id: 3, icon: Icons.SongRequestIcon, label: 'Song Requests', path: '/song_requests'},
-  { id: 4, icon: Icons.ModerationIcon, label: 'Moderation', path: '/moderation'},
+const mockdata = [
+  { label: 'Dashboard', icon: IconGauge },
+  {
+    label: 'Market news',
+    icon: IconNotes,
+    initiallyOpened: true,
+    links: [
+      { label: 'Overview', link: '/' },
+      { label: 'Forecasts', link: '/' },
+      { label: 'Outlook', link: '/' },
+      { label: 'Real time', link: '/' },
+    ],
+  },
+  {
+    label: 'Releases',
+    icon: IconCalendarStats,
+    links: [
+      { label: 'Upcoming releases', link: '/' },
+      { label: 'Previous releases', link: '/' },
+      { label: 'Releases schedule', link: '/' },
+    ],
+  },
+  { label: 'Analytics', icon: IconPresentationAnalytics },
+  { label: 'Contracts', icon: IconFileAnalytics },
+  { label: 'Settings', icon: IconAdjustments },
+  {
+    label: 'Security',
+    icon: IconLock,
+    links: [
+      { label: 'Enable 2FA', link: '/' },
+      { label: 'Change password', link: '/' },
+      { label: 'Recovery codes', link: '/' },
+    ],
+  },
 ];
 
-export function Navbar({ colorScheme, toggleColorScheme }: ThemeProps) {
-  // TODO: clean this up
-  const [_path, setPath] = useState('/')
-  const location = useLocation()
-  const links = route_icons.map((link, _index) => (
-    // @ts-expect-error false positive error
-    <NavbarLink
-    {...link}
-      key={link.label}
-      active={location.pathname === link.path}
-      onClick={() => {
-        setPath(link.path)
-      }}
-    />
-  ));
+export function Navbar() {
+  const links = mockdata.map((item) => <LinksGroup {...item} key={item.label} />);
 
-  const theme = useMantineTheme();
   return (
-    
-    <nav className={classes.navbar}>
-      <div className={classes.navbarMain}>
-        <Stack justify="center" gap={0}>
-          {links}
-        </Stack>
+      <>
+      <div className={classes.header}>
+        <Group justify="space-between">
+          <Logo style={{ width: 120 }} />
+          <Code fw={700}>v3.1.2</Code>
+        </Group>
       </div>
 
-      <Stack justify="center" align='center' gap={'--mantine-spacing-md'}>
-        <ActionIcon size='md' color='orange' radius='sm' onClick={toggleColorScheme} className='theme-toggle' style={{ width: '3.125rem', height: '3.125rem', background: 'transparent' }}>
-          {colorScheme === 'dark' ? <IconMoon color={theme.colors.indigo[0]} size={20} /> : 
-            <IconSunHigh color={theme.colors.yellow[6]} size={20} />}
-        </ActionIcon>
-        <LoginForm />
-      </Stack>
-    </nav>
+      <ScrollArea className={classes.links}>
+        <div className={classes.linksInner}>{links}</div>
+      </ScrollArea>
+
+      <div className={classes.footer}>
+        <UserButton/>
+      </div>
+    </>
   );
 }
