@@ -28,7 +28,7 @@ const mockdata = [
     label: 'Giveaways',
     icon: IconConfettiFilled,
   },
-  { label: 'Commands', icon: IconTerminal2 },
+  { label: 'Commands', icon: IconTerminal2, link: '/commands' },
   { label: 'Song Requests', icon: IconMusicBolt },
   { label: 'Settings', icon: IconAdjustments },
   {
