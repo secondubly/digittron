@@ -17,7 +17,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState(null);
 
   const login = async (credentials: Credentials) => {
-    const response = await fetch('http://localhost:4000/api/users/login', {
+    const response = await fetch('/api/users/login', {
       method: 'POST',
       credentials: 'include', // TODO: set condition to only use in development
       headers: {
@@ -38,12 +38,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = async () => {
-    const response = await fetch('http://localhost:4000/api/users/logout', {
+    const response = await fetch('/api/users/logout', {
       method: 'DELETE',
       credentials: 'include'
     })
 
     if (!response.ok) {
+      console.error('response', response)
       throw new Error('An error occurred while logging out.')
     } else {
       removeToken();
