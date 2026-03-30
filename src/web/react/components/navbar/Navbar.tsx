@@ -87,16 +87,13 @@ export function Navbar({colorScheme, toggleColorScheme}: NavbarProps) {
             <UserButton />
           </Menu.Target>
           <Menu.Dropdown>
-            <Menu.Item leftSection={<IconSettings size={14} />}>
-              Settings
-            </Menu.Item>
             <Menu.Item leftSection={colorScheme === 'dark' ? <IconSun size={14} /> : <IconMoon size={14} />} 
             closeMenuOnClick={false} onClick={toggleColorScheme}>
                 <Text size={'sm'}>
                     {colorScheme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                 </Text>
             </Menu.Item>
-            <Menu.Item leftSection={<IconLogout2 size={14} onClick={handleLogout} />}>
+            <Menu.Item leftSection={<IconLogout2 size={14} />} onClick={handleLogout}>
               Logout
             </Menu.Item>
           </Menu.Dropdown>
