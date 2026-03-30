@@ -1,5 +1,6 @@
 [
    {
+      "id": 1,
       "name":"anniversary",
       "aliases":[
          "anni"
@@ -8,6 +9,7 @@
       "description":"Anniversary stream information"
    },
    {
+      "id": 2,
       "name":"backseat",
       "aliases":[
          
@@ -16,12 +18,14 @@
       "description":"Warning about backseating"
    },
    {
+      "id": 3,
       "name":"blind",
       "aliases":[],
       "enabled":true,
       "description":"Explanation of blind playthroughs"
    },
    {
+      "id": 4,
       "name":"commands",
       "aliases":[
          "help"
@@ -30,6 +34,7 @@
       "description":"Lists all available commands"
    },
    {
+      "id": 5,
       "name":"d20",
       "aliases":[
          
@@ -38,6 +43,7 @@
       "description":"Roll a d20"
    },
    {
+      "id": 6,
       "name":"details",
       "aliases":[
          
@@ -46,6 +52,7 @@
       "description":"Description of currently streaming game"
    },
    {
+      "id": 7,
       "name":"discord",
       "aliases":[
          
@@ -54,6 +61,7 @@
       "description":"the stream discord url"
    },
    {
+      "id": 8,
       "name":"game",
       "aliases":[
          
@@ -62,6 +70,7 @@
       "description":"Show currently streaming game (for viewers) OR change the current game."
    },
    {
+      "id": 9,
       "name":"nowplaying",
       "aliases":[
          "np",
@@ -71,6 +80,7 @@
       "description":"Shows artist and title of currently playing song"
    },
    {
+      "id": 10,
       "name":"permit",
       "aliases":[
          
@@ -79,6 +89,7 @@
       "description":"Allows specified user to post links"
    },
    {
+      "id": 11,
       "name":"playlist",
       "aliases":[
          
@@ -87,6 +98,7 @@
       "description":"Get the streamer’s playlist"
    },
    {
+      "id": 12,
       "name":"raidmsg",
       "aliases":[
          
@@ -95,6 +107,7 @@
       "description":"The channel’s raid message"
    },
    {
+      "id": 13,
       "name":"rank",
       "aliases":[
          
@@ -103,6 +116,7 @@
       "description":"Show Daedlock rank"
    },
    {
+      "id": 14,
       "name":"roulette",
       "aliases":[
          
@@ -111,6 +125,7 @@
       "description":"Play russian roulette! good luck!"
    },
    {
+      "id": 15,
       "name":"subgoal",
       "aliases":[
          
@@ -119,6 +134,7 @@
       "description":"List of subscriber goals during the subathon"
    },
    {
+      "id": 16,
       "name":"test",
       "aliases":[
          
@@ -130,6 +146,7 @@
       ]
    },
    {
+      "id": 17,
       "name":"title",
       "aliases":[
          
@@ -138,6 +155,7 @@
       "description":"Show stream title (for viewers) or change stream title (for moderators and up)"
    },
    {
+      "id": 18,
       "name":"wishlist",
       "aliases":[
          
