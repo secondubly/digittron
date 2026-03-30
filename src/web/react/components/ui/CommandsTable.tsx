@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-// @ts-expect-error false positive error
 import classes from './CommandsTable.module.css'
 import { Table } from "@mantine/core";
 export const CommandsTable = () => {
@@ -16,7 +15,6 @@ export const CommandsTable = () => {
             }
 
             const jsonData = await response.json()
-            console.log('json data', jsonData)
             setData(jsonData)
             setError(null)
             } catch (err) {
