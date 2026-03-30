@@ -1,10 +1,8 @@
-// import { useEffect, useState, useRef } from 'react'
 import { Navbar } from "./components/navbar/Navbar"
 import { useMantineColorScheme, useComputedColorScheme, AppShell, Burger, Group, Stack, ActionIcon, useMantineTheme } from "@mantine/core"
 import { useDisclosure, useMediaQuery} from '@mantine/hooks'
 import AppRoutes from "./Router"
 import { NavLink } from "react-router-dom";
-// @ts-expect-error false positive error
 import classes from './styles/AppShell.module.css';
 import { IconMoon, IconSunHigh } from "@tabler/icons-react";
 
@@ -43,7 +41,7 @@ export default function MyApp() {
 
             <AppShell.Navbar className={'navbar'}>
                 <AppShell.Section visibleFrom="md">
-                    <Navbar />
+                    <Navbar colorScheme={computedColorScheme} toggleColorScheme={toggleColorScheme}/>
                 </AppShell.Section>
                 <Stack
                     bg="var(--mantine-color-body)"
