@@ -57,7 +57,7 @@ export function LinksGroup({ icon: Icon, label, initiallyOpened, links, link }: 
     return (
       <>
         <UnstyledButton component='a' href={link} className={classes.control} px="md" py="sm">
-          <Group justify="space-between" gap={0}>
+          <Group justify="space-between" gap={0} id="test">
             <Box style={{ display: 'flex', alignItems: 'center' }}>
               <ThemeIcon variant="light" size={30}>
                 <Icon size={18} />
