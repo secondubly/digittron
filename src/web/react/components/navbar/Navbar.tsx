@@ -2,11 +2,9 @@ import {
   IconAdjustments,
   IconConfettiFilled,
   IconGauge,
-  IconLock,
   IconLogout2,
   IconMoon,
   IconMusicBolt,
-  IconSettings,
   IconSun,
   IconTerminal2,
 } from '@tabler/icons-react';
@@ -39,13 +37,6 @@ const mockdata = [
   { label: 'Commands', icon: IconTerminal2, link: '/commands' },
   { label: 'Song Requests', icon: IconMusicBolt },
   { label: 'Settings', icon: IconAdjustments },
-  {
-    label: 'Security',
-    icon: IconLock,
-    links: [
-      { label: 'Change password', link: '/' },
-    ],
-  },
 ];
 
 interface NavbarProps {
