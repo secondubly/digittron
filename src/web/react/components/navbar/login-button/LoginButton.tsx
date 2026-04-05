@@ -5,6 +5,7 @@ import { IconChevronRight } from "@tabler/icons-react";
 import { useState } from "react";
 import { useAuth } from "../../../contexts/AuthContext";
 import classes from './LoginButton.module.css'
+import { notifications } from "@mantine/notifications";
 
 interface Credentials {
     username: string
@@ -29,6 +30,10 @@ export const LoginButton = () => {
         try {
             loaderOpen()
             await login(values)
+            notifications.show({
+                message: 'You have been logged in!',
+                autoClose: 1000
+            })
             close()
         } catch(e) {
             if (e instanceof Error) {
