@@ -41,7 +41,6 @@ const plugin: FastifyPluginAsync = async (fastify) => {
     )
     // DELETE /logout - log out (only for authenticated users)
     fastify.delete('/logout', { preHandler: [fastify.authenticate] }, logout)
-    fastify.log.info('user routes registered')
 }
 
 export default plugin
