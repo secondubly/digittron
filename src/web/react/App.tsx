@@ -51,10 +51,10 @@ export default function MyApp() {
                     hiddenFrom="md"
                     w='100%'
                 >
-                <NavLink to='/' className='mobile-nav-link'>Home</NavLink>
-                <NavLink to='/' className='mobile-nav-link'>Commands</NavLink>
-                <NavLink to='/' className='mobile-nav-link'>Song Requests</NavLink>
-                <NavLink to='/' className='mobile-nav-link'>Moderation</NavLink>
+                    <NavLink to='/' className='mobile-nav-link'>Home</NavLink>
+                    <NavLink to='/' className='mobile-nav-link'>Commands</NavLink>
+                    <NavLink to='/' className='mobile-nav-link'>Song Requests</NavLink>
+                    <NavLink to='/' className='mobile-nav-link'>Moderation</NavLink>
                 </Stack>
             </AppShell.Navbar>
 

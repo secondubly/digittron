@@ -1,10 +1,10 @@
 import {
-  IconAdjustments,
   IconConfettiFilled,
   IconGauge,
   IconLogout2,
   IconMoon,
   IconMusicBolt,
+  IconShieldFilled,
   IconSun,
   IconTerminal2,
 } from '@tabler/icons-react';
@@ -33,10 +33,11 @@ const mockdata = [
   {
     label: 'Giveaways',
     icon: IconConfettiFilled,
+    link: '/giveaways'
   },
   { label: 'Commands', icon: IconTerminal2, link: '/commands' },
   { label: 'Song Requests', icon: IconMusicBolt },
-  { label: 'Settings', icon: IconAdjustments },
+  { label: 'Chat Moderation', icon: IconShieldFilled, link: '/chat_moderation' },
 ];
 
 interface NavbarProps {
@@ -50,7 +51,6 @@ export function Navbar({colorScheme, toggleColorScheme}: NavbarProps) {
   const navigate = useNavigate()
 
   const handleLogout = async () => {
-      console.log('logging out')
       await logout()
       navigate('/')
       notifications.show({

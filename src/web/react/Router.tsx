@@ -5,6 +5,7 @@ import Commands from './pages/Commands'
 import Register from './pages/Register'
 import ChatModeration from './pages/Chat_Moderation'
 import ProtectedRoute from "./components/protected_routes/ProtectedRoutes";
+import Giveaways from "./pages/Giveaways";
 
 const AppRoutes = () => {
     return (
@@ -16,6 +17,11 @@ const AppRoutes = () => {
                 </ProtectedRoute>
             } />
             <Route path="/register" element={<Register />} />
+            <Route path="/giveaways" element={
+                <ProtectedRoute>
+                    <Giveaways />
+                </ProtectedRoute>
+            } />
             <Route path="/chat_moderation" element={
                 <ProtectedRoute>
                     <ChatModeration />
