@@ -4,17 +4,18 @@ import classes from './GiveawayCard.module.css'
 
 interface Props {
     icon: typeof IconHome
-    title: string
+    label: string
+    value: string
     description: string
 }
 
-export const GiveawayCard = ({ icon: IconComponent, title, description }: Props) => {
+export const GiveawayCard = ({ icon: IconComponent, value, label, description }: Props) => {
     return (
-        <Radio.Card className={classes.root} value={title} key={title} p='lg'>
+        <Radio.Card className={classes.root} value={value} key={label} p='lg'>
         <Group wrap="nowrap" align="center">
             <IconComponent />
             <div>
-            <Text className={classes.label}>{title}</Text>
+            <Text className={classes.label}>{label}</Text>
             <Text className={classes.description}>{description}</Text>
             </div>
             <Radio.Indicator ml='auto' />

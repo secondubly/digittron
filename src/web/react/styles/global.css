@@ -832,9 +832,33 @@
     }
 }
 
+/* Overrides */
+/* :root {
+    --mantine-color-body: #f6f6f6;
+    &[data-mantine-color-scheme='dark'] {
+        --mantine-color-body: var(--mantine-color-dark-6);
+    }
+} */
+.mantine-Container-root {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mantine-spacing-md);
+}
+
 /* Moderation Page */
 .moderation-icon {
     background-color: var(--mantine-color-default-hover);
     border-radius: var(--mantine-radius-xs);
     box-sizing: content-box;
+}
+
+/* Giveaways Page */
+.mantine-Paper-root {
+    background-color: var(--mantine-color-body);
+}
+
+.twitch-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
 }
