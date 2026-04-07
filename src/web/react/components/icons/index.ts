@@ -1,7 +1,0 @@
-export * from './commands/CommandsIcon'
-export * from './home/HomeIcon'
-export * from './moderation/ModerationIcon'
-export * from './music/SongRequestIcon'
-export * from './logout/LogoutIcon'
-export * from './light/LightIcon'
-export * from './dark/DarkIcon'
