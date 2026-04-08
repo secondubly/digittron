@@ -842,7 +842,9 @@
 .mantine-Container-root {
     display: flex;
     flex-direction: column;
+    flex: 1;
     gap: var(--mantine-spacing-md);
+    margin-inline: initial;
 }
 
 /* Moderation Page */
@@ -861,4 +863,11 @@
     width: 100%;
     height: 100%;
     border: none;
+}
+
+.giveawayForm {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
 }
