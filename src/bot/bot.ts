@@ -57,12 +57,12 @@ export class Bot {
         this.chatClient.onAuthenticationSuccess(() => {
             let commandFiles: string[]
             if (process.env.NODE_ENV === 'development') {
-                commandFiles = readdirSync('./src/bot/commands').filter(
-                    (file) => file.endsWith('.ts'),
+                commandFiles = readdirSync('./src/bot/commands').filter((file) =>
+                    file.endsWith('.ts'),
                 )
             } else {
-                commandFiles = readdirSync('./build/bot/commands').filter(
-                    (file) => file.endsWith('.js'),
+                commandFiles = readdirSync('./build/bot/commands').filter((file) =>
+                    file.endsWith('.js'),
                 )
             }
             log.bot.info(`Loaded ${commandFiles.length} commands.`)
@@ -79,9 +79,7 @@ export class Bot {
                     })
                 })
                 .catch((error) => {
-                    log.bot.error(
-                        `Error when building command map: ${(error as Error).message}`,
-                    )
+                    log.bot.error(`Error when building command map: ${(error as Error).message}`)
                 })
         })
 
@@ -97,10 +95,7 @@ export class Bot {
             this.handleMessage.bind(this),
         )
 
-        this.eventSub.onChannelRaidTo(
-            this.broadcasterID,
-            this.handleIncomingRaid,
-        )
+        this.eventSub.onChannelRaidTo(this.broadcasterID, this.handleIncomingRaid)
 
         this.eventSub.start()
 
@@ -115,18 +110,12 @@ export class Bot {
 
         const botTokenString = await redisClient.get(process.env.BOT_ID!)
         let botAccessToken: AccessToken | null =
-            botTokenString !== null
-                ? (JSON.parse(botTokenString) as AccessToken)
-                : null
+            botTokenString !== null ? (JSON.parse(botTokenString) as AccessToken) : null
         if (!botAccessToken) {
-            log.bot.info(
-                'Bot access token not found in cache, checking database...',
-            )
+            log.bot.info('Bot access token not found in cache, checking database...')
             botAccessToken = await getTwitchToken('bot')
             if (!botAccessToken) {
-                throw new ReferenceError(
-                    'Bot access token not found in cache or database.',
-                )
+                throw new ReferenceError('Bot access token not found in cache or database.')
             }
         }
 
@@ -134,17 +123,13 @@ export class Bot {
             `Bot Access Token: ${botAccessToken.accessToken} expires in ${botAccessToken.expiresIn}`,
         )
 
-        const broadcasterTokenString = await redisClient.get(
-            process.env.TWITCH_ID!,
-        )
+        const broadcasterTokenString = await redisClient.get(process.env.TWITCH_ID!)
         let broadcasterAccessToken =
             broadcasterTokenString !== null
                 ? (JSON.parse(broadcasterTokenString) as AccessToken)
                 : null
         if (!broadcasterAccessToken) {
-            log.bot.info(
-                'Broadcaster access token not found in cache, checking database...',
-            )
+            log.bot.info('Broadcaster access token not found in cache, checking database...')
 
             broadcasterAccessToken = await getTwitchToken('user')
         }
@@ -156,16 +141,9 @@ export class Bot {
         /**
          * add users to auth provider
          */
-        await authProvider.addUser(
-            parseInt(process.env.BOT_ID!),
-            botAccessToken,
-            ['chat'],
-        )
+        await authProvider.addUser(parseInt(process.env.BOT_ID!), botAccessToken, ['chat'])
 
-        await authProvider.addUser(
-            parseInt(process.env.TWITCH_ID!),
-            broadcasterAccessToken,
-        )
+        await authProvider.addUser(parseInt(process.env.TWITCH_ID!), broadcasterAccessToken)
 
         const twitchChannels = process.env.CHANNELS
             ? process.env.CHANNELS.split(',').map((channel) => channel.trim())
@@ -186,9 +164,7 @@ export class Bot {
         })
 
         chatClient.onDisconnect((graceful) => {
-            log.bot.info(
-                `I\'ve been ${graceful ? 'gracefully' : 'forcibly'} disconnected!`,
-            )
+            log.bot.info(`I\'ve been ${graceful ? 'gracefully' : 'forcibly'} disconnected!`)
         })
 
         const apiClient = new ApiClient({
@@ -221,9 +197,7 @@ export class Bot {
 
     private async handleRefresh(userId: string, newTokenData: AccessToken) {
         await redisClient.set(userId, JSON.stringify(newTokenData))
-        log.bot.info(
-            `Token refreshed for ${userId === process.env.BOT_ID ? 'bot' : 'broadcaster'}`,
-        )
+        log.bot.info(`Token refreshed for ${userId === process.env.BOT_ID ? 'bot' : 'broadcaster'}`)
         log.bot.debug(`Token Info: ${JSON.stringify(newTokenData)})`)
     }
 
@@ -249,11 +223,7 @@ export class Bot {
         })
 
         const raidMsg = `Everyone say hi to ${event.raidingBroadcasterDisplayName}! They were playing ${gameInfo.name}!`
-        this.apiClient.chat.sendChatMessageAsApp(
-            this.botID,
-            this.broadcasterID,
-            raidMsg,
-        )
+        this.apiClient.chat.sendChatMessageAsApp(this.botID, this.broadcasterID, raidMsg)
     }
 
     private async handleOutgoingRaid(event: EventSubChannelModerationEvent) {
@@ -268,11 +238,7 @@ export class Bot {
         ]
 
         for (const message of messages) {
-            await this.apiClient.chat.sendChatMessageAsApp(
-                this.botID,
-                this.broadcasterID,
-                message,
-            )
+            await this.apiClient.chat.sendChatMessageAsApp(this.botID, this.broadcasterID, message)
             // wait a bit before sending the next message
             await new Promise((resolve) => setTimeout(resolve, 1500))
         }
@@ -296,9 +262,7 @@ export class Bot {
             command = this.commands.get(name)
         } else {
             const commandsArray = [...this.commands.values()]
-            command = commandsArray.find(
-                (cmd) => cmd.aliases && cmd.aliases.includes(name),
-            )
+            command = commandsArray.find((cmd) => cmd.aliases && cmd.aliases.includes(name))
         }
 
         if (!command || command.enabled === false) return
@@ -306,8 +270,7 @@ export class Bot {
         // check if command is still in cooldown
         const now = Date.now()
         if (this.cooldownList.has(command.name) && !isBroadcaster && !isMod) {
-            const expirationTime =
-                this.cooldownList.get(command.name)! + this.cooldownAmount
+            const expirationTime = this.cooldownList.get(command.name)! + this.cooldownAmount
 
             if (now < expirationTime) {
                 log.bot.warn(
@@ -321,13 +284,18 @@ export class Bot {
 
         switch (command.name.toLocaleLowerCase()) {
             case 'commands':
-                const commandNames = [...this.commands]
-                    .filter(
-                        ([name, command]) =>
-                            command.enabled && name !== 'commands',
-                    )
-                    .map(([name, _command]) => name)
-                command.execute(event, commandNames, this.apiClient)
+                if (args.length === 0) {
+                    const commandNames = [...this.commands]
+                        .filter(([name, command]) => command.enabled && name !== 'commands')
+                        .map(([name, _command]) => name)
+                    command.execute(event, commandNames, this.apiClient)
+                } else {
+                    // assuming this is a user trying to create a custom command
+                    if (!isMod && !isBroadcaster) {
+                        return
+                    }
+                    command.execute(event, args, this.apiClient)
+                }
                 break
             case 'permit':
                 // if not a broadcaster or mod, do nothing
@@ -372,14 +340,10 @@ export class Bot {
             event.chatterId,
         )
         const isBot = event.chatterId === this.botID
-        const channelInfo = await this.apiClient.channels.getChannelInfoById(
-            event.broadcasterId,
-        )
+        const channelInfo = await this.apiClient.channels.getChannelInfoById(event.broadcasterId)
 
         if (!channelInfo) {
-            log.bot.warn(
-                `Could not find channel info for broadcaster ${event.broadcasterId}`,
-            )
+            log.bot.warn(`Could not find channel info for broadcaster ${event.broadcasterId}`)
         }
 
         if (!this.hasSpoken.has(authorInfo.id)) {
@@ -395,20 +359,9 @@ export class Bot {
         const message = event.messageText
         log.bot.info(`${authorInfo.displayName}: ${message}`)
         if (event.messageText.startsWith(this.prefix)) {
-            this.handleCommands(
-                message,
-                event,
-                authorInfo,
-                isBroadcaster,
-                isBot,
-            )
+            this.handleCommands(message, event, authorInfo, isBroadcaster, isBot)
         } else if (findUrl(event.messageText).length > 0) {
-            if (
-                isBroadcaster ||
-                isMod ||
-                isBot ||
-                this.permitList.has(authorInfo.displayName)
-            ) {
+            if (isBroadcaster || isMod || isBot || this.permitList.has(authorInfo.displayName)) {
                 return
             }
 
