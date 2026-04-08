@@ -2,7 +2,7 @@ import fCookie, { type FastifyCookieOptions } from '@fastify/cookie'
 
 export const autoConfig = (): FastifyCookieOptions => {
     return {
-        secret: 'some-secret-key',
+        secret: process.env.COOKIE_SECRET ?? 'some-secret-key',
         hook: 'preHandler',
     }
 }
