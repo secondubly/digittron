@@ -58,7 +58,7 @@ export default function MyApp() {
                 </Stack>
             </AppShell.Navbar>
 
-            <AppShell.Main ml={{ s: 0, md: 'calc(18.75rem * var(--mantine-scale))'}}>
+            <AppShell.Main ml={{ s: 0, md: 'calc(18.75rem * var(--mantine-scale))'}} flex={1} display={'flex'} style={{flexDirection: 'column'}}>
                 <AppRoutes />
             </AppShell.Main>
         </AppShell>
