@@ -15,7 +15,7 @@ export const ModerationPanelCard = ({ icon: IconComponent, title, description, e
         <Card radius={'sm'} p={0}>
             <Stack>
                 <Flex gap={'sm'} align={'flex-start'} p={25}>
-                    <IconComponent className="moderation-icon" size={18} />
+                    <IconComponent />
                     <Stack gap={'xs'}>
                         <Title size={'md'} fw={'bold'}>{title}</Title>
                         <Text>{description}</Text>
