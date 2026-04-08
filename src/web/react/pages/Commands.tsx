@@ -1,10 +1,11 @@
 import React from 'react';
 import { CommandsTable } from '../components/ui/CommandsTable';
+import { Title } from '@mantine/core';
 
 const Commands: React.FC = () => {
   return (
     <>
-      <h2>Commands Page</h2>
+      <Title>Commands Page</Title>
       <CommandsTable />
     </>
   )
