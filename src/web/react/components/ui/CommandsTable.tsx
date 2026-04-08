@@ -1,11 +1,24 @@
 import { useEffect, useState } from "react"
 import classes from './CommandsTable.module.css'
-import { Table } from "@mantine/core";
+import { Switch, Table } from "@mantine/core";
+
+interface Command {
+    id: number;
+    name: string;
+    aliases: string[],
+    description: string,
+    enabled: boolean,
+    permissions?: string[]
+}
+
 export const CommandsTable = () => {
-    const [data, setData] = useState([])
+    const [data, setData] = useState<Command[]>([])
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const toggleRow = (id: number) => {
+        setData((current) => current.map((item) => item.id === id ? { ...item, enabled: !item.enabled } : item))
+    }
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -42,6 +55,7 @@ export const CommandsTable = () => {
         <Table className={classes.link}>
             <Table.Thead>
                 <Table.Tr>
+                    <Table.Th>Enabled</Table.Th>
                     <Table.Th>Name</Table.Th>
                     <Table.Th>Aliases</Table.Th>
                     <Table.Th>Description</Table.Th>
@@ -50,8 +64,8 @@ export const CommandsTable = () => {
             <Table.Tbody>
                 {data.map((item) => (
                     <Table.Tr key={item.id}>
+                        <Table.Td><Switch withThumbIndicator checked={item.enabled} onChange={(_event) => toggleRow(item.id)} /></Table.Td>
                         <Table.Td>{item.name}</Table.Td>
-
                         <Table.Td>{item.aliases.join(', ')}</Table.Td>
                         <Table.Td>{item.description}</Table.Td>
                     </Table.Tr>
