@@ -55,6 +55,7 @@ export function LinksGroup({ icon: Icon, label, initiallyOpened, links, link }: 
     );
   } else {
     return (
+      // TODO: highlight button when selected
       <>
         <UnstyledButton component='a' href={link} className={classes.control} px="md" py="sm">
           <Group justify="space-between" gap={0} id="test">
