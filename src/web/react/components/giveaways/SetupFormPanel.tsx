@@ -19,6 +19,7 @@ interface CheckboxGroupProps {
   form: UseFormReturnType<GiveawayFormValues>
 }
 
+// TODO: move this into SetupFormStepTwo
 export const SetupFormPanel = ({ options: participants, description, label, form }: CheckboxGroupProps) => {
     console.log('participants input props', {...form.getInputProps('participants')})
     return (
