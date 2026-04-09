@@ -831,14 +831,17 @@
         background-color: var(--mantine-color-dark-6);
     }
 }
+.mobile-nav-link:active {
+    background-color: var(--mantine-color-dark-3);
+}
 
 /* Overrides */
-/* :root {
+:root {
     --mantine-color-body: #f6f6f6;
     &[data-mantine-color-scheme='dark'] {
         --mantine-color-body: var(--mantine-color-dark-6);
     }
-} */
+}
 .mantine-Container-root {
     display: flex;
     flex-direction: column;
