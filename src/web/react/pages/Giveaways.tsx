@@ -14,7 +14,7 @@ const colorScheme = useComputedColorScheme()
             <Text>Create and manage giveaways</Text>
         </Box>
         <Group grow={true} align='stretch' flex={1}>
-            <Paper shadow='xs' p={'md'}>
+            <Paper shadow='xs' p={'md'} withBorder={true} mah={'50em'} style={{overflowY: 'scroll'}}>
                 <SetupForm />
             </Paper>
             <Paper shadow='xs'>
