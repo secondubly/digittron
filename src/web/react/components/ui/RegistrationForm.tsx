@@ -38,7 +38,6 @@ const RegistrationForm = () => {
 
 
         const data = await response.json()
-        console.log(data)
         if (response.status === 401) {
             throw new Error('Invalid username or password')
         } else if (!response.ok) {
