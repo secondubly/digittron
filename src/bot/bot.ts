@@ -12,6 +12,7 @@ import {
     type EventSubChannelModerationEvent,
     EventSubChannelRaidEvent,
     EventSubChannelRaidModerationEvent,
+    EventSubStreamOnlineEvent,
 } from '@twurple/eventsub-base'
 import { EventSubHttpListener } from '@twurple/eventsub-http'
 import { NgrokAdapter } from '@twurple/eventsub-ngrok'
@@ -31,6 +32,7 @@ export class Bot {
     hasSpoken: Set<string>
     permitList: Map<string, NodeJS.Timeout>
     prefix: string
+    msgInterval: NodeJS.Timeout | string | number | undefined
 
     private constructor(
         chatClient: ChatClient,
@@ -101,6 +103,15 @@ export class Bot {
             this.broadcasterID,
             this.handleIncomingRaid,
         )
+
+        // TODO: test!
+        const onlineListener = this.eventSub.onStreamOnline(
+            this.broadcasterID,
+            this.handleStreamStart.bind(this),
+        )
+        ;(async () => {
+            console.log(await onlineListener.getCliTestCommand())
+        })()
 
         this.eventSub.start()
 
@@ -197,24 +208,26 @@ export class Bot {
 
         await apiClient.eventSub.deleteAllSubscriptions()
 
-        const eventSub =
-            process.env.NODE_ENV === 'development'
-                ? new EventSubHttpListener({
-                      apiClient: apiClient,
-                      adapter: new NgrokAdapter({
-                          ngrokConfig: {
-                              authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
-                          },
-                      }),
-                      logger: { minLevel: 'debug' },
-                      secret:
-                          process.env.EVENTSUB_SECRET ??
-                          'thisShouldBeARandomlyGeneratedFixedString',
-                  })
-                : new EventSubWsListener({
-                      apiClient: apiClient,
-                      logger: { minLevel: 'info' },
-                  })
+        let eventSub: EventSubHttpListener | EventSubWsListener
+        if (process.env.NODE_ENV === 'development') {
+            eventSub = new EventSubHttpListener({
+                apiClient: apiClient,
+                adapter: new NgrokAdapter({
+                    ngrokConfig: {
+                        authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
+                    },
+                }),
+                logger: { minLevel: 'debug' },
+                secret:
+                    process.env.EVENTSUB_SECRET ??
+                    'thisShouldBeARandomlyGeneratedFixedString',
+            })
+        } else {
+            eventSub = new EventSubWsListener({
+                apiClient: apiClient,
+                logger: { minLevel: 'info' },
+            })
+        }
 
         return new Bot(chatClient, authProvider, apiClient, eventSub)
     }
@@ -278,8 +291,32 @@ export class Bot {
         }
     }
 
-    // TODO: send automated messages every X minutes
-    // private async sendAutoMessage() {}
+    private async sendAdAlert() {
+        const message =
+            'An ad break will be starting soon! Thanks for supporting the stream.'
+        clearInterval(this.msgInterval)
+
+        setTimeout(() => {
+            this.apiClient.chat.sendChatMessageAsApp(
+                this.botID,
+                this.broadcasterID,
+                message,
+            )
+
+            this.msgInterval = setInterval(() => {
+                this.apiClient.chat.sendChatMessageAsApp(
+                    this.botID,
+                    this.broadcasterID,
+                    message,
+                )
+            }, 3000000) // 3000000 = 50 minutes
+        }, 300000) // 300000 = 5 minutes
+        this.apiClient.chat.sendChatMessageAsApp(
+            this.botID,
+            this.broadcasterID,
+            message,
+        )
+    }
 
     private async handleCommands(
         message: string,
@@ -427,6 +464,13 @@ export class Bot {
                 `${authorInfo.displayName}, please refrain from posting links!
                 If you want to post a link, ask a mod or the streamer to permit you.`,
             )
+        }
+    }
+
+    private async handleStreamStart(event: EventSubStreamOnlineEvent) {
+        log.bot.debug(`Received stream online event for ${this.broadcasterID}`)
+        if (event.type === 'live') {
+            this.sendAdAlert()
         }
     }
 }
