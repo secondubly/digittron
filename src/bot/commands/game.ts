@@ -31,7 +31,7 @@ const game: Command = {
                 return
             }
 
-            const gameTitle = args.join()
+            const gameTitle = args.join(' ')
             const gameData = await apiClient.games.getGamesByNames([gameTitle])
             if (!gameData.length) {
                 log.bot.warn(
