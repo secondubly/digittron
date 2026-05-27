@@ -33,7 +33,7 @@ const game: Command = {
                 return
             }
 
-            const gameTitle = args.join()
+            const gameTitle = args.join(' ')
             const gameData = await apiClient.games.getGamesByNames([gameTitle])
             if (!gameData.length) {
                 log.bot.warn(
@@ -50,6 +50,12 @@ const game: Command = {
             apiClient.channels.updateChannelInfo(channelId, {
                 gameId: gameData[0].id,
             })
+
+            apiClient.chat.sendChatMessageAsApp(
+                process.env.BOT_ID!,
+                event.broadcasterId,
+                `Successfully updated game to ${gameTitle}.`,
+            )
         }
     },
 }
