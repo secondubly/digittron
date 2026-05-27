@@ -48,6 +48,12 @@ const game: Command = {
             apiClient.channels.updateChannelInfo(channelId, {
                 gameId: gameData[0].id,
             })
+
+            apiClient.chat.sendChatMessageAsApp(
+                process.env.BOT_ID!,
+                event.broadcasterId,
+                `Successfully updated game to ${gameTitle}.`,
+            )
         }
     },
 }
