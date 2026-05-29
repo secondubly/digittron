@@ -421,7 +421,7 @@ export class Bot {
                 log.bot.info(
                     `Sending playAudio event for ${authorInfo.displayName} (${authorInfo.id})`,
                 )
-                // playAudio(authorInfo.id)
+                playAudio(authorInfo.id)
             }
         }
 
