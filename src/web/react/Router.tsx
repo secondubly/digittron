@@ -12,9 +12,7 @@ const AppRoutes = () => {
         <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/commands" element={
-                <ProtectedRoute>
-                    <Commands />
-                </ProtectedRoute>
+                <Commands />
             } />
             <Route path="/register" element={<Register />} />
             <Route path="/giveaways" element={
