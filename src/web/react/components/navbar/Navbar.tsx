@@ -20,7 +20,7 @@ import { notifications } from '@mantine/notifications';
 const linkData = [
   // TODO: if you're logged out, dashboard should take you to login
   // otherwise dashboard should auto load when you load the page
-  { label: 'Dashboard', icon: IconGauge, link: '/dashboard' },
+  { label: 'Dashboard', icon: IconGauge, link: '/' },
   {
     label: 'Giveaways',
     icon: IconConfettiFilled,
