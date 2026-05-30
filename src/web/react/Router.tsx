@@ -4,6 +4,7 @@ import NotFound from "./pages/NotFound";
 import Commands from './pages/Commands'
 import Register from './pages/Register'
 import ChatModeration from './pages/Chat_Moderation'
+import SongRequests from './pages/SongRequests'
 import ProtectedRoute from "./components/protected_routes/ProtectedRoutes";
 import Giveaways from "./pages/Giveaways";
 
@@ -24,6 +25,9 @@ const AppRoutes = () => {
                 <ProtectedRoute>
                     <ChatModeration />
                 </ProtectedRoute>
+            } />
+            <Route path="/song_requests" element={
+                <SongRequests />
             } />
             <Route path="*" element={<NotFound />} />
         </Routes>
