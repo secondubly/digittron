@@ -8,35 +8,26 @@ import {
   IconSun,
   IconTerminal2,
 } from '@tabler/icons-react';
-import { Code, Group, Menu, ScrollArea, Text } from '@mantine/core';
-import { LinksGroup } from './navbar-group/NavbarLinksGroup';
+import { Code, Group, Menu, NavLink as MantineNavLink, ScrollArea, Text, ThemeIcon } from '@mantine/core';
 import { UserButton } from './user-button/UserButton';
 import { Logo } from './Logo';
 import classes from './Navbar.module.css';
 import { useAuth } from '../../contexts/AuthContext';
 import { LoginButton } from './login-button/LoginButton';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, NavLink as RouterNavLink } from 'react-router-dom';
 import { notifications } from '@mantine/notifications';
 
-const mockdata = [
+const linkData = [
   // TODO: if you're logged out, dashboard should take you to login
   // otherwise dashboard should auto load when you load the page
-  { label: 'Dashboard', icon: IconGauge },
-  // {
-  //   label: 'Dashboard',
-  //   icon: IconGauge,
-  //   links: [
-  //     { label: 'Logs', link: '/' },
-  //     { label: 'Chat Moderation', link: '/' },
-  //   ],
-  // },
+  { label: 'Dashboard', icon: IconGauge, link: '/dashboard' },
   {
     label: 'Giveaways',
     icon: IconConfettiFilled,
     link: '/giveaways'
   },
   { label: 'Commands', icon: IconTerminal2, link: '/commands' },
-  { label: 'Song Requests', icon: IconMusicBolt },
+  { label: 'Song Requests', icon: IconMusicBolt, link: '/song_requests' },
   { label: 'Chat Moderation', icon: IconShieldFilled, link: '/chat_moderation' },
 ];
 
@@ -46,7 +37,6 @@ interface NavbarProps {
 }
 
 export function Navbar({colorScheme, toggleColorScheme}: NavbarProps) {
-  const links = mockdata.map((item) => <LinksGroup {...item} key={item.label} />);
   const { logout, isAuthenticated } = useAuth()
   const navigate = useNavigate()
 
@@ -57,6 +47,20 @@ export function Navbar({colorScheme, toggleColorScheme}: NavbarProps) {
           message: 'You have successfully logged out.'
       })
   }
+
+  const links = linkData.map((item) => (
+        <>
+        <MantineNavLink 
+          key={item.label}
+          label={item.label} 
+          renderRoot={(props) => <RouterNavLink to={item.link} {...props} />}
+          leftSection={
+            <ThemeIcon variant="light" size={30}>
+              <item.icon size={18} />
+            </ThemeIcon>
+          } />
+      </>
+  ));
 
   return (
       <>
@@ -71,6 +75,7 @@ export function Navbar({colorScheme, toggleColorScheme}: NavbarProps) {
         <div className={classes.linksInner}>{links}</div>
       </ScrollArea>
 
+      {/* Login Footer */}
       <div className={classes.footer}>
         { isAuthenticated &&
          <Menu withArrow position="right-end" arrowPosition='center'>
