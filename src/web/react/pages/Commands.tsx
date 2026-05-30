@@ -1,11 +1,14 @@
 import React from 'react';
 import { CommandsTable } from '../components/ui/CommandsTable';
-import { Title } from '@mantine/core';
+import { Box, Title, Text } from '@mantine/core';
 
 const Commands: React.FC = () => {
   return (
     <>
-      <Title>Commands Page</Title>
+      <Box id="heading">
+          <Title>Commands</Title>
+          <Text>Commands are used to trigger responses in chat</Text>
+      </Box>
       <CommandsTable />
     </>
   )
