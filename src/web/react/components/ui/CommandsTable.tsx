@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import classes from './CommandsTable.module.css'
-import { Switch, Table } from "@mantine/core";
+import { Switch, Table, Pill } from "@mantine/core";
 import { useAuth } from '../../contexts/AuthContext'
 
 interface Command {
@@ -21,11 +21,23 @@ export const CommandsTable = () => {
     const toggleRow = (id: number) => {
         setData((current) => current.map((item) => item.id === id ? { ...item, enabled: !item.enabled } : item))
     }
+
+    const setPillStyle = (text: string) => {
+        switch (text.toLocaleLowerCase()) {
+            case 'everyone':
+                return { backgroundColor: 'var(--mantine-color-dark-filled)', color: 'var(--mantine-color-white)' }
+            case 'moderator':
+                return { backgroundColor: 'var(--mantine-color-green-8)', color: 'var(--mantine-color-white)' }
+            case 'broadcaster':
+                return { backgroundColor: 'var(--mantine-color-red-8)', color: 'var(--mantine-color-white)' }
+        }
+    }
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const response = await fetch('http://localhost:4000/public/commands.json')
-                if (!response. ok) {
+                if (!response.ok) {
                     throw new Error (`Error fetching data: ${response.status}`)
                 }
 
@@ -59,18 +71,20 @@ export const CommandsTable = () => {
             <Table.Thead>
                 <Table.Tr>
                     {isAuthenticated && <Table.Th>Enabled</Table.Th>}
-                    <Table.Th>Name</Table.Th>
+                    <Table.Th>Command</Table.Th>
                     <Table.Th>Aliases</Table.Th>
                     <Table.Th>Description</Table.Th>
+                    <Table.Th>User Level</Table.Th>
                 </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
                 {data.map((item) => (
                     <Table.Tr key={item.id}>
                         {isAuthenticated && <Table.Td><Switch withThumbIndicator checked={item.enabled} onChange={(_event) => toggleRow(item.id)} /></Table.Td>}
-                        <Table.Td>{item.name}</Table.Td>
+                        <Table.Td>!{item.name}</Table.Td>
                         <Table.Td>{item.aliases.join(', ')}</Table.Td>
                         <Table.Td>{item.description}</Table.Td>
+                        <Table.Td>{item.permissions ? <Pill style={setPillStyle(item.permissions[0])}>{item.permissions[0]}</Pill> : <Pill style={setPillStyle('Everyone')}>Everyone</Pill>}</Table.Td>
                     </Table.Tr>
                 ))}
             </Table.Tbody>
