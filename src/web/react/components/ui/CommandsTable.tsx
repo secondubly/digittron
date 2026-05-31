@@ -82,7 +82,7 @@ export const CommandsTable = () => {
                     <Table.Tr key={item.id}>
                         {isAuthenticated && <Table.Td><Switch withThumbIndicator checked={item.enabled} onChange={(_event) => toggleRow(item.id)} /></Table.Td>}
                         <Table.Td>!{item.name}</Table.Td>
-                        <Table.Td>{item.aliases.join(', ')}</Table.Td>
+                        <Table.Td>{item.aliases.map((a) => `!${a}`).join(', ')}</Table.Td>
                         <Table.Td>{item.description}</Table.Td>
                         <Table.Td>{item.permissions ? <Pill style={setPillStyle(item.permissions[0])}>{item.permissions[0]}</Pill> : <Pill style={setPillStyle('Everyone')}>Everyone</Pill>}</Table.Td>
                     </Table.Tr>
