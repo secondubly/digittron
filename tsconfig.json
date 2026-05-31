@@ -48,7 +48,7 @@
     "skipLibCheck": true,
     "allowJs": true,
   },
-  "include": ["./src/**/*.ts", "src/lib/db/data.ts"],
+  "include": ["./src/**/*.ts", "src/environment.d.ts"],
   "ts-node": {
     "esm": true,
     "transpileOnly": true

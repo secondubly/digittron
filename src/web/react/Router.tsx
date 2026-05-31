@@ -5,6 +5,7 @@ import Commands from './pages/Commands'
 import Register from './pages/Register'
 import ChatModeration from './pages/Chat_Moderation'
 import SongRequests from './pages/SongRequests'
+import SpotifyLogin from './pages/SpotifyLogin'
 import ProtectedRoute from "./components/protected_routes/ProtectedRoutes";
 import Giveaways from "./pages/Giveaways";
 
@@ -29,6 +30,10 @@ const AppRoutes = () => {
             <Route path="/song_requests" element={
                 <SongRequests />
             } />
+
+            <Route path="/spotify_login" element={
+                <SpotifyLogin />
+             } />
             <Route path="*" element={<NotFound />} />
         </Routes>
     )

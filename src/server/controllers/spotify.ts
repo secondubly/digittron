@@ -4,6 +4,7 @@ import { Token } from '@lib/db/models/token.entity'
 import type { SpotifyAccessToken } from '@lib/core/types'
 import redisClient from '@lib/utils/redis'
 import type {
+    callbackQuerySchema,
     getTokenParams,
     UpdateTokenInput,
     UpdateTokenParams,
@@ -76,6 +77,48 @@ export async function putSpotifyToken(
     reply.code(204).send()
 }
 
+export async function handleSpotifyCallback(
+    request: FastifyRequest<{
+        Querystring: callbackQuerySchema
+    }>,
+    reply: FastifyReply,
+) {
+    const code = request.query.code
+    const state = request.query.state
+
+    if (!state) {
+        reply.redirect('/#' + JSON.stringify('error: state mismatch'))
+        return
+    }
+
+    const authOptions = {
+        url: 'https://accounts.spotify.com/api/token',
+        form: {
+            code: code,
+            redirect_uri: 'http://127.0.0.1:4000/api/spotify/callback',
+            grant_type: 'authorization_code',
+        },
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            Authorization:
+                'Basic ' +
+                Buffer.from(
+                    process.env.SPOTIFY_CLIENT_ID +
+                        ':' +
+                        process.env.SPOTIFY_CLIENT_SECRET,
+                ).toString('base64'),
+        },
+    }
+
+    const response = await fetch(authOptions.url, {
+        method: 'POST',
+        body: new URLSearchParams(authOptions.form),
+        headers: authOptions.headers,
+    })
+
+    const data = await response.json()
+    console.log(data)
+}
 async function getAccessToken(id: string): Promise<SpotifyAccessToken | null> {
     const em = RequestContext.getEntityManager()
     if (!em) {

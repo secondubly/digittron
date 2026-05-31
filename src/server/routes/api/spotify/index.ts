@@ -1,9 +1,11 @@
 import type { FastifyPluginAsync } from 'fastify'
 import {
     getSpotifyToken,
+    handleSpotifyCallback,
     putSpotifyToken,
 } from '../../../controllers/spotify.js'
 import {
+    callbackQuerySchema,
     getTokenParamsSchema,
     getTokenResponseSchema,
     updateTokenBodySchema,
@@ -22,6 +24,16 @@ const plugin: FastifyPluginAsync = async (fastify) => {
             },
         },
         getSpotifyToken,
+    )
+
+    fastify.get(
+        '/callback',
+        {
+            schema: {
+                querystring: callbackQuerySchema,
+            },
+        },
+        handleSpotifyCallback,
     )
 
     fastify.put(

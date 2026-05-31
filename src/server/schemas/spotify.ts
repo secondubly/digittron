@@ -24,6 +24,13 @@ export const getTokenResponseSchema = Type.Object({
     scope: Type.Array(Type.String()),
 })
 
+export const callbackQuerySchema = Type.Object({
+    state: Type.Optional(Type.String()),
+    code: Type.String(),
+    error: Type.Optional(Type.String()),
+})
+
 export type getTokenParams = Static<typeof getTokenParamsSchema>
 export type UpdateTokenParams = Static<typeof updateTokenParamsSchema>
 export type UpdateTokenInput = Static<typeof updateTokenBodySchema>
+export type callbackQuerySchema = Static<typeof callbackQuerySchema>
