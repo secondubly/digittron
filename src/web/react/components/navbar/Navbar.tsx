@@ -6,9 +6,11 @@ import {
   IconMusicBolt,
   IconShieldFilled,
   IconSun,
+  IconSunHigh,
   IconTerminal2,
 } from '@tabler/icons-react';
-import { Code, Group, Menu, NavLink as MantineNavLink, ScrollArea, Text, ThemeIcon } from '@mantine/core';
+import type { MantineTheme } from '@mantine/core';
+import { Group, Menu, NavLink as MantineNavLink, ScrollArea, Text, ThemeIcon, ActionIcon } from '@mantine/core';
 import { UserButton } from './user-button/UserButton';
 import { Logo } from './Logo';
 import classes from './Navbar.module.css';
@@ -34,9 +36,10 @@ const linkData = [
 interface NavbarProps {
   colorScheme: string
   toggleColorScheme: () => void
+  theme: MantineTheme
 }
 
-export function Navbar({colorScheme, toggleColorScheme}: NavbarProps) {
+export function Navbar({colorScheme, toggleColorScheme, theme}: NavbarProps) {
   const { logout, isAuthenticated } = useAuth()
   const navigate = useNavigate()
 
@@ -49,17 +52,15 @@ export function Navbar({colorScheme, toggleColorScheme}: NavbarProps) {
   }
 
   const links = linkData.map((item) => (
-        <>
-        <MantineNavLink 
-          key={item.label}
-          label={item.label} 
-          renderRoot={(props) => <RouterNavLink to={item.link} {...props} />}
-          leftSection={
-            <ThemeIcon variant="light" size={30}>
-              <item.icon size={18} />
-            </ThemeIcon>
-          } />
-      </>
+    <MantineNavLink 
+      key={item.label}
+      label={item.label} 
+      renderRoot={(props) => <RouterNavLink to={item.link} {...props} />}
+      leftSection={
+        <ThemeIcon variant="light" size={30}>
+          <item.icon size={18} />
+        </ThemeIcon>
+      } />
   ));
 
   return (
@@ -67,7 +68,12 @@ export function Navbar({colorScheme, toggleColorScheme}: NavbarProps) {
       <div className={classes.header}>
         <Group justify="space-between">
           <Logo style={{ width: 120 }} />
-          <Code fw={700}>v3.1.2</Code>
+          {!isAuthenticated && 
+            <ActionIcon size='md' color='orange' radius='sm' onClick={toggleColorScheme} className='theme-toggle' style={{ width: '3.125rem', height: '3.125rem', background: 'transparent' }}>
+                {colorScheme === 'dark' ? <IconMoon color={theme.colors.indigo[0]} size={20} /> : 
+                <IconSunHigh color={theme.colors.yellow[6]} size={20} />}
+            </ActionIcon>
+          }
         </Group>
       </div>
 
