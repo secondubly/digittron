@@ -9,7 +9,7 @@ import {
 const plugin: FastifyPluginAsync = async (fastify) => {
     // GET /token - get Twitch token
     fastify.get(
-        '/token',
+        '/token/:id',
         {
             schema: {
                 params: twitchParamsSchema,
