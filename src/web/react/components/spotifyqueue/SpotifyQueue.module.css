@@ -1,0 +1,46 @@
+.now-playing-album {
+    box-shadow: var(--paper-shadow);
+}
+
+.now-playing-title {
+    text-transform: uppercase;
+}
+
+ol {
+    list-style-type: none;
+    counter-reset: item-counter;
+    /* padding-left: 20px; */
+}
+
+ol li {
+    counter-increment: clean-counter; /* Increments counter for each item */
+    position: relative;
+    margin-bottom: var(--mantine-spacing-xs);
+}
+
+ol li::before {
+    content: counter(clean-counter) '';
+    color: var(--mantine-color-dark-2);
+    position: absolute;
+    left: -20px;
+}
+
+.queue-item {
+    padding: var(--mantine-spacing-xs);
+}
+
+.queue-item-container {
+    gap: var(--mantine-spacing-xs);
+}
+
+.queue-album-art {
+    min-width: 50px;
+    max-width: calc(var(--mantine-scale) * 3.75rem);
+}
+
+.queue-item-track-info {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
