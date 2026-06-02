@@ -9,5 +9,5 @@ export class Token {
     twitchAccessToken!: string
 
     @Property({ nullable: true })
-    spotifyAccessToken?: string
+    spotifyRefreshToken?: string
 }
