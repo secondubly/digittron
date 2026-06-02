@@ -1,7 +1,5 @@
 import type { Command } from '@lib/bot/types.js'
-import { authFetch } from '@lib/core/fetch.js'
-import { log } from '@lib/utils/logger.js'
-import type { PlaybackState, Track } from '@spotify/web-api-ts-sdk'
+import { getCurrentlyPlayingTrack } from '@lib/utils/spotify'
 
 const nowplaying: Command = {
     name: 'nowplaying',
@@ -10,60 +8,24 @@ const nowplaying: Command = {
     description: 'Shows artist and title of currently playing song',
     async execute(event, _args, apiClient) {
         const { chatterDisplayName: displayName } = event
-        const response = await getNowPlayingTrack()
+        const response = await getCurrentlyPlayingTrack()
 
-        if (response) {
-            apiClient.chat.sendChatMessageAsApp(
-                process.env.BOT_ID!,
-                event.broadcasterId,
-                `${displayName} ${response}`,
-            )
-        } else {
+        if (typeof response === 'number') {
             apiClient.chat.sendChatMessageAsApp(
                 process.env.BOT_ID!,
                 event.broadcasterId,
                 `${displayName} nothing is playing right now!`,
             )
+            return
+        } else {
+            const nowplaying = `“${response.item.name}” by ${response.item.artists.map((a) => a.name).join(',')}`
+            apiClient.chat.sendChatMessageAsApp(
+                process.env.BOT_ID!,
+                event.broadcasterId,
+                `${displayName} ${nowplaying}`,
+            )
         }
     },
-}
-
-const getNowPlayingTrack = async (): Promise<string | null> => {
-    const response = await authFetch(
-        'https://api.spotify.com/v1/me/player/currently-playing',
-        {
-            headers: {
-                Authorization: '',
-            },
-        },
-    )
-
-    if (!response.ok) {
-        log.bot.error(await response.text())
-        return null
-    } else if (response.status === 204) {
-        // if there is no content, return null
-        return null
-    }
-
-    const body = await response.json()
-    if (!body) {
-        return null
-    } else {
-        const data: PlaybackState = body
-        if (data.item && data.item.type === 'track') {
-            const track = data.item as Track
-            const title = track.name
-            let artist: string
-            if (track.album.artists.length) {
-                artist = track.album.artists[0].name
-            } else {
-                artist = track.artists[0].name
-            }
-            return `“${title}” by ${artist}`
-        }
-    }
-    return null
 }
 
 export default nowplaying

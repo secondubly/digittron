@@ -1,83 +1,56 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import { RequestContext } from '@mikro-orm/core'
+import { RequestContext, wrap } from '@mikro-orm/core'
 import { Token } from '@lib/db/models/token.entity'
-import type { SpotifyAccessToken } from '@lib/core/types'
 import redisClient from '@lib/utils/redis'
-import type {
-    callbackQuerySchema,
-    getTokenParams,
-    UpdateTokenInput,
-    UpdateTokenParams,
+import {
+    TokenSchema,
+    type callbackQuerySchema,
+    type getTokenParams,
 } from '../schemas/spotify.js'
 import { log } from '@lib/utils/logger'
+import Value from 'typebox/value'
 
-export async function getSpotifyToken(
+export async function getToken(
     request: FastifyRequest<{
         Params: getTokenParams
     }>,
     reply: FastifyReply,
 ) {
     const { id } = request.params
-    const token = await getAccessToken(id)
-
-    if (!token) {
-        reply.code(404).send({ error: 'Token not found' })
-        return
-    } else if (!token.refresh_token) {
-        reply
-            .code(422)
-            .send({ error: 'No refresh token attached to access token' })
-        return
-    }
-
     if (!redisClient.isOpen) {
         await redisClient.connect()
     }
 
-    await redisClient.set(`spotify_${id}`, JSON.stringify(token))
-    reply.code(200).send(token)
+    let token = await redisClient.get(`${id}_spotify_token`)
 
-    return
-}
+    if (!token) {
+        const refreshToken = await redisClient.get(
+            `${id}_spotify_refresh_token`,
+        )
 
-export async function putSpotifyToken(
-    request: FastifyRequest<{
-        Params: UpdateTokenParams
-        Body: UpdateTokenInput
-    }>,
-    reply: FastifyReply,
-) {
-    const { id } = request.params
-    const token = request.body
+        if (!refreshToken) {
+            return reply.send(404)
+        }
 
-    const em = RequestContext.getEntityManager()
-    if (!em) {
-        throw new Error('Could not retrieve entity manager')
-    }
-    const tokensTable = em.getRepository(Token)
-    const oldToken = await tokensTable.findOne(
-        { id: parseInt(id) },
-        {
-            fields: ['spotifyAccessToken'],
-        },
-    )
+        const newToken = await generateNewToken(refreshToken)
 
-    if (!oldToken) {
-        reply.code(404).send({
-            message: 'Could not find token matching given ID',
-        })
-        return
+        if (typeof newToken === 'number') {
+            return reply.send(newToken).send()
+        } else {
+            redisClient.set(`${id}_spotify_token`, newToken, {
+                expiration: {
+                    type: 'EX',
+                    value: 3600,
+                },
+            })
+            token = newToken
+        }
     }
 
-    // REVIEW: check to make sure we're storing the right value
-    oldToken.spotifyAccessToken = token.access_token
-    em.flush()
-    await redisClient.set(`spotify_${id}`, JSON.stringify(token))
-
-    reply.code(204).send()
+    return reply.code(200).send(token)
 }
 
-export async function handleSpotifyCallback(
+export async function handleCallback(
     request: FastifyRequest<{
         Querystring: callbackQuerySchema
     }>,
@@ -116,33 +89,93 @@ export async function handleSpotifyCallback(
         headers: authOptions.headers,
     })
 
-    const data = await response.json()
-    console.log(data)
-}
-async function getAccessToken(id: string): Promise<SpotifyAccessToken | null> {
-    const em = RequestContext.getEntityManager()
-    if (!em) {
-        throw new Error('Could not retrieve entity manager')
+    if (!redisClient.isOpen) {
+        await redisClient.connect()
     }
-    const tokensTable = em.getRepository(Token)
 
-    const token = await tokensTable.findOne(
-        { id: parseInt(id) },
+    let spotifyToken = null
+    const data = await response.json()
+    spotifyToken = Value.Parse(TokenSchema, data)
+    // store access token in redis cache, store refresh token in both DB and cache
+    redisClient.set(
+        `${process.env.TWITCH_ID}_spotify_token`,
+        spotifyToken.access_token,
         {
-            fields: ['spotifyAccessToken'],
+            expiration: {
+                type: 'EX',
+                value: 3600,
+            },
         },
     )
 
-    if (!token || !token.spotifyAccessToken) {
-        return null
+    redisClient.set(
+        `${process.env.TWITCH_ID}_spotify_refresh_token`,
+        spotifyToken.refresh_token || '',
+    )
+
+    const em = RequestContext.getEntityManager()
+    if (!em) {
+        log.api.error('Could not retrieve entity manager')
+        reply.code(500).send()
+        return
     }
 
-    const spotifyAccessToken: SpotifyAccessToken = JSON.parse(
-        token.spotifyAccessToken,
-    )
+    if (spotifyToken.refresh_token) {
+        redisClient.set(
+            `${process.env.TWITCH_ID}_spotify`,
+            spotifyToken.refresh_token,
+        )
 
-    log.api.debug(
-        `spotify access token: ${JSON.stringify(spotifyAccessToken, null, '\t')}`,
-    )
-    return spotifyAccessToken
+        const record = await em.findOne(Token, {
+            id: Number(process.env.TWITCH_ID),
+        })
+        if (record) {
+            wrap(record).assign({
+                spotifyRefreshToken: spotifyToken.refresh_token,
+            })
+        } else {
+            em.create(Token, {
+                id: Number(process.env.TWITCH_ID),
+                twitchAccessToken: '',
+                spotifyRefreshToken: spotifyToken.refresh_token,
+            })
+        }
+
+        await em.flush()
+    }
+}
+
+const generateNewToken = async (token: string): Promise<string | number> => {
+    const encodedAuth = Buffer.from(
+        process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_CLIENT_SECRET,
+    ).toString('base64')
+
+    const refreshOptions = {
+        url: 'https://accounts.spotify.com/api/token',
+        form: {
+            grant_type: 'refresh_token',
+            refresh_token: token,
+        },
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+            Authorization: 'Basic ' + encodedAuth,
+        },
+        json: true,
+    }
+
+    const response = await fetch(refreshOptions.url, {
+        method: 'POST',
+        body: new URLSearchParams(refreshOptions.form),
+        headers: refreshOptions.headers,
+    })
+
+    if (!response.ok) {
+        log.api.error(response)
+        return response.status
+    }
+
+    const data = await response.json()
+    const newToken = Value.Parse(TokenSchema, data)
+
+    return newToken.access_token
 }
