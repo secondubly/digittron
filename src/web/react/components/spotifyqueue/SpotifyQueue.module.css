@@ -1,6 +1,7 @@
 .now-playing-container img {
     width: 50%;
     box-shadow: var(--paper-shadow);
+    flex-grow: 1; /* maybe shrink this a bit */
 }
 
 .now-playing-title {
