@@ -22,7 +22,10 @@ export default function MyApp() {
     return ( 
         <AppShell
             header={{ height: 60, collapsed: isMediumScreenOrLarger }}
-            navbar={{ width: {desktop: 'fit-content', mobile: '100%'}, breakpoint: 'sm', collapsed: { desktop: false, mobile: !opened } }}
+            navbar={{ 
+                width: {desktop: 'fit-content', mobile: '100%'}, 
+                breakpoint: 'sm', // switch to mobile below this breakpoint
+                collapsed: { mobile: !opened } }} // hide navbar on mobile unless toggled
             padding="md"
             classNames={{
                 navbar: classes.nav,
@@ -40,9 +43,12 @@ export default function MyApp() {
             </AppShell.Header>
 
             <AppShell.Navbar className={'navbar'}>
+                {/* Desktop Navigation */}
                 <AppShell.Section visibleFrom="md">
                     <Navbar colorScheme={computedColorScheme} toggleColorScheme={toggleColorScheme} theme={theme}/>
                 </AppShell.Section>
+
+                {/* Mobile navigation */}
                 <Stack
                     bg="var(--mantine-color-body)"
                     align="stretch"
@@ -52,8 +58,9 @@ export default function MyApp() {
                     w='100%'
                 >
                     <NavLink to='/' className='mobile-nav-link'>Home</NavLink>
-                    <NavLink to='/' className='mobile-nav-link'>Commands</NavLink>
-                    <NavLink to='/' className='mobile-nav-link'>Song Requests</NavLink>
+                    <NavLink to='/giveaways' className='mobile-nav-link'>Giveaways</NavLink>
+                    <NavLink to='/commands' className='mobile-nav-link'>Commands</NavLink>
+                    <NavLink to='/song_requests' className='mobile-nav-link'>Song Requests</NavLink>
                     <NavLink to='/' className='mobile-nav-link'>Moderation</NavLink>
                 </Stack>
             </AppShell.Navbar>
