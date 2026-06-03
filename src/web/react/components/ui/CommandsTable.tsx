@@ -109,7 +109,7 @@ export const CommandsTable = () => {
                                 <Text>{item.description}</Text>
                             </Stack>
                         </Table.Td>
-                        <Table.Td>
+                        {isAuthenticated && <Table.Td>
                             <Menu shadow="md" width={200} position="bottom-end">
                             <Menu.Target>
                                 <ActionIcon variant="subtle" color="gray">
@@ -127,7 +127,7 @@ export const CommandsTable = () => {
                                 </Menu.Item>
                             </Menu.Dropdown>
                             </Menu>
-                        </Table.Td>
+                        </Table.Td> }
                     </Table.Tr>
                     ))}  
                 </Table.Tbody>
