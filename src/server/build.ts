@@ -1,8 +1,15 @@
 import path from 'node:path'
 import fastifyAutoload from '@fastify/autoload'
-import type { FastifyError, FastifyInstance, FastifyPluginOptions } from 'fastify'
+import type {
+    FastifyError,
+    FastifyInstance,
+    FastifyPluginOptions,
+} from 'fastify'
 
-export default async function bootstrap(fastify: FastifyInstance, opts: FastifyPluginOptions) {
+export default async function bootstrap(
+    fastify: FastifyInstance,
+    opts: FastifyPluginOptions,
+) {
     delete opts.skipOverride
     /**
      * load external plugins first because the server may need them immediately
@@ -56,6 +63,21 @@ export default async function bootstrap(fastify: FastifyInstance, opts: FastifyP
             }),
         },
         (request, reply) => {
+            const knownPathPrefixes = [
+                '/api/spotify/token',
+                '/api/twitch/token',
+            ]
+            const matchesPartialPath = knownPathPrefixes.some((p) =>
+                request.url.startsWith(p),
+            )
+
+            if (matchesPartialPath && request.method === 'GET') {
+                return reply.code(400).send({
+                    statusCode: 400,
+                    error: 'Bad Request',
+                    message: 'Missing required path parameters',
+                })
+            }
             request.log.warn(
                 {
                     request: {
@@ -68,9 +90,11 @@ export default async function bootstrap(fastify: FastifyInstance, opts: FastifyP
                 'Resource not found',
             )
 
-            reply.code(404)
-
-            return { message: 'Not Found' }
+            return reply.code(404).send({
+                statusCode: 404,
+                error: 'Not Found',
+                message: `Route ${request.method}:${request.url} not found`,
+            })
         },
     )
 }
