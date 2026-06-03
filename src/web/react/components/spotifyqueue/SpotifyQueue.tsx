@@ -1,7 +1,7 @@
 import useSWR from 'swr'
 import classes from './SpotifyQueue.module.css'
 import { type QueueResponse, type SimplifiedTrack } from '../../types/spotify'
-import { Box, Flex, Grid, Group, Image, SimpleGrid, Stack, Text, Title } from '@mantine/core'
+import { Box, Grid, Group, Image, ScrollArea, SimpleGrid, Stack, Text, Title } from '@mantine/core'
 
 const getToken = async () => {
   try {
@@ -68,7 +68,7 @@ const SpotifyQueue = () => {
   if (!data || (data.currently_playing === null && !data.queue.length)) return <div>No active device or music playing.</div>;
 
   return (
-    <Grid>
+    <Grid h={'100%'}>
       <Grid.Col span={9}>
           {data.currently_playing && (
             <SimpleGrid cols={2} py='lg' className={classes['spotify-container']}>
@@ -91,20 +91,23 @@ const SpotifyQueue = () => {
           {data.queue.length === 0 ? (
             <p>Queue is empty.</p>
           ) : (
-          <ol>
-            {data.queue.map((track: SimplifiedTrack, index: number) => (
-                <li key={`${track.id}-${index}`} className={classes['queue-item']}>
-                  <Group justify='center' className={classes['queue-item-container']}>
-                  <Image src={track.album.images[0].url} radius='lg' className={classes['queue-album-art']} />
-                  <Stack justify='center' gap='0' className={classes['queue-item-track-info']}>
-                    <Text truncate='end' flex={1}>{track.name}</Text>
-                    <Text truncate='end' flex={1}>{track.artists[0]?.name}</Text>
-                  </Stack>
-                  <Text>{formatTime(track.duration_ms)}</Text>
-                  </Group>
-                </li>
-            ))}
-          </ol>)}
+          <ScrollArea type='auto' offsetScrollbars my={'md'} overscrollBehavior='contain'>
+            <ol>
+              {data.queue.map((track: SimplifiedTrack, index: number) => (
+                  <li key={`${track.id}-${index}`} className={classes['queue-item']}>
+                    <Group justify='center' className={classes['queue-item-container']}>
+                    <Image src={track.album.images[0].url} radius='lg' className={classes['queue-album-art']} />
+                    <Stack justify='center' gap='0' className={classes['queue-item-track-info']}>
+                      <Text truncate='end' flex={1}>{track.name}</Text>
+                      <Text truncate='end' flex={1}>{track.artists[0]?.name}</Text>
+                    </Stack>
+                    <Text>{formatTime(track.duration_ms)}</Text>
+                    </Group>
+                  </li>
+              ))}
+            </ol>
+          </ScrollArea>
+        )}
       </Grid.Col>
     </Grid>
   );
