@@ -81,7 +81,7 @@ const SpotifyQueue = () => {
             <Box className={classes['queue-container']}>
               <Box pl='md' pb='lg' style={{ 'borderBottom': '1px solid var(--mantine-color-dark-3)'}}>
                 <Title order={4}>Up Next</Title>
-                <Text>{data.queue.length} songs in queue</Text>
+                <Text c={'dark.2'}>{data.queue.length} songs in queue</Text>
               </Box>
               {data.queue.length === 0 ? (
                 <p>Queue is empty.</p>
