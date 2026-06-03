@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { build } from '../../../helper.js'
 
 describe('Twitch API', () => {
-    it('/token should have resposne status 400 when missing params', async (t) => {
+    it('/token should have response status 400 when missing params', async (t) => {
         const server = await build(t)
         const response = await server.inject({
             method: 'GET',

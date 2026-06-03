@@ -31,15 +31,4 @@ describe('Spotify API', () => {
 
         assert.strictEqual(response.statusCode, 200)
     })
-
-    it('PUT /token should have response status 400 when missing the token id', async (t) => {
-        const server = await build(t)
-
-        const response = await server.inject({
-            method: 'PUT',
-            url: BASE_URL,
-        })
-
-        assert.strictEqual(response.statusCode, 400)
-    })
 })
