@@ -104,14 +104,10 @@ export class Bot {
             this.handleIncomingRaid,
         )
 
-        // TODO: test!
-        const onlineListener = this.eventSub.onStreamOnline(
+        this.eventSub.onStreamOnline(
             this.broadcasterID,
             this.handleStreamStart.bind(this),
         )
-        ;(async () => {
-            console.log(await onlineListener.getCliTestCommand())
-        })()
 
         this.eventSub.start()
 
