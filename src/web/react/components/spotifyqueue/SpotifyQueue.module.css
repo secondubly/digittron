@@ -27,6 +27,7 @@ ol li::before {
 
 .queue-container {
     flex-basis: 25%;
+    flex-grow: 1;
 }
 
 .queue-item {
@@ -37,33 +38,14 @@ ol li::before {
     gap: var(--mantine-spacing-xs);
     counter-increment: clean-counter;
     flex-wrap: nowrap;
-    padding: var(--mantine-spacing-xs);
+    padding: var(--mantine-spacing-md);
 }
 
 .queue-item img {
-    width: 25%;
+    width: 15%;
 }
 
 .queue-item-duration {
     flex-grow: 1;
     text-align: right;
 }
-/* .queue-item {
-    padding: var(--mantine-spacing-xs);
-}
-
-.queue-item-container {
-    gap: var(--mantine-spacing-xs);
-}
-
-.queue-album-art {
-    min-width: 50px;
-    max-width: calc(var(--mantine-scale) * 3.75rem);
-}
-
-.queue-item-track-info {
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-} */

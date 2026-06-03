@@ -1,4 +1,4 @@
-import { Box, Container, Grid, GridCol, Text, Title } from '@mantine/core'
+import { Box, Container, Text, Title } from '@mantine/core'
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import SpotifyQueue from '../components/spotifyqueue/SpotifyQueue';

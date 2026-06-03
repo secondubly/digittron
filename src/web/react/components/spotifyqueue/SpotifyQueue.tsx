@@ -79,7 +79,10 @@ const SpotifyQueue = () => {
                 </Stack>
             </Group>
             <Box className={classes['queue-container']}>
-              <Title order={4}>Up Next</Title>
+              <Box pl='md' pb='lg' style={{ 'borderBottom': '1px solid var(--mantine-color-dark-3)'}}>
+                <Title order={4}>Up Next</Title>
+                <Text>{data.queue.length} songs in queue</Text>
+              </Box>
               {data.queue.length === 0 ? (
                 <p>Queue is empty.</p>
               ) : (
@@ -90,7 +93,7 @@ const SpotifyQueue = () => {
                         <Image src={track.album.images[0].url} radius='md' className={classes['queue-album-art']} />
                         <Stack gap='0' className={classes['queue-item-track-info']}>
                           <Text lineClamp={1}>{track.name}</Text>
-                          <Text lineClamp={1}>{track.artists[0]?.name}</Text>
+                          <Text lineClamp={1} c='dark.1'>{track.artists[0]?.name}</Text>
                         </Stack>
                         <Text className={classes['queue-item-duration']}>{formatTime(track.duration_ms)}</Text>
                       </li>
