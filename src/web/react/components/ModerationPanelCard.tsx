@@ -1,4 +1,4 @@
-import { Card, Divider, Flex, Group, Stack, Switch, Text, Title } from "@mantine/core";
+import { Card, Flex, Group, Stack, Switch, Text, Title } from "@mantine/core";
 import { IconHome } from "@tabler/icons-react";
 import { useState } from "react";
 
@@ -10,10 +10,11 @@ interface Props {
 }
 
 export const ModerationPanelCard = ({ icon: IconComponent, title, description, enabled: on }: Props) => {
+
     const [enabled, setEnabled] = useState(on)
     return (
-        <Card radius={'sm'} p={0}>
-            <Stack>
+        <Card radius={'sm'} p={0} withBorder shadow="sm">
+            <Card.Section withBorder p='xs'>
                 <Flex gap={'sm'} align={'flex-start'} p={25}>
                     <IconComponent />
                     <Stack gap={'xs'}>
@@ -21,13 +22,12 @@ export const ModerationPanelCard = ({ icon: IconComponent, title, description, e
                         <Text>{description}</Text>
                     </Stack>
                 </Flex>
-                <Divider />
-                <Group px={24} py={10} align={'center'}>
-                    <Switch withThumbIndicator checked={enabled} 
-                    label={enabled ? 'Enabled' : 'Disabled'}
-                    onChange={(event) => (setEnabled(event.currentTarget.checked))} />
-                </Group>
-            </Stack>
+            </Card.Section>
+            <Group px='lg' py='md' align={'center'}>
+                <Switch size='sm' withThumbIndicator checked={enabled} 
+                label={enabled ? 'Enabled' : 'Disabled'}
+                onChange={(event) => (setEnabled(event.currentTarget.checked))} />
+            </Group>
         </Card>
     )
 }

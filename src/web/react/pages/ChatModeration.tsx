@@ -11,7 +11,7 @@ const ChatModeration: React.FC = () => {
         <Text c='dimmed' size='md'>Manage chat restrictions and spam filters</Text>
       </Box>
 
-      <SimpleGrid cols={3} spacing={'lg'}>
+      <SimpleGrid cols={{md: 3, xs: 1}} spacing={'lg'}>
         <ModerationPanelCard icon={IconCancel} title={'Blacklist Words/Phrases'} 
         description='This filter allows you to timeout custom words, phrases, and patterns.' 
         enabled={true}/>
