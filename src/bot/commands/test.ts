@@ -1,4 +1,4 @@
-import { Role, type Command } from '@lib/bot/types.js'
+import { Role, type Command } from '@lib/types.js'
 
 const test: Command = {
     name: 'test',

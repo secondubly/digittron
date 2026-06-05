@@ -5,7 +5,7 @@ import { log } from '@lib/utils/logger.js'
 import { ApiClient, HelixUser } from '@twurple/api'
 import redisClient from '@lib/utils/redis.js'
 import { readdirSync } from 'fs'
-import { type Command } from '@lib/bot/types.js'
+import { type Command } from '@lib/types.js'
 import { EventSubWsListener } from '@twurple/eventsub-ws'
 import {
     EventSubChannelChatMessageEvent,

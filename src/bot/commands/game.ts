@@ -1,4 +1,4 @@
-import type { Command } from '@lib/bot/types.js'
+import type { Command } from '@lib/types.js'
 import { log } from '@lib/utils/logger.js'
 
 const game: Command = {

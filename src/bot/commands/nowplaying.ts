@@ -1,4 +1,4 @@
-import type { Command } from '@lib/bot/types.js'
+import type { Command } from '@lib/types.js'
 import { getCurrentlyPlayingTrack } from '@lib/utils/spotify'
 
 const nowplaying: Command = {

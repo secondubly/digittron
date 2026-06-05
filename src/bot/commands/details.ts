@@ -1,5 +1,5 @@
 import { log } from '@lib/utils/logger.js'
-import type { Command } from '@lib/bot/types.js'
+import type { Command } from '@lib/types.js'
 
 const details: Command = {
     name: 'details',

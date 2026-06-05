@@ -1,9 +1,18 @@
 import { Text, Container, Box, Title, SimpleGrid } from '@mantine/core';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ModerationPanelCard } from '../components/ModerationPanelCard';
 import { IconCancel, IconCodeAsterisk, IconLetterD, IconLinkFilled, IconMoodSmile, IconRepeat } from '@tabler/icons-react';
+import { WebSocket } from 'node:http';
 
 const ChatModeration: React.FC = () => {
+
+  const wsRef = useRef<WebSocket | null>(null)
+  const [cardStates, setCardStates] = useState<boolean[]>([])
+
+  useEffect(() => {
+    const socket = new WebSocket('wss://localhost:4000/button')
+  })
+
   return (
     <Container size={'xl'} >
       <Box mb={40}>

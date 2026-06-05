@@ -1,4 +1,4 @@
-import type { Command, MMRHistory } from '@lib/bot/types.js'
+import type { Command, MMRHistory } from '@lib/types.js'
 import redisClient from '@lib/utils/redis.js'
 
 const DEADLOCK_RANKS = new Map<number, string>([
