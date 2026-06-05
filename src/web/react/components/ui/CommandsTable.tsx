@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import classes from './CommandsTable.module.css'
-import { Box, Switch, Table, Pill, Text, Stack, ActionIcon, rem, Menu, Group, alpha, Paper } from "@mantine/core";
+import { Switch, Table, Pill, Text, Stack, ActionIcon, rem, Menu, Group, alpha, Paper } from "@mantine/core";
 import { useAuth } from '../../contexts/AuthContext'
 import { IconDotsVertical } from "@tabler/icons-react";
 
@@ -104,7 +104,7 @@ export const CommandsTable = () => {
                     {data.map((item) => (
                     <Table.Tr key={item.id}>
                         <Table.Td>
-                            <Stack>
+                            <Stack justify='space-around' gap={'xs'}>
                                 <Text>!{item.name}</Text>
                                 <Group>
                                 {
