@@ -1,4 +1,4 @@
-import { createTheme, type MantineColorsTuple, type MantineThemeOverride, type CSSVariablesResolver } from '@mantine/core';
+import { createTheme, type MantineColorsTuple, type MantineThemeOverride, type CSSVariablesResolver, ActionIcon } from '@mantine/core';
  
 // ─── Color palettes ───────────────────────────────────────────────────────────
 // Mantine requires a 10-stop tuple per color key.
@@ -132,6 +132,19 @@ const darkColors: MantineColorsTuple = [
   '#434640', // [8]
   '#2E302B', // [9] deepest shade
 ];
+
+const lightColors: MantineColorsTuple = [
+  '#FFFFFF', // [0] lightest tint
+  '#FAFCF8', // [1]
+  '#F3F6F0', // [2] ← seed
+  '#E8EDE4', // [3]
+  '#D9DED4', // [4]
+  '#C6CBC1', // [5]
+  '#ADB2A8', // [6]
+  '#888D84', // [7]
+  '#5E6359', // [8]
+  '#363B32', // [9] deepest shade
+];
  
 // ─── Theme ────────────────────────────────────────────────────────────────────
  
@@ -151,14 +164,16 @@ const theme: MantineThemeOverride = createTheme({
     success:   successColors,
     error:     errorColors,
     warning:   warningColors,
-    dark: darkColors
+    dark: darkColors,
+    orange: primaryColors
   },
  
   /** Active roles */
-  primaryColor: 'primary',
+  primaryColor: 'orange',
   primaryShade: { light: 6, dark: 3 },
   white: '#F3F6F0',
- 
+  autoContrast: true,
+  luminanceThreshold: 0.3,
   /** Component defaults that respect the token intent */
   components: {
     Badge: {
@@ -176,7 +191,7 @@ const theme: MantineThemeOverride = createTheme({
       defaultProps: {
         bg: "light-dark(#ECEFE9,#60625D)"
       }
-    }
+    },
   },
   fontFamily: 'Rubik',
   fontFamilyMonospace: 'Roboto Mono',
