@@ -3,7 +3,7 @@ import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Commands from './pages/Commands'
 import Register from './pages/Register'
-import ChatModeration from './pages/Chat_Moderation'
+import ChatModeration from './pages/ChatModeration'
 import SongRequests from './pages/SongRequests'
 import SpotifyLogin from './pages/SpotifyLogin'
 import ProtectedRoute from "./components/protected_routes/ProtectedRoutes";

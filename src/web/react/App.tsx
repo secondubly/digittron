@@ -61,7 +61,7 @@ export default function MyApp() {
                     <NavLink to='/giveaways' className='mobile-nav-link'>Giveaways</NavLink>
                     <NavLink to='/commands' className='mobile-nav-link'>Commands</NavLink>
                     <NavLink to='/song_requests' className='mobile-nav-link'>Song Requests</NavLink>
-                    <NavLink to='/' className='mobile-nav-link'>Moderation</NavLink>
+                    <NavLink to='/chat_moderation' className='mobile-nav-link'>Moderation</NavLink>
                 </Stack>
             </AppShell.Navbar>
 
