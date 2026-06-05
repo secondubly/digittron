@@ -1,4 +1,4 @@
-import { createTheme, type MantineColorsTuple, type MantineThemeOverride, type CSSVariablesResolver, ActionIcon } from '@mantine/core';
+import { createTheme, type MantineColorsTuple, type MantineThemeOverride, type CSSVariablesResolver } from '@mantine/core';
  
 // ─── Color palettes ───────────────────────────────────────────────────────────
 // Mantine requires a 10-stop tuple per color key.

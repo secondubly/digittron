@@ -1,4 +1,4 @@
-import { Box, Text, Title } from '@mantine/core';
+import { Box, Title } from '@mantine/core';
 import { useRef, useEffect, useState, useCallback } from 'react';
 import classes from './MarqueeText.module.css';
  
@@ -34,10 +34,7 @@ export const MarqueeText = ({
   const measure = useCallback(() => {
     
     const wrapW  = wrapRef.current?.offsetWidth  ?? 0;
-    console.log('wrapW', wrapW)
     const copy1W = copy1Ref.current?.offsetWidth ?? 0;
-    console.log('copy1W', copy1W)
-    console.log('Duration', copy1W > wrapW ? copy1W / speed : null)
     setDuration(copy1W > wrapW ? copy1W / speed : null);
   }, [speed]);
  
