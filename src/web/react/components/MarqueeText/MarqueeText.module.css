@@ -1,0 +1,67 @@
+.wrap {
+    position: relative;
+    overflow: hidden;
+}
+
+/* ── Scrolling track ── */
+.trackAnimating {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+    animation-name: marqueeScroll;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+
+.trackStatic {
+    display: flex;
+    width: 100%; /* this is what enables the scrolling animation! */
+}
+
+.copy {
+    white-space: nowrap;
+    padding-right: 56px; /* gap between the two copies */
+}
+
+.fadeLeft,
+.fadeRight {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 28px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.fadeLeft {
+    left: 0;
+    background: linear-gradient(
+        to right,
+        var(--mantine-color-body),
+        transparent
+    );
+}
+
+.fadeRight {
+    right: 0;
+    background: linear-gradient(
+        to left,
+        var(--mantine-color-body),
+        transparent
+    );
+}
+
+.hoverLayer {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+}
+
+@keyframes marqueeScroll {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-50%);
+    }
+}

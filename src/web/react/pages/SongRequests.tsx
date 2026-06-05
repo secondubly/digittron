@@ -6,7 +6,7 @@ import SpotifyQueue from '../components/spotifyqueue/SpotifyQueue';
 const SongRequests: React.FC = () => {
   const { isAuthenticated } = useAuth()
   return (
-    <Container fluid>
+    <Container fluid p={0}>
       <Box id="heading">
           <Title>Song Requests</Title>
           <Text>{isAuthenticated ? 'Manage' : 'View'} Song Requests</Text>
