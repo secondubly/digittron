@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import classes from './CommandsTable.module.css'
-import { Box, Switch, Table, Pill, Text, Stack, ActionIcon, rem, Menu, Group, alpha } from "@mantine/core";
+import { Box, Switch, Table, Pill, Text, Stack, ActionIcon, rem, Menu, Group, alpha, Paper } from "@mantine/core";
 import { useAuth } from '../../contexts/AuthContext'
 import { IconDotsVertical } from "@tabler/icons-react";
 
@@ -26,11 +26,11 @@ export const CommandsTable = () => {
     const setPillStyle = (text: string) => {
         switch (text.toLocaleLowerCase()) {
             case 'everyone':
-                return { backgroundColor: alpha('var(--mantine-color-gray-filled)', 0.75), color: alpha('var(--mantine-color-white)', 0.75) }
+                return { backgroundColor: alpha('var(--mantine-color-primary)', 0.75), color: alpha('var(--mantine-color-white)', 0.75) }
             case 'moderator':
                 return { backgroundColor: 'var(--mantine-color-green-8)', color: 'var(--mantine-color-white)' }
             case 'broadcaster':
-                return { backgroundColor: 'rgba(255, 135, 135, 0.45)', color: '#FFE3E3' }
+                return { backgroundColor: 'rgba(205, 135, 135, 0.85)', color: '#FFE3E3' }
         }
     }
     
@@ -68,7 +68,7 @@ export const CommandsTable = () => {
     }
 
     return (
-        <Box id="command-table" bg={'dark.5'}>
+        <Paper withBorder>
             <Table className={classes.link} visibleFrom="md">
                 <Table.Thead>
                     <Table.Tr>
@@ -92,55 +92,53 @@ export const CommandsTable = () => {
                 </Table.Tbody>
             </Table>
             
-            <Box hiddenFrom="md" bg='dark.3' bd={'1px solid dark.4'} bdrs={'sm'}>
-                <Table stickyHeader>
-                    <Table.Thead bg={'transparent'}>
-                        <Table.Tr>
-                            <Table.Th>
-                                Command
-                            </Table.Th>
-                        </Table.Tr>
-                    </Table.Thead>
-                    <Table.Tbody>
-                        {data.map((item) => (
-                        <Table.Tr key={item.id}>
-                            <Table.Td>
-                                <Stack>
-                                    <Text>!{item.name}</Text>
-                                    <Group>
-                                    {
-                                        item.aliases.map((a) => {
-                                            return (<Pill w={'auto'}>${a}</Pill>)
-                                        })
-                                    }
-                                    </Group>
-                                    <Text>{item.description}</Text>
-                                </Stack>
-                            </Table.Td>
-                            {isAuthenticated && <Table.Td>
-                                <Menu shadow="md" width={200} position="bottom-end">
-                                <Menu.Target>
-                                    <ActionIcon variant="subtle" color="gray">
+            <Table stickyHeader width='100%' hiddenFrom="md">
+                <Table.Thead bg={'transparent'}>
+                    <Table.Tr>
+                        <Table.Th colSpan={2}>
+                            Command
+                        </Table.Th>
+                    </Table.Tr>
+                </Table.Thead>
+                <Table.Tbody>
+                    {data.map((item) => (
+                    <Table.Tr key={item.id}>
+                        <Table.Td>
+                            <Stack>
+                                <Text>!{item.name}</Text>
+                                <Group>
+                                {
+                                    item.aliases.map((a) => {
+                                        return (<Pill w={'auto'}>${a}</Pill>)
+                                    })
+                                }
+                                </Group>
+                                <Text>{item.description}</Text>
+                            </Stack>
+                        </Table.Td>
+                        {isAuthenticated && <Table.Td>
+                            <Menu shadow="md" width={200} position="bottom-end">
+                            <Menu.Target>
+                                <ActionIcon variant="subtle" color="gray">
                                     <IconDotsVertical style={{ width: rem(20), height: rem(20) }} />
-                                    </ActionIcon>
-                                </Menu.Target>
+                                </ActionIcon>
+                            </Menu.Target>
 
-                                <Menu.Dropdown>
-                                    <Menu.Item>
-                                    Edit
-                                    </Menu.Item>
-                                    <Menu.Item 
-                                    color="red">
-                                    Delete
-                                    </Menu.Item>
-                                </Menu.Dropdown>
-                                </Menu>
-                            </Table.Td> }
-                        </Table.Tr>
-                        ))}  
-                    </Table.Tbody>
-                </Table>
-            </Box>
-        </Box>
+                            <Menu.Dropdown>
+                                <Menu.Item>
+                                Edit
+                                </Menu.Item>
+                                <Menu.Item 
+                                color="red">
+                                Delete
+                                </Menu.Item>
+                            </Menu.Dropdown>
+                            </Menu>
+                        </Table.Td> }
+                    </Table.Tr>
+                    ))}  
+                </Table.Tbody>
+            </Table>
+        </Paper>
     )
 }
