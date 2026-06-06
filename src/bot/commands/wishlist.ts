@@ -1,17 +1,17 @@
-import type { Command } from '@lib/types.js'
+// import type { Command } from '@lib/types.js'
 
-const wishlist: Command = {
-    name: 'wishlist',
-    aliases: [],
-    enabled: true,
-    description: 'Stream wishlist links',
-    async execute(event, _args, apiClient) {
-        apiClient.chat.sendChatMessageAsApp(
-            process.env.BOT_ID!,
-            event.broadcasterId,
-            'throne: https://throne.com/secondubly | steam: https://store.steampowered.com/wishlist/id/secondubly',
-        )
-    },
-}
+// const wishlist: Command = {
+//     name: 'wishlist',
+//     aliases: [],
+//     enabled: true,
+//     description: 'Stream wishlist links',
+//     async execute(event, _args, apiClient) {
+//         apiClient.chat.sendChatMessageAsApp(
+//             process.env.BOT_ID!,
+//             event.broadcasterId,
+//             'throne: https://throne.com/secondubly | steam: https://store.steampowered.com/wishlist/id/secondubly',
+//         )
+//     },
+// }
 
-export default wishlist
+// export default wishlist

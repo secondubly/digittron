@@ -1,19 +1,19 @@
-import type { Command } from '@lib/types.js'
+// import type { Command } from '@lib/types.js'
 
-const commands: Command = {
-    name: 'commands',
-    aliases: [],
-    enabled: true,
-    description: 'Lists all available commands',
-    async execute(event, args, apiClient) {
-        const commands = args.slice(0, -1).join(', ')
-        const displayName = event.chatterName
-        apiClient?.chat.sendChatMessageAsApp(
-            process.env.BOT_ID!,
-            event.broadcasterId,
-            `@${displayName} available commands: ${commands}`,
-        )
-    },
-}
+// const commands: Command = {
+//     name: 'commands',
+//     aliases: [],
+//     enabled: true,
+//     description: 'Lists all available commands',
+//     async execute(event, args, apiClient) {
+//         const commands = args.slice(0, -1).join(', ')
+//         const displayName = event.chatterName
+//         apiClient?.chat.sendChatMessageAsApp(
+//             process.env.BOT_ID!,
+//             event.broadcasterId,
+//             `@${displayName} available commands: ${commands}`,
+//         )
+//     },
+// }
 
-export default commands
+// export default commands

@@ -1,4 +1,4 @@
-import { Value } from 'typebox/value'
+import { Value } from '@sinclair/typebox/value'
 import { currentlyPlayingSchema } from 'src/server/schemas/spotify'
 
 const BASE_URL = 'http://localhost:4000'

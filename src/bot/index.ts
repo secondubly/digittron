@@ -1,23 +1,16 @@
-import { connectRedis } from '@lib/utils/redis.js'
-import { Bot } from './bot.js'
-import { log } from '@lib/utils/logger.js'
+import { connectRedis } from '@lib/services/redis.js'
+import { log } from '@lib/services/logger.js'
+import { init } from '@lib/utils.js'
+import { config } from 'src/config'
 
 export const startup = () => {
-    const CLIENT_ID = process.env.CLIENT_ID
-    const CLIENT_SECRET = process.env.CLIENT_SECRET
-
-    if (!CLIENT_ID || !CLIENT_SECRET) {
-        throw new ReferenceError(
-            'Client ID and/or Client Secret not found in config file.',
-        )
+    if (config.NODE_ENV === 'development') {
+        log.bot.info('Running in development mode')
     }
 
-    if (process.env.NODE_ENV === 'development') {
-        log.app.info('Running in development mode')
-    }
-    Bot.init(CLIENT_ID, CLIENT_SECRET)
+    init()
 }
 if (import.meta.main) {
-    connectRedis()
+    await connectRedis()
     startup()
 }

@@ -1,213 +1,54 @@
-import { type AccessToken, RefreshingAuthProvider } from '@twurple/auth'
+import { RefreshingAuthProvider } from '@twurple/auth'
 import { ChatClient } from '@twurple/chat'
-import { find as findUrl } from 'linkifyjs'
-import { log } from '@lib/utils/logger.js'
-import { ApiClient, HelixUser } from '@twurple/api'
-import redisClient from '@lib/utils/redis.js'
-import { readdirSync } from 'fs'
-import { type Command } from '@lib/types.js'
+import { ApiClient } from '@twurple/api'
 import { EventSubWsListener } from '@twurple/eventsub-ws'
-import {
-    EventSubChannelChatMessageEvent,
-    type EventSubChannelModerationEvent,
-    EventSubChannelRaidEvent,
-    EventSubChannelRaidModerationEvent,
-    EventSubStreamOnlineEvent,
-} from '@twurple/eventsub-base'
 import { EventSubHttpListener } from '@twurple/eventsub-http'
 import { NgrokAdapter } from '@twurple/eventsub-ngrok'
-import { getTwitchToken, playAudio } from '@lib/utils/utils.js'
+import type { BotConfig } from '@lib/config/bot'
+import { CommandRegistry } from '@lib/bot/CommandRegistry'
+import path from 'path'
+import { EventRegistry } from '@lib/bot/EventRegistry'
+
+const config: BotConfig = {
+    broadcasterId: process.env.TWITCH_BROADCASTER_ID ?? '',
+    botId: process.env.TWITCH_BOT_ID ?? '',
+}
 
 export class Bot {
-    authProvider: RefreshingAuthProvider
-    audioAlertUsers: Set<string>
-    apiClient: ApiClient
-    botID: string
-    broadcasterID: string
-    chatClient: ChatClient
-    commands: Map<string, Command>
-    cooldownAmount = 60 * 1000 // 60 seconds
-    cooldownList: Map<string, number>
-    eventSub: EventSubWsListener | EventSubHttpListener
-    hasSpoken: Set<string>
-    permitList: Map<string, NodeJS.Timeout>
-    prefix: string
-    msgInterval: NodeJS.Timeout | string | number | undefined
+    private chatClient?: ChatClient
+    private apiClient?: ApiClient
+    private eventSub?: EventSubHttpListener | EventSubWsListener
+    private readonly channels: string[]
+    private readonly commandRegistry: CommandRegistry
+    private readonly eventRegistry: EventRegistry
+    private botId: string
+    private sessionChatters: Set<string> = new Set()
+    // TODO: set audio alerts and such again
+    // private audioAlertUsers = new Set(['89181064', '537326154']) // remove 89181064 after testing
+    // private permitList = new Map<string, NodeJS.Timeout>()
 
-    private constructor(
-        chatClient: ChatClient,
-        authProvider: RefreshingAuthProvider,
-        apiClient: ApiClient,
-        eventSub: EventSubHttpListener | EventSubWsListener,
-    ) {
-        this.chatClient = chatClient
-        this.authProvider = authProvider
-        this.apiClient = apiClient
-        this.commands = new Map()
-        this.audioAlertUsers = new Set(['89181064', '537326154']) // remove 89181064 after testing
-        this.cooldownList = new Map()
-        this.permitList = new Map()
-        this.broadcasterID = process.env.TWITCH_ID ?? ''
-        this.botID = process.env.BOT_ID ?? ''
-        this.prefix = '!'
-        this.eventSub = eventSub
-        this.hasSpoken = new Set()
-
-        /** setup event handlers */
-        authProvider.onRefresh(this.handleRefresh)
-
-        this.chatClient.onAuthenticationSuccess(() => {
-            let commandFiles: string[]
-            if (process.env.NODE_ENV === 'development') {
-                commandFiles = readdirSync('./src/bot/commands').filter(
-                    (file) => file.endsWith('.ts'),
-                )
-            } else {
-                commandFiles = readdirSync('./build/bot/commands').filter(
-                    (file) => file.endsWith('.js'),
-                )
-            }
-            log.bot.info(`Loaded ${commandFiles.length} commands.`)
-            log.bot.debug(commandFiles)
-            Promise.all(
-                commandFiles.map((file) => {
-                    return import(`./commands/${file}`)
-                }),
-            )
-                .then((commands) => {
-                    commands.forEach((command) => {
-                        const commandName = command.default.name
-                        this.commands.set(commandName, command.default)
-                    })
-                })
-                .catch((error) => {
-                    log.bot.error(
-                        `Error when building command map: ${(error as Error).message}`,
-                    )
-                })
-        })
-
-        this.eventSub.onChannelModerate(
-            this.broadcasterID,
-            this.botID,
-            this.handleOutgoingRaid.bind(this),
-        )
-
-        this.eventSub.onChannelChatMessage(
-            this.broadcasterID,
-            this.botID,
-            this.handleMessage.bind(this),
-        )
-
-        this.eventSub.onChannelRaidTo(
-            this.broadcasterID,
-            this.handleIncomingRaid,
-        )
-
-        this.eventSub.onStreamOnline(
-            this.broadcasterID,
-            this.handleStreamStart.bind(this),
-        )
-
-        this.eventSub.start()
-
-        this.chatClient.connect()
+    constructor(authProvider: RefreshingAuthProvider, channels: string[]) {
+        this.channels = channels
+        this.botId = config.botId
+        config.channelName = channels[0]
+        this.commandRegistry = new CommandRegistry('!')
+        this.eventRegistry = new EventRegistry()
+        this.initializeClients(authProvider)
     }
 
-    static async init(clientID: string, clientSecret: string): Promise<Bot> {
-        const authProvider = new RefreshingAuthProvider({
-            clientId: clientID,
-            clientSecret,
-        })
-
-        const botTokenString = await redisClient.get(process.env.BOT_ID!)
-        let botAccessToken: AccessToken | null =
-            botTokenString !== null
-                ? (JSON.parse(botTokenString) as AccessToken)
-                : null
-        if (!botAccessToken) {
-            log.bot.info(
-                'Bot access token not found in cache, checking database...',
-            )
-            botAccessToken = await getTwitchToken('bot')
-            if (!botAccessToken) {
-                throw new ReferenceError(
-                    'Bot access token not found in cache or database.',
-                )
-            }
-        }
-
-        log.bot.debug(
-            `Bot Access Token: ${botAccessToken.accessToken} expires in ${botAccessToken.expiresIn}`,
-        )
-
-        const broadcasterTokenString = await redisClient.get(
-            process.env.TWITCH_ID!,
-        )
-        let broadcasterAccessToken =
-            broadcasterTokenString !== null
-                ? (JSON.parse(broadcasterTokenString) as AccessToken)
-                : null
-        if (!broadcasterAccessToken) {
-            log.bot.info(
-                'Broadcaster access token not found in cache, checking database...',
-            )
-
-            broadcasterAccessToken = await getTwitchToken('user')
-        }
-
-        log.bot.debug(
-            `Broadcaster Access Token: ${broadcasterAccessToken.accessToken} expires in ${broadcasterAccessToken.expiresIn}`,
-        )
-
-        /**
-         * add users to auth provider
-         */
-        await authProvider.addUser(
-            parseInt(process.env.BOT_ID!),
-            botAccessToken,
-            ['chat'],
-        )
-
-        await authProvider.addUser(
-            parseInt(process.env.TWITCH_ID!),
-            broadcasterAccessToken,
-        )
-
-        const twitchChannels = process.env.CHANNELS
-            ? process.env.CHANNELS.split(',').map((channel) => channel.trim())
-            : []
-
-        /**
-         * setup clients and eventsub
-         */
-        const chatClient = new ChatClient({
+    private initializeClients(authProvider: RefreshingAuthProvider) {
+        this.chatClient = new ChatClient({
             authProvider,
-            channels: twitchChannels,
+            channels: this.channels,
         })
 
-        chatClient.onConnect(() => {
-            log.bot.info(
-                `Connected to ${twitchChannels.length} ${twitchChannels.length === 1 ? 'channel' : 'channels'}: ${twitchChannels.join(', ')}`,
-            )
-        })
-
-        chatClient.onDisconnect((graceful) => {
-            log.bot.info(
-                `I\'ve been ${graceful ? 'gracefully' : 'forcibly'} disconnected!`,
-            )
-        })
-
-        const apiClient = new ApiClient({
+        this.apiClient = new ApiClient({
             authProvider,
         })
 
-        await apiClient.eventSub.deleteAllSubscriptions()
-
-        let eventSub: EventSubHttpListener | EventSubWsListener
         if (process.env.NODE_ENV === 'development') {
-            eventSub = new EventSubHttpListener({
-                apiClient: apiClient,
+            this.eventSub = new EventSubHttpListener({
+                apiClient: this.apiClient,
                 adapter: new NgrokAdapter({
                     ngrokConfig: {
                         authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
@@ -219,262 +60,39 @@ export class Bot {
                     'thisShouldBeARandomlyGeneratedFixedString',
             })
         } else {
-            eventSub = new EventSubWsListener({
-                apiClient: apiClient,
+            this.eventSub = new EventSubWsListener({
+                apiClient: this.apiClient,
                 logger: { minLevel: 'info' },
             })
         }
-
-        return new Bot(chatClient, authProvider, apiClient, eventSub)
     }
 
-    private async handleRefresh(userId: string, newTokenData: AccessToken) {
-        await redisClient.set(userId, JSON.stringify(newTokenData))
-        log.bot.info(
-            `Token refreshed for ${userId === process.env.BOT_ID ? 'bot' : 'broadcaster'}`,
+    public async start(): Promise<void> {
+        await this.commandRegistry.loadCommands(
+            path.join(import.meta.dirname, 'commands'),
         )
-        log.bot.debug(`Token Info: ${JSON.stringify(newTokenData)})`)
-    }
 
-    private async handleIncomingRaid(event: EventSubChannelRaidEvent) {
-        // get game info for raidingUser
-        const channelInfo = await this.apiClient.channels.getChannelInfoById(
-            event.raidingBroadcasterId,
+        await this.eventRegistry.loadEvents(
+            path.join(import.meta.dirname, 'events'),
+            { registry: this.commandRegistry },
         )
-        if (!channelInfo) {
-            log.bot.warn('Could not retrieve channel info for raider')
-            return
-        }
 
-        const gameInfo = await channelInfo.getGame()
-        if (!gameInfo) {
-            log.bot.warn('Could not get game info for raider')
-            return
-        }
+        await this.apiClient?.eventSub.deleteAllSubscriptions()
 
-        // shoutout raider
-        await this.apiClient.asUser(this.botID, async (ctx) => {
-            await ctx.chat.shoutoutUser(this.botID, event.raidingBroadcasterId)
+        await this.chatClient?.connect()
+        await this.eventSub?.start()
+
+        await this.eventRegistry.registerAll({
+            apiClient: this.apiClient!,
+            chatClient: this.chatClient!,
+            eventSub: this.eventSub!,
+            broadcasterId: config.broadcasterId,
+            botUserId: this.botId,
         })
-
-        const raidMsg = `Everyone say hi to ${event.raidingBroadcasterDisplayName}! They were playing ${gameInfo.name}!`
-        this.apiClient.chat.sendChatMessageAsApp(
-            this.botID,
-            this.broadcasterID,
-            raidMsg,
-        )
     }
 
-    private async handleOutgoingRaid(event: EventSubChannelModerationEvent) {
-        if (!(event instanceof EventSubChannelRaidModerationEvent)) {
-            return
-        }
-
-        const raidedChannel = event.userDisplayName
-        const messages = [
-            `We're raiding @${raidedChannel}!`,
-            `Use this as the raid message: second15Raid 01010010 01000001 01001001 01000100 00100001 00100001 00100001 second15Raid`,
-        ]
-
-        for (const message of messages) {
-            await this.apiClient.chat.sendChatMessageAsApp(
-                this.botID,
-                this.broadcasterID,
-                message,
-            )
-            // wait a bit before sending the next message
-            await new Promise((resolve) => setTimeout(resolve, 1500))
-        }
-    }
-
-    private async sendAdAlert() {
-        const message =
-            'An ad break will be starting soon! Thanks for supporting the stream.'
-        clearInterval(this.msgInterval)
-
-        setTimeout(() => {
-            this.apiClient.chat.sendChatMessageAsApp(
-                this.botID,
-                this.broadcasterID,
-                message,
-            )
-
-            this.msgInterval = setInterval(() => {
-                this.apiClient.chat.sendChatMessageAsApp(
-                    this.botID,
-                    this.broadcasterID,
-                    message,
-                )
-            }, 3000000) // 3000000 = 50 minutes
-        }, 300000) // 300000 = 5 minutes
-        this.apiClient.chat.sendChatMessageAsApp(
-            this.botID,
-            this.broadcasterID,
-            message,
-        )
-    }
-
-    private async handleCommands(
-        message: string,
-        event: EventSubChannelChatMessageEvent,
-        authorInfo: HelixUser,
-        isBroadcaster: boolean,
-        isMod: boolean,
-    ) {
-        message = message.substring(this.prefix.length)
-        const [name, ...args] = message.split(' ')
-
-        let command
-        if (this.commands.has(name)) {
-            command = this.commands.get(name)
-        } else {
-            const commandsArray = [...this.commands.values()]
-            command = commandsArray.find(
-                (cmd) => cmd.aliases && cmd.aliases.includes(name),
-            )
-        }
-
-        if (!command || command.enabled === false) return
-
-        // check if command is still in cooldown
-        const now = Date.now()
-        if (this.cooldownList.has(command.name) && !isBroadcaster && !isMod) {
-            const expirationTime =
-                this.cooldownList.get(command.name)! + this.cooldownAmount
-
-            if (now < expirationTime) {
-                log.bot.warn(
-                    `${authorInfo.displayName} tried to execute ${command.name} too early.`,
-                )
-                return
-            } else {
-                this.cooldownList.delete(command.name)
-            }
-        }
-
-        switch (command.name.toLocaleLowerCase()) {
-            case 'commands':
-                if (args.length === 0) {
-                    const commandNames = [...this.commands]
-                        .filter(
-                            ([name, command]) =>
-                                command.enabled && name !== 'commands',
-                        )
-                        .map(([name, _command]) => name)
-                    command.execute(event, commandNames, this.apiClient)
-                } else {
-                    // assuming this is a user trying to create a custom command
-                    if (!isMod && !isBroadcaster) {
-                        return
-                    }
-                    command.execute(event, args, this.apiClient)
-                }
-                break
-            case 'permit':
-                // if not a broadcaster or mod, do nothing
-                if (!isMod && !isBroadcaster) {
-                    return
-                }
-
-                // add to permit list ahead of time
-                let username = args[0]
-                if (username.startsWith('@')) {
-                    username = username.slice(1)
-                    args[0] = username
-                }
-                const permitId = setTimeout(() => {
-                    this.permitList.delete(username)
-                    log.bot.info(`Removed ${username} from permit list`)
-                }, 60000)
-                this.permitList.set(username, permitId)
-                command.execute(event, args, this.apiClient)
-                break
-            case 'details':
-                const appAccessToken = await (
-                    await this.authProvider.getAppAccessToken()
-                ).accessToken
-                args.push(appAccessToken)
-                command.execute(event, args, this.apiClient) // repeated
-                break
-            default:
-                command.execute(event, args, this.apiClient)
-                break
-        }
-
-        // add command to cooldown list
-        this.cooldownList.set(command.name, now)
-    }
-
-    private async handleMessage(event: EventSubChannelChatMessageEvent) {
-        const authorInfo = await event.getChatter()
-        const isBroadcaster = event.chatterId === this.broadcasterID
-        const isMod = await this.apiClient.moderation.checkUserMod(
-            this.broadcasterID,
-            event.chatterId,
-        )
-        const isBot = event.chatterId === this.botID
-        const channelInfo = await this.apiClient.channels.getChannelInfoById(
-            event.broadcasterId,
-        )
-
-        if (!channelInfo) {
-            log.bot.warn(
-                `Could not find channel info for broadcaster ${event.broadcasterId}`,
-            )
-        }
-
-        if (!this.hasSpoken.has(authorInfo.id)) {
-            this.hasSpoken.add(authorInfo.id)
-            if (this.audioAlertUsers.has(authorInfo.id)) {
-                log.bot.info(
-                    `Sending playAudio event for ${authorInfo.displayName} (${authorInfo.id})`,
-                )
-                playAudio(authorInfo.id)
-            }
-        }
-
-        const message = event.messageText
-        log.bot.info(`${authorInfo.displayName}: ${message}`)
-        if (event.messageText.startsWith(this.prefix)) {
-            this.handleCommands(
-                message,
-                event,
-                authorInfo,
-                isBroadcaster,
-                isBot,
-            )
-        } else if (findUrl(event.messageText).length > 0) {
-            if (
-                isBroadcaster ||
-                isMod ||
-                isBot ||
-                this.permitList.has(authorInfo.displayName)
-            ) {
-                return
-            }
-
-            // timeout users who post links
-            await this.apiClient.asUser(this.botID, async (ctx) => {
-                await ctx.moderation.banUser(this.broadcasterID, {
-                    duration: 1,
-                    reason: 'for posting links (temporary)',
-                    user: authorInfo.id,
-                })
-            })
-
-            this.apiClient.chat.sendChatMessageAsApp(
-                this.botID,
-                this.broadcasterID,
-                `${authorInfo.displayName}, please refrain from posting links!
-                If you want to post a link, ask a mod or the streamer to permit you.`,
-            )
-        }
-    }
-
-    private async handleStreamStart(event: EventSubStreamOnlineEvent) {
-        log.bot.debug(`Received stream online event for ${this.broadcasterID}`)
-        if (event.type === 'live') {
-            this.sendAdAlert()
-        }
+    public async stop(): Promise<void> {
+        await this.eventSub?.stop()
+        await this.chatClient?.quit()
     }
 }

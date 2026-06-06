@@ -1,9 +1,9 @@
 // import { init as apiInit } from './server/index.js'
 import { init as webInit } from './web/index.js'
-import { startup as botInit } from './bot/index.js'
-import { connectRedis } from '@lib/utils/redis.js'
-import { setupShutdownHandler } from '@lib/utils/utils.js'
-import { log } from '@lib/utils/logger.js'
+import { init as botInit } from './lib/utils.js'
+import { connectRedis } from '@lib/services/redis.js'
+import { log } from '@lib/services/logger.js'
+
 const config = {
     API_PORT: process.env.API_PORT ?? '4001',
     WEB_PORT: process.env.WEB_PORT ?? '5001',
@@ -11,7 +11,8 @@ const config = {
 
 const startup = async () => {
     try {
-        setupShutdownHandler()
+        // TODO: fix shutdown handler
+        // setupShutdownHandler()
         // start up api
         // await apiInit(parseInt(config.API_PORT))
         // Spin up cache
@@ -31,3 +32,7 @@ const startup = async () => {
 if (import.meta.main) {
     startup()
 }
+
+startup().catch((err) => {
+    log.app.error(`Failed to start bot: `, err)
+})
