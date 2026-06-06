@@ -1,21 +1,7 @@
 import { log } from '@lib/services/logger'
-import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 import type { Bot } from 'src/bot/bot.js'
 
 const SHUTDOWN_TIMEOUT_MS = 5_000
-
-export function parseUser(msg: EventSubChannelChatMessageEvent) {
-    return {
-        id: msg.chatterId,
-        username: msg.chatterName,
-        displayName: msg.chatterDisplayName,
-        isBroadcaster: msg.chatterId === msg.broadcasterId,
-        isMod: Object.keys(msg.badges).some((b) => b === 'moderator'),
-        isVip: Object.keys(msg.badges).some((b) => b === 'vip'),
-        isSub: Object.keys(msg.badges).some((b) => b === 'subscriber'),
-        bits: msg.bits ?? 0,
-    }
-}
 
 export async function gracefulShutdown(
     bot: Bot,
