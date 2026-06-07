@@ -31,7 +31,7 @@ const server = Fastify({
     },
 }).withTypeProvider<TypeBoxTypeProvider>()
 
-async function init() {
+export async function init() {
     server.register(fp(bootstrap))
 
     closeWithGrace(
@@ -68,6 +68,8 @@ async function init() {
         server.log.error(err)
         process.exit(1)
     }
+
+    return server
 }
 
 if (import.meta.main) {
