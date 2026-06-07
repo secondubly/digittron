@@ -1,3 +1,4 @@
+import type { TokenStore } from '@lib/core/tokens/TokenStore'
 import type { ApiClient } from '@twurple/api'
 import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 
@@ -7,6 +8,10 @@ export enum Role {
     Subscriber = 'Subscriber',
     VIP = 'VIP',
     Viewer = 'Viewer',
+}
+
+export interface CommandDeps {
+    tokenStore: TokenStore
 }
 
 export interface CommandContext {
