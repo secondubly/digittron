@@ -1,6 +1,7 @@
 import type { TokenStore } from '@lib/core/tokens/TokenStore'
 import type { ApiClient } from '@twurple/api'
 import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
+import type { CommandRegistry } from './CommandRegistry'
 
 export enum Role {
     Broadcaster = 'Broadcaster',
@@ -12,6 +13,7 @@ export enum Role {
 
 export interface CommandDeps {
     tokenStore: TokenStore
+    registry: CommandRegistry
 }
 
 export interface CommandContext {
