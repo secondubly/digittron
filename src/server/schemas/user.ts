@@ -1,4 +1,4 @@
-import { type Static, Type } from 'typebox'
+import { type Static, Type } from '@sinclair/typebox'
 
 // registration schema (only useable by admin)
 export const createUserSchema = Type.Object(
