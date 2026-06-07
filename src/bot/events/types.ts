@@ -3,13 +3,15 @@ import type { ApiClient } from '@twurple/api'
 import type { ChatClient } from '@twurple/chat'
 import type { EventSubHttpListener } from '@twurple/eventsub-http'
 import type { EventSubWsListener } from '@twurple/eventsub-ws'
+import type { Bot } from '../bot'
 
 export interface EventDeps {
     registry: CommandRegistry
+    bot: Bot
+    apiClient: ApiClient
 }
 
 export interface BotContext {
-    apiClient: ApiClient
     chatClient: ChatClient
     eventSub: EventSubWsListener | EventSubHttpListener
     broadcasterId: string

@@ -1,10 +1,10 @@
 import { log } from '@lib/services/logger'
-import type { EventSubEvent } from '../types'
+import type { EventDeps, EventSubEvent } from '../types'
 
-export default {
+export default ({ apiClient }: EventDeps): EventSubEvent => ({
     type: 'eventsub',
     name: 'onChannelRaidIn',
-    register({ eventSub, broadcasterId, apiClient, botUserId }) {
+    register({ eventSub, broadcasterId, botUserId }) {
         eventSub.onChannelRaidTo(broadcasterId, async (event) => {
             // get game info for raidingUser
             const channelInfo = await apiClient.channels.getChannelInfoById(
@@ -37,4 +37,4 @@ export default {
             )
         })
     },
-} satisfies EventSubEvent
+})
