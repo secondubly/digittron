@@ -29,7 +29,7 @@ digittron
         ```
     * For broadcaster access token, use the following url:
         ```
-        https://id.twitch.tv/oauth2/authorize?client_id=CLIENT_ID&redirect_uri=http://localhost:3000&response_type=code&scope=bits:read+channel:bot+channel:manage:broadcast+channel:manage:polls+channel:manage:predictions+channel:manage:raids+channel:manage:redemptions+channel:manage:schedule+channel:manage:videos+channel:read:editors+channel:read:hype_train+channel:read:polls+channel:read:predictions+channel:read:redemptions+channel:read:subscriptions+channel:read:vips+clips:edit+moderation:read+user:read:subscriptions&force_verify=true
+        https://id.twitch.tv/oauth2/authorize?client_id=CLIENT_ID&redirect_uri=http://localhost:3000&response_type=code&scope=bits:read+channel:bot+channel:read:ads+channel:manage:broadcast+channel:manage:polls+channel:manage:predictions+channel:manage:raids+channel:manage:redemptions+channel:manage:schedule+channel:manage:videos+channel:read:editors+channel:read:hype_train+channel:read:polls+channel:read:predictions+channel:read:redemptions+channel:read:subscriptions+channel:read:vips+clips:edit+moderation:read+user:read:subscriptions&force_verify=true
         ```
     * In development mode, you will need an ngrok auth token - you can get one by signing up here: http://ngrok.com. This is used to enable the “Bot” badge for the bot, allowing extra functionality.
     * The `EVENTSUB_SECRET` is just a randomly generated string.
