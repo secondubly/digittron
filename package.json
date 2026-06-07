@@ -12,7 +12,7 @@
     },
     "scripts": {
         "api": "tsx watch --env-file=.env src/server/index.ts",
-        "bot": "tsx watch --env-file=.env src/bot/index.ts",
+        "bot": "tsx watch --env-file=.env src/bot/main.ts",
         "build": "vite build && tsc -p tsconfig.json && tsc-alias",
         "dev": "concurrently -c magenta,#7700cf -n API,WEB,BOT \"pnpm:api\" \"vite\" \"pnpm:bot\"",
         "format": "prettier --write .",
@@ -103,6 +103,7 @@
         "tsx": "^4.21.0",
         "typescript": "^5.9.3",
         "typescript-eslint": "^8.50.1",
-        "vite": "^7.3.0"
+        "vite": "^7.3.0",
+        "vitest": "^4.1.8"
     }
 }
