@@ -2,7 +2,7 @@ import fastifyRateLimit from '@fastify/rate-limit'
 import { type FastifyInstance } from 'fastify'
 
 // TODO: set up config class for project
-export const autoConfig = (fastify: FastifyInstance) => {
+export const autoConfig = (_fastify: FastifyInstance) => {
     return {
         // any IP can make at most 4 requests per minute
         max: process.env.RATE_LIMIT_MAX,
