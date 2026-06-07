@@ -2,10 +2,7 @@ import fastify, { type FastifyBaseLogger, type FastifyInstance } from 'fastify'
 import fastifyStatic from '@fastify/static'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { log } from '@lib/utils/logger.js'
-import { setupShutdownHandler } from '@lib/utils/utils.js'
-
-setupShutdownHandler()
+import { log } from '@lib/services/logger.js'
 
 export const init = (port: number) => {
     console.log(`Initializing web on port ${port}`)
