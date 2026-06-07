@@ -4,7 +4,9 @@ import {
     twitchParamsSchema,
     twitchTokenQuerySchema,
     twitchTokenResponseSchema,
+    CallbackSchema,
 } from 'src/server/schemas/twitch.js'
+import { handleCallback } from 'src/server/controllers/twitch.js'
 
 const plugin: FastifyPluginAsync = async (fastify) => {
     // GET /token - get Twitch token
@@ -20,6 +22,15 @@ const plugin: FastifyPluginAsync = async (fastify) => {
             },
         },
         getTwitchToken,
+    )
+
+    // GET /callback
+    fastify.get(
+        '/callback',
+        {
+            schema: CallbackSchema,
+        },
+        handleCallback(fastify),
     )
 }
 

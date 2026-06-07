@@ -1,11 +1,19 @@
-import type { FastifyReply, FastifyRequest } from 'fastify'
+import {
+    type FastifyInstance,
+    type FastifyReply,
+    type FastifyRequest,
+} from 'fastify'
 import type {
+    CallbackSchemaType,
     TwitchTokenInputParams,
     TwitchTokenQuery,
 } from '../schemas/twitch'
 import { RequestContext } from '@mikro-orm/core'
 import { Token } from '@lib/db/models/token.entity'
-import type { AccessToken } from '@twurple/auth'
+import { exchangeCode, type AccessToken } from '@twurple/auth'
+import { config } from 'src/config'
+import type { HelixUser } from '@twurple/api'
+import { log } from '@lib/services/logger'
 
 export async function getTwitchToken(
     request: FastifyRequest<{
@@ -71,4 +79,60 @@ async function getToken(id: string, scopes?: string) {
     }
 
     return accessToken
+}
+
+async function getTwitchUser(accessToken: string): Promise<HelixUser> {
+    const res = await fetch('https://api.twitch.tv/helix/users', {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Client-Id': config.TWITCH_CLIENT_ID,
+        },
+    })
+
+    if (!res.ok) throw new Error(`Failed to fetch Twitch user: ${res.status}`)
+
+    const { data } = await res.json()
+    return data[0] as HelixUser
+}
+
+export function handleCallback(server: FastifyInstance) {
+    return async (
+        request: FastifyRequest<{
+            Querystring: CallbackSchemaType
+        }>,
+        reply: FastifyReply,
+    ) => {
+        const { code, state } = request.query
+        // TODO: build twitch_login page similar to Spotify_login page
+        // if (!state) {
+        //     reply.redirect('/#' + JSON.stringify('error: state mismatch'))
+        //     return
+        // }
+
+        const tokenData = await exchangeCode(
+            config.TWITCH_CLIENT_ID,
+            config.TWITCH_CLIENT_SECRET,
+            code,
+            'http://localhost:4000/api/twitch/callback', // TODO: move this to a config variable or similar
+        )
+
+        const twitchUser = await getTwitchUser(tokenData.accessToken)
+
+        if (twitchUser.id === config.TWITCH_BOT_ID) {
+            await server.tokenStore.set('token:bot', tokenData)
+            request.em.upsert(Token, {
+                id: Number(config.TWITCH_BOT_ID),
+                twitchAccessToken: JSON.stringify(tokenData),
+            })
+        } else if (twitchUser.id === config.TWITCH_BROADCASTER_ID) {
+            await server.tokenStore.set('token:broadcaster', tokenData)
+            request.em.upsert(Token, {
+                id: Number(config.TWITCH_BROADCASTER_ID),
+                twitchAccessToken: JSON.stringify(tokenData),
+            })
+        } else {
+            log.api.warn('Got back an invalid user for the associated token')
+            return reply.code(500).send({ error: 'Internal Server Error' })
+        }
+    }
 }

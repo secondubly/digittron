@@ -1,14 +1,14 @@
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import { RequestContext, wrap } from '@mikro-orm/core'
 import { Token } from '@lib/db/models/token.entity'
-import redisClient from '@lib/utils/redis'
+import redisClient from '@lib/services/redis'
 import {
     TokenSchema,
     type callbackQuerySchema,
     type getTokenParams,
 } from '../schemas/spotify.js'
-import { log } from '@lib/utils/logger'
-import Value from 'typebox/value'
+import { log } from '@lib/services/logger.js'
+import { Value } from '@sinclair/typebox/value'
 
 export async function getToken(
     request: FastifyRequest<{
