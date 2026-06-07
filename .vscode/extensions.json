@@ -1,3 +1,7 @@
 {
-    "recommendations": ["vunguyentuan.vscode-postcss", "vunguyentuan.vscode-css-variables"]
+    "recommendations": [
+        "vunguyentuan.vscode-postcss",
+        "vunguyentuan.vscode-css-variables",
+        "wayou.vscode-todo-highlight"
+    ]
 }
