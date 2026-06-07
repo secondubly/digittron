@@ -63,8 +63,7 @@ docker compose up
 * `CHANNELS`: List of twitch channels to connect to (separated by commas)
 * `SPOTIFY_CLIENT_ID`: Spotify application Client ID (Optional)
 * `SPOTIFY_CLIENT_SECRET`: Spotify application client secret (Optional)
-* `REDIS_HOST`: Hostname for your redis instance (in development mode, default is localhost)
-* `REDIS_PORT`: Port for your redis instance (default is 6379)
+* `REDIS_URL`: URL to connect to your redis instance (in development mode, default is localhost)
 * `NODE_ENV`: Whether to run bot in production or development mode
 * `NGROK_AUTH_TOKEN`: Only needed in development mode, ngrok auth token is used to create a EventSub adapter
 * `EVENTSUB_SECRET`: Only needed in development mode, eventsub secret is used to validate connections to EventSub adapter
