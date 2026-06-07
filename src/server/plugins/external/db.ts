@@ -1,12 +1,23 @@
 import fp from 'fastify-plugin'
-import { MikroORM } from '@mikro-orm/sqlite'
 import type { FastifyInstance } from 'fastify'
+import { MikroORM } from '@mikro-orm/core'
+import type { EntityManager } from '@mikro-orm/sqlite'
+import mikroOrmConfig from 'src/mikro-orm.config'
 
-// decorate fastify instance with ORM
-const orm = await MikroORM.init()
+export default fp(
+    async (server: FastifyInstance) => {
+        const orm = await MikroORM.init(mikroOrmConfig)
 
-async function mikroHookPlugin(fastify: FastifyInstance) {
-    fastify.orm = orm
-}
+        server.decorate('orm', orm)
+        server.decorate('db', orm.em)
 
-export default fp(mikroHookPlugin)
+        server.addHook('onRequest', async (req) => {
+            req.em = orm.em.fork() as EntityManager
+        })
+
+        server.addHook('onClose', async () => {
+            await orm.close()
+        })
+    },
+    { name: 'db' },
+)
