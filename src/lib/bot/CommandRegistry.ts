@@ -5,6 +5,7 @@ import type { Command, CommandContext } from './types.js'
 import type { ApiClient } from '@twurple/api'
 import { log } from '@lib/services/logger.js'
 import { config } from 'src/config.js'
+import type { CommandDeps } from './types.js'
 
 export class CommandRegistry {
     private readonly commands = new Map<string, Command>()
@@ -17,7 +18,7 @@ export class CommandRegistry {
         this.prefix = prefix
     }
 
-    async loadCommands(dir: string): Promise<void> {
+    async loadCommands(dir: string, deps: CommandDeps): Promise<void> {
         const files = await fs.readdir(dir)
 
         const imports = files
@@ -31,7 +32,10 @@ export class CommandRegistry {
         await Promise.all(
             imports.map(async (filePath) => {
                 const mod = await import(filePath)
-                const command: Command = mod.default
+                const exported = mod.default
+
+                const command: Command =
+                    typeof exported === 'function' ? exported(deps) : exported
 
                 if (!command?.name || !command?.execute) {
                     log.bot.warn(
