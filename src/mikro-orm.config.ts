@@ -1,10 +1,10 @@
-import { type Options, SqliteDriver } from '@mikro-orm/sqlite'
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
 import { Migrator } from '@mikro-orm/migrations'
 import { SeedManager } from '@mikro-orm/seeder'
+import { defineConfig } from '@mikro-orm/sqlite'
+import { config } from './config'
 
-const config: Options = {
-    driver: SqliteDriver,
+export default defineConfig({
     dbName: './db/sqlite.db',
     // folder-based discovery setup, using common filename suffix
     entities: ['build/lib/db/models/*.entity.js'],
@@ -13,7 +13,7 @@ const config: Options = {
     // check the documentation for their differences: https://mikro-orm.io/docs/metadata-providers
     metadataProvider: TsMorphMetadataProvider,
     // enable debug to log sql queries and discovery information
-    debug: process.env.NODE_ENV === 'development' ? true : false,
+    debug: config.NODE_ENV === 'development' ? true : false,
     extensions: [Migrator, SeedManager],
     migrations: {
         tableName: 'digittron_migrations',
@@ -28,6 +28,4 @@ const config: Options = {
         glob: '!(*.d).{js,ts}',
         emit: process.env.NODE_ENV === 'development' ? 'ts' : 'js',
     },
-}
-
-export default config
+})
