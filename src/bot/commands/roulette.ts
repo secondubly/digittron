@@ -1,51 +1,53 @@
-// import type { Command } from '@lib/types.js'
+import type { Command, CommandContext } from '@lib/bot/types.js'
+import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
+import { config } from 'src/config'
 
-// const roulette: Command = {
-//     name: 'roulette',
-//     aliases: [],
-//     cooldown: 60000, // cooldown in milliseconds
-//     enabled: true,
-//     description: 'play russian roulette! good luck!',
-//     async execute(event, _args, apiClient) {
-//         const bullet = Math.floor(Math.random() * 6 + 1)
+const isTrustedUser = (event: EventSubChannelChatMessageEvent) => {
+    const { chatterId, broadcasterId } = event
 
-//         const isMod = await apiClient.moderation.checkUserMod(
-//             event.broadcasterId,
-//             event.chatterId,
-//         )
-//         const isBroadcaster = event.chatterId === process.env.TWITCH_ID
-//         const isSubscriber =
-//             await apiClient.subscriptions.checkUserSubscription(
-//                 event.chatterId,
-//                 event.broadcasterId,
-//             )
+    if (chatterId === broadcasterId) return true
 
-//         if (bullet === 1) {
-//             if (isMod || isBroadcaster || isSubscriber) {
-//                 apiClient.chat.sendChatMessageAsApp(
-//                     process.env.BOT_ID!,
-//                     event.broadcasterId,
-//                     `the gun fired, but ${event.chatterDisplayName} caught the bullet!`,
-//                 )
-//             } else {
-//                 apiClient.chat.sendChatMessageAsApp(
-//                     process.env.BOT_ID!,
-//                     event.broadcasterId,
-//                     `${event.chatterDisplayName} was shot!`,
-//                 )
-//                 apiClient.moderation.banUser(event.broadcasterId, {
-//                     duration: 600, // 10 minutes
-//                     reason: 'lost the roulette game',
-//                     user: event.chatterId,
-//                 })
-//             }
-//         } else {
-//             apiClient.chat.sendChatMessageAsApp(
-//                 process.env.BOT_ID!,
-//                 event.broadcasterId,
-//                 `${event.chatterDisplayName} was spared!`,
-//             )
-//         }
-//     },
-// }
-// export default roulette
+    return Object.keys(event.badges).some(
+        (b) => b === 'moderator' || b === 'subscriber',
+    )
+}
+
+const SHOT_TIMEOUT_DURATION_SECONDS = 60
+export default (): Command => ({
+    name: 'roulette',
+    aliases: [],
+    description: 'Play russian roulette! Good luck!',
+    async execute({ msg, client }: CommandContext) {
+        const { broadcasterId, chatterId, chatterDisplayName } = msg
+        const bullet = Math.floor(Math.random() * 6 + 1)
+
+        const isTrusted = isTrustedUser(msg)
+
+        if (bullet === 1) {
+            if (isTrusted) {
+                client.chat.sendChatMessageAsApp(
+                    process.env.BOT_ID!,
+                    broadcasterId,
+                    `The gun fired, but ${chatterDisplayName} caught the bullet!`,
+                )
+            } else {
+                await client.chat.sendChatMessageAsApp(
+                    process.env.BOT_ID!,
+                    broadcasterId,
+                    `${chatterDisplayName} was shot!`,
+                )
+                client.moderation.banUser(broadcasterId, {
+                    duration: SHOT_TIMEOUT_DURATION_SECONDS, // 10 minutes
+                    reason: 'lost the roulette game',
+                    user: chatterId,
+                })
+            }
+        } else {
+            client.chat.sendChatMessageAsApp(
+                config.TWITCH_BOT_ID!,
+                broadcasterId,
+                `${chatterDisplayName} was spared!`,
+            )
+        }
+    },
+})

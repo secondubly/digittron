@@ -1,31 +1,31 @@
-// import type { Command } from '@lib/types.js'
-// import { getCurrentlyPlayingTrack } from '@lib/utils/spotify'
+import type { Command, CommandContext } from '@lib/bot/types'
+import { getCurrentlyPlayingTrack } from '@lib/services/spotify'
+import { config } from 'src/config'
 
-// const nowplaying: Command = {
-//     name: 'nowplaying',
-//     aliases: ['np', 'playing'],
-//     enabled: true,
-//     description: 'Shows artist and title of currently playing song',
-//     async execute(event, _args, apiClient) {
-//         const { chatterDisplayName: displayName } = event
-//         const response = await getCurrentlyPlayingTrack()
+const nowplaying: Command = {
+    name: 'nowplaying',
+    aliases: ['np', 'playing'],
+    description: 'Shows artist and title of currently playing song',
+    async execute({ client, msg }: CommandContext) {
+        const { chatterDisplayName: displayName, broadcasterId } = msg
+        const response = await getCurrentlyPlayingTrack()
 
-//         if (typeof response === 'number') {
-//             apiClient.chat.sendChatMessageAsApp(
-//                 process.env.BOT_ID!,
-//                 event.broadcasterId,
-//                 `${displayName} nothing is playing right now!`,
-//             )
-//             return
-//         } else {
-//             const nowplaying = `“${response.item.name}” by ${response.item.artists.map((a) => a.name).join(',')}`
-//             apiClient.chat.sendChatMessageAsApp(
-//                 process.env.BOT_ID!,
-//                 event.broadcasterId,
-//                 `${displayName} ${nowplaying}`,
-//             )
-//         }
-//     },
-// }
+        if (typeof response === 'number') {
+            client.chat.sendChatMessageAsApp(
+                config.TWITCH_BOT_ID,
+                broadcasterId,
+                `${displayName} nothing is playing right now!`,
+            )
+            return
+        } else {
+            const nowplaying = `“${response.item.name}” by ${response.item.artists.map((a) => a.name).join(',')}`
+            client.chat.sendChatMessageAsApp(
+                config.TWITCH_BOT_ID,
+                broadcasterId,
+                `${displayName} ${nowplaying}`,
+            )
+        }
+    },
+}
 
-// export default nowplaying
+export default nowplaying

@@ -1,19 +1,20 @@
-// import type { Command } from '@lib/types.js'
+import type { Command, CommandContext } from '@lib/bot/types.js'
+import { config } from 'src/config'
 
-// const anniversary: Command = {
-//     name: 'd20',
-//     aliases: [],
-//     enabled: true,
-//     description: 'Roll a d20',
-//     async execute(event, _args, apiClient) {
-//         const displayName = event.chatterDisplayName
-//         const roll = Math.floor(Math.random() * 20 + 1)
-//         apiClient.chat.sendChatMessageAsApp(
-//             process.env.BOT_ID!,
-//             event.broadcasterId,
-//             `${displayName} rolled a ${roll}${roll === 20 ? '! 🎉' : '.'}`,
-//         )
-//         // TODO: if user rolled a 1, timeout for 1 minute
-//     },
-// }
-// export default anniversary
+const d20: Command = {
+    name: 'd20',
+    aliases: [],
+    description: 'Roll a d20',
+    execute: async function ({ client, msg }: CommandContext): Promise<void> {
+        const displayName = msg.chatterDisplayName
+        const roll = Math.floor(Math.random() * 20 + 1)
+        client.chat.sendChatMessageAsApp(
+            config.TWITCH_BOT_ID,
+            config.TWITCH_BROADCASTER_ID,
+            `${displayName} rolled a ${roll}${roll === 20 ? '! 🎉' : ''}`,
+        )
+        // TODO: if user rolled a 1, timeout for 1 minute
+    },
+}
+
+export default d20

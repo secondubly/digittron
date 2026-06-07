@@ -1,38 +1,54 @@
-// import type { Command } from '@lib/types.js'
+import type { Command, CommandContext } from '@lib/bot/types'
+import { log } from '@lib/services/logger'
+import { config } from 'src/config'
 
-// const permit: Command = {
-//     name: 'permit',
-//     aliases: [],
-//     enabled: true,
-//     description: 'Allows specified user to post links',
-//     async execute(event, args, apiClient) {
-//         const isMod = await apiClient.moderation.checkUserMod(
-//             event.broadcasterId,
-//             event.chatterId,
-//         )
-//         const isBroadcaster = event.chatterId === process.env.TWITCH_ID
-//         // by this point this shouldn't fire but just in case, we have a second check
-//         if (!isMod && !isBroadcaster) {
-//             return
-//         }
+const permitList = new Map<string, number>()
+const PERMIT_DURATION_MS = 60_999
 
-//         const username = args[0]
-//         const author = event.chatterDisplayName
-//         if (!username) {
-//             apiClient.chat.sendChatMessageAsApp(
-//                 process.env.BOT_ID!,
-//                 event.broadcasterId,
-//                 `@${author} you didn't include the user to permit!`,
-//             )
-//             return
-//         } else {
-//             apiClient.chat.sendChatMessageAsApp(
-//                 process.env.BOT_ID!,
-//                 event.broadcasterId,
-//                 `@${username} you have have been permitted 60 seconds to post a link!`,
-//             )
-//         }
-//     },
-// }
+export function isPermitted(userId: string): boolean {
+    const expiresAt = permitList.get(userId)
+    if (!expiresAt) return false
+    // you're only allowed to post one link, so delete them from the permit list if they're in it
+    permitList.delete(userId)
+    if (Date.now() > expiresAt) {
+        return false
+    }
+    return true
+}
 
-// export default permit
+export default (): Command => ({
+    name: 'permit',
+    aliases: ['allow'],
+    description: 'Allow a user to post a link',
+    modOnly: true,
+    async execute({ client, msg, args }: CommandContext) {
+        const target = args[0]?.replace('@', '').toLocaleLowerCase()
+        const { broadcasterId } = msg
+        if (!target) {
+            client.chat.sendChatMessageAsApp(
+                config.TWITCH_BOT_ID,
+                broadcasterId,
+                `Invalid command! Usage: !permit @username`,
+            )
+            return
+        }
+
+        const targetUser = await client.users.getUserByName(target)
+        if (!targetUser) {
+            client.chat.sendChatMessageAsApp(
+                config.TWITCH_BOT_ID,
+                broadcasterId,
+                `User @${target} not found.`,
+            )
+            return
+        }
+
+        permitList.set(targetUser.id, Date.now() + PERMIT_DURATION_MS)
+        await client.chat.sendChatMessageAsApp(
+            config.TWITCH_BOT_ID,
+            broadcasterId,
+            `@${targetUser.displayName}, you may post one link in the next 60 seconds.`,
+        )
+        log.bot.info(`Permit granted to ${targetUser.displayName}`)
+    },
+})
