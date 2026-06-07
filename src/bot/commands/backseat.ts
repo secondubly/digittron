@@ -1,18 +1,17 @@
-// import type { Command } from '@lib/types.js'
+import type { Command } from '@lib/bot/types.js'
+import { config } from 'src/config'
 
-// const backseat: Command = {
-//     name: 'backseat',
-//     aliases: [],
-//     enabled: true,
-//     description: 'Warning about backseating',
-//     async execute(event, _args, apiClient) {
-//         const broadcaster = event.broadcasterDisplayName
-//         apiClient?.chat.sendChatMessageAsApp(
-//             process.env.BOT_ID!,
-//             event.broadcasterId,
-//             `Please do not backseat the streamer! when @${broadcaster} needs help, they will ask for it! thank you!`,
-//         )
-//     },
-// }
+const backseat: Command = {
+    name: 'backseat',
+    aliases: [],
+    description: 'Warning about backseating',
+    execute: async function ({ channel, client }) {
+        client.chat.sendChatMessageAsApp(
+            config.TWITCH_BOT_ID,
+            config.TWITCH_BROADCASTER_ID,
+            `Please do not backseat the streamer! when @${channel} needs help, they will ask for it! Thank you!`,
+        )
+    },
+}
 
-// export default backseat
+export default backseat
