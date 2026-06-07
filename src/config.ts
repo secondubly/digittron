@@ -19,6 +19,7 @@ const EnvSchema = Type.Object({
     TWITCH_CHANNELS: SpaceSeparatedChannels,
     LEAD_TIME_MS: Type.Number({ default: 60_000 }),
     POLL_INTERVAL_MS: Type.Number({ default: 300_000 }),
+    STEAM_ID: Type.String({ default: '89010416' }),
     REDIS_URL: Type.String({ default: 'redis:6379' }),
     NODE_ENV: Type.Union(
         [Type.Literal('development'), Type.Literal('production')],
