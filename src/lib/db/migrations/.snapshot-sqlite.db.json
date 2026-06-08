@@ -398,8 +398,59 @@
       "comment": null
     },
     {
-      "name": "token",
+      "name": "oauth_token",
       "columns": {
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "datetime",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "datetime",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
         "id": {
           "name": "id",
           "type": "integer",
@@ -417,8 +468,25 @@
           "enumItems": [],
           "mappedType": "integer"
         },
-        "spotify_refresh_token": {
-          "name": "spotify_refresh_token",
+        "provider_name": {
+          "name": "provider_name",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "refresh_token": {
+          "name": "refresh_token",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,
@@ -434,8 +502,25 @@
           "enumItems": [],
           "mappedType": "text"
         },
-        "twitch_access_token": {
-          "name": "twitch_access_token",
+        "token_type": {
+          "name": "token_type",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'Bearer'",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "twitch_id": {
+          "name": "twitch_id",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,
@@ -450,9 +535,36 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "text"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "datetime",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
         }
       },
       "indexes": [
+        {
+          "columnNames": [
+            "twitch_id"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "oauth_token_twitch_id_index",
+          "primary": false,
+          "unique": false
+        },
         {
           "columnNames": [
             "id"
@@ -466,18 +578,48 @@
       ],
       "checks": [],
       "triggers": [],
-      "foreignKeys": {},
+      "foreignKeys": {
+        "oauth_token_twitch_id_foreign": {
+          "columnNames": [
+            "twitch_id"
+          ],
+          "constraintName": "oauth_token_twitch_id_foreign",
+          "localTableName": "oauth_token",
+          "referencedColumnNames": [
+            "twitch_id"
+          ],
+          "referencedTableName": "user",
+          "deleteRule": "cascade"
+        }
+      },
       "comment": null
     },
     {
       "name": "user",
       "columns": {
-        "id": {
-          "name": "id",
+        "access_token_encrypted": {
+          "name": "access_token_encrypted",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "expires_at": {
+          "name": "expires_at",
           "type": "integer",
           "unsigned": false,
-          "autoincrement": true,
-          "primary": true,
+          "autoincrement": false,
+          "primary": false,
           "nullable": false,
           "unique": false,
           "length": null,
@@ -489,12 +631,46 @@
           "enumItems": [],
           "mappedType": "integer"
         },
-        "password": {
-          "name": "password",
+        "refresh_token_encrypted": {
+          "name": "refresh_token_encrypted",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "scopes": {
+          "name": "scopes",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "twitch_id": {
+          "name": "twitch_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
           "nullable": false,
           "unique": false,
           "length": null,
@@ -527,7 +703,7 @@
       "indexes": [
         {
           "columnNames": [
-            "id"
+            "twitch_id"
           ],
           "composite": false,
           "constraint": true,
