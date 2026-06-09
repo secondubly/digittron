@@ -33,7 +33,7 @@ const rank = ({ tokenStore }: CommandDeps) => ({
         if (!response.ok) {
             if (response.status === 500) {
                 // use cached value
-                const rank = tokenStore.get(`deadlock:${config.STEAM_ID}`)
+                const rank = tokenStore.get(`token:deadlock:${config.STEAM_ID}`)
                 if (!rank) {
                     client.chat.sendChatMessageAsApp(
                         config.TWITCH_BOT_ID,
