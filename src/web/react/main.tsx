@@ -4,18 +4,18 @@ import { MantineProvider } from '@mantine/core'
 import theme from './components/theme.js'
 import { BrowserRouter } from 'react-router-dom'
 import { Notifications } from '@mantine/notifications'
+import { AuthProvider } from './contexts/AuthContext.js'
 import '@mantine/core/styles.css';
 import './styles/global.css'
 import '@mantine/notifications/styles.css';
-import { AuthProvider } from './contexts/AuthContext.js'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <MantineProvider theme={theme}>
         <Notifications />
-        <AuthProvider>
             <BrowserRouter>
-                <App />
+                <AuthProvider>
+                    <App />
+                </AuthProvider>
             </BrowserRouter>
-        </AuthProvider>
-    </MantineProvider>,
+    </MantineProvider>
 )
