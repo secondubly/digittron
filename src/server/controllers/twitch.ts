@@ -5,15 +5,63 @@ import {
 } from 'fastify'
 import type {
     CallbackSchemaType,
+    LoginSchemaType,
     TwitchTokenInputParams,
     TwitchTokenQuery,
 } from '../schemas/twitch'
 import { RequestContext } from '@mikro-orm/core'
-import { Token } from '@lib/db/models/token.entity'
+// import { Token } from '@lib/db/models/token.entity'
 import { exchangeCode, type AccessToken } from '@twurple/auth'
 import { config } from 'src/config'
 import type { HelixUser } from '@twurple/api'
 import { log } from '@lib/services/logger'
+import crypto from 'node:crypto'
+
+const BOT_SCOPES = [
+    'channel:edit:commercial',
+    'channel:moderate',
+    'chat:read',
+    'chat:edit',
+    'clips:edit',
+    'moderator:manage:announcements',
+    'moderator:manage:banned_users',
+    'moderator:manage:blocked_terms',
+    'moderator:manage:chat_messages',
+    'moderator:manage:shoutouts',
+    'moderator:manage:unban_requests',
+    'moderator:manage:warnings',
+    'moderator:read:chat_settings',
+    'moderator:read:chatters',
+    'moderator:read:followers',
+    'moderator:read:moderators',
+    'moderator:read:vips',
+    'user:bot',
+    'user:read:chat',
+    'user:write:chat',
+]
+
+const BROADCASTER_SCOPES = [
+    'bits:read',
+    'channel:bot',
+    'channel:read:ads',
+    'channel:manage:broadcast',
+    'channel:manage:polls',
+    'channel:manage:predictions',
+    'channel:manage:raids',
+    'channel:manage:redemptions',
+    'channel:manage:schedule',
+    'channel:manage:videos',
+    'channel:read:editors',
+    'channel:read:hype_train',
+    'channel:read:polls',
+    'channel:read:predictions',
+    'channel:read:redemptions',
+    'channel:read:subscriptions',
+    'channel:read:vips',
+    'clips:edit',
+    'moderation:read',
+    'user:read:subscriptions',
+]
 
 export async function getTwitchToken(
     request: FastifyRequest<{
@@ -103,11 +151,10 @@ export function handleCallback(server: FastifyInstance) {
         reply: FastifyReply,
     ) => {
         const { code, state } = request.query
-        // TODO: build twitch_login page similar to Spotify_login page
-        // if (!state) {
-        //     reply.redirect('/#' + JSON.stringify('error: state mismatch'))
-        //     return
-        // }
+        if (!state) {
+            reply.redirect('/#' + JSON.stringify('error: state mismatch'))
+            return
+        }
 
         const tokenData = await exchangeCode(
             config.TWITCH_CLIENT_ID,
@@ -120,19 +167,57 @@ export function handleCallback(server: FastifyInstance) {
 
         if (twitchUser.id === config.TWITCH_BOT_ID) {
             await server.tokenStore.set('token:bot', tokenData)
-            request.em.upsert(Token, {
-                id: Number(config.TWITCH_BOT_ID),
-                twitchAccessToken: JSON.stringify(tokenData),
-            })
+            // request.em.upsert(Token, {
+            //     id: Number(config.TWITCH_BOT_ID),
+            //     twitchAccessToken: JSON.stringify(tokenData),
+            // })
         } else if (twitchUser.id === config.TWITCH_BROADCASTER_ID) {
             await server.tokenStore.set('token:broadcaster', tokenData)
-            request.em.upsert(Token, {
-                id: Number(config.TWITCH_BROADCASTER_ID),
-                twitchAccessToken: JSON.stringify(tokenData),
-            })
+            // request.em.upsert(Token, {
+            //     id: Number(config.TWITCH_BROADCASTER_ID),
+            //     twitchAccessToken: JSON.stringify(tokenData),
+            // })
         } else {
             log.api.warn('Got back an invalid user for the associated token')
             return reply.code(500).send({ error: 'Internal Server Error' })
         }
+    }
+}
+
+export function handleLogin(server: FastifyInstance) {
+    return async (
+        request: FastifyRequest<{
+            Querystring: LoginSchemaType
+        }>,
+        reply: FastifyReply,
+    ) => {
+        const { type } = request.query
+        const state = crypto.randomBytes(32).toString('hex')
+        // TODO: store redirect uri in variable
+        const authOptions = {
+            url: 'http://id.twitch.tv/oauth2/authorize',
+            redirect_uri: 'http://localhost:4000/api/twitch/callback',
+            response_type: 'code',
+            state,
+            scope: encodeURIComponent(
+                type === 'bot'
+                    ? BOT_SCOPES.join(' ')
+                    : BROADCASTER_SCOPES.join(' '),
+            ),
+        }
+
+        const url =
+            'https://id.twitch.tv/oauth/authorize?redirect_uri=' +
+            authOptions.redirect_uri +
+            '&response_type=code' +
+            '&state=' +
+            state +
+            '&scope=' +
+            authOptions.scope +
+            '&force_verify=true'
+
+        server.tokenStore.set(`state:${type}`, state)
+
+        return reply.redirect(url)
     }
 }

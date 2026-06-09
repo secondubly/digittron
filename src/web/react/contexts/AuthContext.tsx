@@ -1,77 +1,58 @@
-import React, { createContext, type ReactNode, useContext, useState } from 'react';
-import useToken from '../components/logic/UseToken';
-import type { Credentials, Token } from '../types/loginTypes';
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+
+export interface User {
+    id: number
+    displayName: string
+    avatarUrl: string
+}
 
 interface AuthContextType {
-    token: string | null
-    user: string | null;
-    login: (values: Credentials) => void;
-    logout: () => void;
-    isAuthenticated: boolean;
+    user: User | null
+    loading: boolean
+    login: () => void
+    logout: () => Promise<void>
+    isAuthenticated: boolean
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const API = 'http://localhost:4000'
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { token, setToken, removeToken } = useToken();
-  const [user, setUser] = useState(null);
+const AuthContext = createContext<AuthContextType>({
+    user: null,
+    loading: true,
+    login: () => {},
+    logout: async () => {},
+    isAuthenticated: false
+})
 
-  const login = async (credentials: Credentials) => {
-    const response = await fetch('/api/users/login', {
-      method: 'POST',
-      credentials: 'include', // TODO: set condition to only use in development
-      headers: {
-          'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(credentials)
-    })
+export function AuthProvider({ children }: { children: ReactNode }) {
+    const [user, setUser] = useState<User | null>(null)
+    const [loading, setLoading] = useState(true)
 
-    if (response.status === 401) {
-        throw new Error('Invalid username or password')
-    } else if (!response.ok) {
-        throw new Error
+    useEffect(() => {
+        fetch(`http://localhost:4000/api/auth/me`, { credentials: 'include' })
+            .then((r) => r.json())
+            .then(({ user }) => setUser(user ?? null))
+            .catch(() => setUser(null))
+            .finally(() => setLoading(false))
+    }, [])
+
+    const login = () => {
+        window.location.href = `${API}/api/auth/twitch/login`
     }
 
-    const data = await response.json() as Token
-    setToken(data)
-    return data
-  };
-
-  const logout = async () => {
-    const response = await fetch('/api/users/logout', {
-      method: 'DELETE',
-      credentials: 'include'
-    })
-
-    if (!response.ok) {
-      console.error('response', response)
-      throw new Error('An error occurred while logging out.')
-    } else {
-      removeToken();
-      setUser(null);
-      return
+    const logout = async () => {
+        await fetch(`${API}/api/auth/logout`, {
+            method: 'POST',
+            credentials: 'include',
+        })
+        setUser(null)
     }
-  };
 
-  const value = {
-    token,
-    user,
-    login,
-    logout,
-    isAuthenticated: !!token
-  };
-
-  return (
-    <AuthContext.Provider value={value}>
+    return (
+    <AuthContext.Provider value={{ user, loading, login, logout, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
-  );
+)
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+export const useAuth = () => useContext(AuthContext);

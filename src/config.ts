@@ -24,6 +24,9 @@ const EnvSchema = Type.Object({
     REDIS_URL: Type.String({ default: 'redis:6379' }),
     RATE_LIMIT_MAX: Type.Number({ default: 4 }),
     ENCRYPTION_KEY: Type.String({ minLength: 1 }),
+    AUTH_SECRET: Type.String({ minLength: 1 }),
+    SESSION_SECRET: Type.String({ minLength: 1 }),
+    TWITCH_REDIRECT_URI: Type.String({ minLength: 1 }),
     NODE_ENV: Type.Union(
         [Type.Literal('development'), Type.Literal('production')],
         { default: 'development' },

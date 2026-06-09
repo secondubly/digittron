@@ -1,10 +1,9 @@
-import fCookie, { type FastifyCookieOptions } from '@fastify/cookie'
+import { fastifyCookie } from '@fastify/cookie'
+import fp from 'fastify-plugin'
 
-export const autoConfig = (): FastifyCookieOptions => {
-    return {
-        secret: process.env.COOKIE_SECRET ?? 'some-secret-key',
-        hook: 'preHandler',
-    }
-}
-
-export default fCookie
+export default fp(
+    async (fastify) => {
+        fastify.register(fastifyCookie)
+    },
+    { name: 'cookie' },
+)
