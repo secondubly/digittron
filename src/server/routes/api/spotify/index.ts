@@ -1,35 +1,28 @@
-// import type { FastifyPluginAsync } from 'fastify'
-// import { getToken, handleCallback } from '../../../controllers/spotify.js'
-// import {
-//     callbackQuerySchema,
-//     getTokenParamsSchema,
-// } from 'src/server/schemas/spotify.js'
+import type { FastifyPluginAsync } from 'fastify'
+import { getToken, handleCallback } from '../../../controllers/spotify.js'
+import { callbackQuerySchema } from 'src/server/schemas/spotify.js'
+import fastifyPassport from '@fastify/passport'
 
-// const plugin: FastifyPluginAsync = async (fastify) => {
-//     fastify.get(
-//         '/token/:id',
-//         {
-//             schema: {
-//                 params: getTokenParamsSchema,
-//                 response: {
-//                     200: {
-//                         type: 'string',
-//                     },
-//                 },
-//             },
-//         },
-//         getToken,
-//     )
+const plugin: FastifyPluginAsync = async (fastify) => {
+    fastify.get(
+        '/login',
+        {
+            preValidation: fastifyPassport.authenticate('spotify'),
+        },
+        async () => {},
+    )
 
-//     fastify.get(
-//         '/callback',
-//         {
-//             schema: {
-//                 querystring: callbackQuerySchema,
-//             },
-//         },
-//         handleCallback,
-//     )
-// }
+    fastify.get(
+        '/callback',
+        {
+            preValidation: fastifyPassport.authenticate('spotify', {
+                failureRedirect: '/spotify_login?error=spotify_failed',
+            }),
+        },
+        async (_request, reply) => {
+            reply.redirect('/')
+        },
+    )
+}
 
-// export default plugin
+export default plugin
