@@ -6,10 +6,11 @@ import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
 function getLoggerOptions() {
     if (process.stdout.isTTY || process.env.NODE_ENV === 'development') {
         return {
-            level: 'debug',
+            level: 'trace',
             transport: {
                 target: 'pino-pretty',
                 options: {
+                    colorize: true,
                     translateTime: 'HH:mm:ss Z',
                     ignore: 'pid,hostname',
                 },

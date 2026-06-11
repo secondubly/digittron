@@ -1,22 +1,18 @@
 import { IconChevronRight } from '@tabler/icons-react';
 import { Avatar, Group, Text, UnstyledButton } from '@mantine/core';
 import classes from './UserButton.module.css';
-// @ts-expect-error false positive error
-import placeholder from '../../../assets/images/h_jjk.jpg'
 import { forwardRef } from 'react';
 import { useAuth } from '../../../contexts/AuthContext'
 
 export const UserButton = forwardRef<HTMLButtonElement, React.ComponentPropsWithoutRef<'button'>>(  
   ({ ...others}, ref) => {
         const { user } = useAuth();
-
         return (
       <UnstyledButton className={classes.user} p="md" ref={ref} {...others} w='100%'>
         <Group>
           <Avatar
-            src={user?.avatarUrl}
+            src={user?.avatar}
             radius="xl"
-            alt="Hiromi Higuruma"
           />
 
           <div style={{ flex: 1 }}>

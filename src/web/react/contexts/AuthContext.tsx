@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 export interface User {
     id: number
     displayName: string
-    avatarUrl: string
+    avatar: string
 }
 
 interface AuthContextType {
@@ -31,7 +31,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         fetch(`http://localhost:4000/api/auth/me`, { credentials: 'include' })
             .then((r) => r.json())
-            .then(({ user }) => setUser(user ?? null))
+            .then(({ user }) => {
+                console.log('user data', user)
+                setUser(user ?? null)
+            })
             .catch(() => setUser(null))
             .finally(() => setLoading(false))
     }, [])

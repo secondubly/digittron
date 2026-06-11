@@ -20,7 +20,7 @@ export default fp(
 
         await redis.connect()
 
-        const tokenStore = new TokenStore(redis, fastify.orm) // app.db from your db plugin
+        const tokenStore = new TokenStore(redis, fastify.orm.em) // app.db from your db plugin
 
         fastify.decorate('redis', redis)
         fastify.decorate('tokenStore', tokenStore)

@@ -19,11 +19,6 @@ export default async function bootstrap(
         options: { ...opts },
     })
 
-    await fastify.register(fastifyAutoload, {
-        dir: path.join(import.meta.dirname, 'plugins/server'),
-        options: { ...opts },
-    })
-
     fastify.register(fastifyAutoload, {
         dir: path.join(import.meta.dirname, 'routes'),
         autoHooks: true,
@@ -58,7 +53,7 @@ export default async function bootstrap(
     fastify.setNotFoundHandler(
         {
             preHandler: fastify.rateLimit({
-                max: 3,
+                max: 1,
                 timeWindow: 500,
             }),
         },

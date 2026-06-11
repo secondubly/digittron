@@ -4,10 +4,10 @@ import {
     PrimaryKey,
     Property,
 } from '@mikro-orm/decorators/legacy'
-import { User } from './user.entity'
+import { BaseEntity, User } from './user.entity'
 
 @Entity()
-export class OauthToken {
+export class OauthToken extends BaseEntity {
     @PrimaryKey()
     id!: number
 
@@ -22,20 +22,14 @@ export class OauthToken {
     provider_name!: string
 
     @Property()
-    access_token!: string
+    access_token_encrypted!: string
 
-    @Property()
-    refresh_token?: string
+    @Property({ nullable: true })
+    refresh_token_encrypted: string | null = null
 
     @Property({ default: 'Bearer' })
     token_type?: string
 
     @Property()
-    expires_at?: Date
-
-    @Property({ onCreate: () => new Date() })
-    created_at?: Date
-
-    @Property({ onUpdate: () => new Date() })
-    updated_at?: Date
+    expires_in?: number
 }
