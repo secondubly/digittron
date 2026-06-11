@@ -1,3 +1,11 @@
+body,
+* {
+    transition:
+        color 0.3s ease,
+        background-color 0.3s ease,
+        border-color 0.3s ease;
+}
+
 .page-layout {
     display: flex;
     gap: 2rem;
@@ -282,7 +290,10 @@
 
 /* ActionIcon */
 .mantine-ActionIcon-root {
-    &:where(:disabled:not([data-loading]), [data-disabled]:not([data-loading])) {
+    &:where(
+        :disabled:not([data-loading]),
+        [data-disabled]:not([data-loading])
+    ) {
         border: var(--ai-bd);
         opacity: 0.5;
 
@@ -294,7 +305,10 @@
 
 /* Button */
 .mantine-Button-root {
-    &:where(:disabled:not([data-loading]), [data-disabled]:not([data-loading])) {
+    &:where(
+        :disabled:not([data-loading]),
+        [data-disabled]:not([data-loading])
+    ) {
         border: var(--button-bd);
         opacity: 0.5;
     }
@@ -311,7 +325,10 @@
 
 /* Navbar */
 .navbar {
-    background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
+    background-color: light-dark(
+        var(--mantine-color-white),
+        var(--mantine-color-dark-6)
+    );
     height: 100%;
     width: calc(18.75rem * var(--mantine-scale));
     padding: var(--mantine-spacing-md);
@@ -363,10 +380,15 @@
         &:where([data-active]) {
             background-color: var(--pagination-active-bg);
             border-color: var(--pagination-active-bg);
-            color: var(--pagination-active-color, var(--mantine-primary-color-contrast));
+            color: var(
+                --pagination-active-color,
+                var(--mantine-primary-color-contrast)
+            );
 
             &:hover {
-                background-color: rgba(from var(--pagination-active-bg) r g b / 0.9);
+                background-color: rgba(
+                    from var(--pagination-active-bg) r g b / 0.9
+                );
             }
         }
     }
@@ -499,7 +521,10 @@
         background-color: transparent;
 
         &:where([data-hovered]) {
-            background-color: var(--menu-item-hover, var(--mantine-color-default-hover));
+            background-color: var(
+                --menu-item-hover,
+                var(--mantine-color-default-hover)
+            );
         }
     }
 
@@ -713,9 +738,16 @@
                 font-size: calc(var(--day-size) / 2.28);
 
                 &:hover:where(
-                        :not([data-static], [data-disabled], [data-selected], [data-in-range])
+                        :not(
+                            [data-static],
+                            [data-disabled],
+                            [data-selected],
+                            [data-in-range]
+                        )
                     ) {
-                    background-color: var(--mantine-color-default-hover) !important;
+                    background-color: var(
+                        --mantine-color-default-hover
+                    ) !important;
                     border-radius: var(--mantine-radius-default);
 
                     &[data-in-range] {
@@ -723,7 +755,9 @@
                     }
                 }
 
-                &:where([data-selected]):hover:where(:not([data-disabled], [data-static])) {
+                &:where([data-selected]):hover:where(
+                        :not([data-disabled], [data-static])
+                    ) {
                     background-color: var(--mantine-primary-color-filled-hover);
                     border-radius: var(--mantine-radius-default);
                 }
