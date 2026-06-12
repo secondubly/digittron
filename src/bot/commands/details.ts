@@ -37,7 +37,9 @@ export default ({ tokenStore }: CommandDeps): Command => ({
             return
         }
 
-        const appAccessToken = await tokenStore.get('token:bot')
+        const appAccessToken = await tokenStore.get(
+            `twitch:${config.TWITCH_BOT_ID}`,
+        )
         const response = await fetch('https://api.igdb.com/v4/games', {
             method: 'POST',
             headers: {
