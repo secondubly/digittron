@@ -43,7 +43,9 @@ if (!Value.Check(EnvSchema, withDefaults)) {
 
     log.app.error('Invalid environment variables')
     // REVIEW: check this
-    errors.forEach(({ path, message }) => console.error(`   ${path}:`, message))
+    errors.forEach(({ path, message }) =>
+        log.app.error(`   ${path}: ${message}`),
+    )
     process.exit(2)
 }
 
