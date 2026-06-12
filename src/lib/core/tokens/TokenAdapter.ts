@@ -23,7 +23,7 @@ function toAccessToken(record: TokenRecord): AccessToken {
         refreshToken: record.refreshToken ?? null,
         expiresIn: record.expiresIn,
         obtainmentTimestamp: record.obtainedAt,
-        scope: record.scope?.split(' '),
+        scope: record.scope.split(' '),
     }
 }
 
