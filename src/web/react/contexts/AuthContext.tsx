@@ -32,7 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fetch(`http://localhost:4000/api/auth/me`, { credentials: 'include' })
             .then((r) => r.json())
             .then(({ user }) => {
-                console.log('user data', user)
                 setUser(user ?? null)
             })
             .catch(() => setUser(null))
