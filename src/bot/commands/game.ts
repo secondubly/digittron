@@ -17,7 +17,7 @@ const game: Command = {
     description:
         'Show currently streaming game (for viewers) OR change the current game.',
     async execute({ client, msg, args }: CommandContext) {
-        const { broadcasterId, chatterDisplayName, chatterId } = msg
+        const { broadcasterId, chatterDisplayName } = msg
         if (args.length === 0) {
             const channelInfo =
                 await client.channels.getChannelInfoById(broadcasterId)
