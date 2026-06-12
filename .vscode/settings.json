@@ -6,5 +6,57 @@
         "**/*.code-search": true,
         "pnpm-lock.yaml": true
     },
-    "js/ts.tsdk.path": "node_modules/typescript/lib"
+    "js/ts.tsdk.path": "node_modules/typescript/lib",
+    "better-todo-tree.general.tags": [
+        "BUG",
+        "FIXME",
+        "TODO",
+        "NOTE",
+        "REVIEW",
+        "HACK"
+    ],
+    "better-todo-tree.highlights.customHighlight": {
+        "BUG": {
+            "foreground": "#2C292D",
+            "background": "#FF6188",
+            "icon": "bug",
+            "iconColour": "#FF6188",
+            "type": "label"
+        },
+        "FIXME": {
+            "foreground": "#2C292D",
+            "background": "#FC9867",
+            "icon": "tools",
+            "iconColour": "#FC9867",
+            "type": "label"
+        },
+        "TODO": {
+            "foreground": "#2C292D",
+            "background": "#FFD866",
+            "icon": "check",
+            "iconColour": "#FFD866",
+            "type": "label"
+        },
+        "NOTE": {
+            "foreground": "#2C292D",
+            "background": "#A9DC76",
+            "icon": "info",
+            "iconColour": "#A9DC76",
+            "type": "label"
+        },
+        "REVIEW": {
+            "foreground": "#2C292D",
+            "background": "#78DCE8",
+            "icon": "eye",
+            "iconColour": "#78DCE8",
+            "type": "label"
+        },
+        "HACK": {
+            "foreground": "#2C292D",
+            "background": "#AB9DF2",
+            "icon": "zap",
+            "iconColour": "#AB9DF2",
+            "type": "label"
+        }
+    }
 }
