@@ -14,9 +14,9 @@ export class OauthToken extends BaseEntity {
     @ManyToOne(() => User, {
         fieldName: 'twitch_id',
         deleteRule: 'cascade',
-        nullable: false,
+        nullable: true,
     })
-    user_id!: string
+    user_id?: string
 
     @Property()
     provider_name!: string
