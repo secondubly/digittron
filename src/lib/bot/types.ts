@@ -3,14 +3,6 @@ import type { ApiClient } from '@twurple/api'
 import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 import type { CommandRegistry } from './CommandRegistry'
 
-export enum Role {
-    Broadcaster = 'Broadcaster',
-    Moderator = 'Moderator',
-    Subscriber = 'Subscriber',
-    VIP = 'VIP',
-    Viewer = 'Viewer',
-}
-
 export interface CommandDeps {
     tokenStore: TokenStore
     registry: CommandRegistry
