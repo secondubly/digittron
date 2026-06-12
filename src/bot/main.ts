@@ -17,7 +17,7 @@ async function createTokenStore() {
 
     const orm = await MikroORM.init(mikroOrmConfig)
 
-    const tokenStore = new TokenStore(redis, orm)
+    const tokenStore = new TokenStore(redis, orm.em.fork())
     tokenStore.connect()
     return tokenStore
 }
