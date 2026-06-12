@@ -1,12 +1,12 @@
 import { EventSubChannelRaidModerationEvent } from '@twurple/eventsub-base'
-import type { EventSubEvent } from '../types'
+import type { EventDeps, EventSubEvent } from '../types'
 import { config } from 'src/config'
 import { log } from '@lib/services/logger'
 
-export default {
+export default ({ apiClient }: EventDeps): EventSubEvent => ({
     type: 'eventsub',
     name: 'onChannelModerate',
-    register({ eventSub, apiClient, broadcasterId, botUserId }) {
+    register({ eventSub, broadcasterId, botUserId }) {
         eventSub.onChannelModerate(broadcasterId, botUserId, async (event) => {
             if (!(event instanceof EventSubChannelRaidModerationEvent)) {
                 return
@@ -30,4 +30,4 @@ export default {
             )
         })
     },
-} satisfies EventSubEvent
+})
