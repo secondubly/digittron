@@ -8,11 +8,15 @@ import { IconBrandSpotify,
 import classes                    from './SpotifyAuthButton.module.css';
 
 const SPOTIFY_SCOPES = [
+  'user-modify-playback-state',
   'user-read-currently-playing',
+  'user-read-email',
   'user-read-playback-state',
+  'user-read-private',
   'user-read-recently-played',
   'user-top-read',
-] as const;
+  'streaming'
+]
 
 interface SpotifyAuthButtonProps {
   scopes?:  readonly string[];
