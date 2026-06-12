@@ -106,39 +106,41 @@ const SpotifyQueue = () => {
                 )}
               </Box>
             </Flex>
-
-            <Stack hiddenFrom='md'>
-              <Box>
-                <Image src={data.currently_playing.album.images[0].url} className={classes['now-playing-album']} w='100%' />
-              </Box>
-              <Box>
-                <Stack gap={0}>
-                  <Group wrap='nowrap' justify='space-between'>
-                    <MarqueeText text={data.currently_playing.name} pauseOnHover={false} speed={30} />
-                    <ActionIcon bg={'transparent'} size='xl'><IconMusicPlus size='100%' /></ActionIcon>
-                  </Group>
-                  <Text size='lg'>{data.currently_playing.artists[0]?.name}</Text>
-                </Stack>
-              </Box>
-            </Stack>
-            <Divider my={'lg'} />
-            <Stack>
-              <Title order={4} fw={'600'}>Up Next</Title>
-              <Paper p={'xs'}>
-                <Box component='ul' className='queue-list' p={0} mt={0}>
-                  {data.queue.map((track: SimplifiedTrack, index: number) => (
-                      <li key={`${track.id}-${index}`} className={classes['queue-item']}>
-                        <Image src={track.album.images[0].url} radius='md' className={classes['queue-album-art']} />
-                        <Stack gap='0' className={classes['queue-item-track-info']}>
-                          <Text lineClamp={1}>{track.name}</Text>
-                          <Text lineClamp={1} style={{ color: 'light-dark(#42443F, #CFD1CC)'}}>{track.artists[0]?.name}</Text>
-                        </Stack>
-                        <Text className={classes['queue-item-duration']} style={{ color: 'light-dark(#42443F, #CFD1CC)'}}>{formatTime(track.duration_ms)}</Text>
-                      </li>
-                  ))}
+              
+            <Box hiddenFrom='md'>
+              <Stack>
+                <Box>
+                  <Image src={data.currently_playing.album.images[0].url} className={classes['now-playing-album']} w='100%' />
                 </Box>
-              </Paper>
-            </Stack>
+                <Box>
+                  <Stack gap={0}>
+                    <Group wrap='nowrap' justify='space-between'>
+                      <MarqueeText text={data.currently_playing.name} pauseOnHover={false} speed={30} />
+                      <ActionIcon bg={'transparent'} size='xl'><IconMusicPlus size='100%' /></ActionIcon>
+                    </Group>
+                    <Text size='lg'>{data.currently_playing.artists[0]?.name}</Text>
+                  </Stack>
+                </Box>
+              </Stack>
+              <Divider my={'lg'} />
+              <Stack>
+                <Title order={4} fw={'600'}>Up Next</Title>
+                <Paper p={'xs'}>
+                  <Box component='ul' className='queue-list' p={0} mt={0}>
+                    {data.queue.map((track: SimplifiedTrack, index: number) => (
+                        <li key={`${track.id}-${index}`} className={classes['queue-item']}>
+                          <Image src={track.album.images[0].url} radius='md' className={classes['queue-album-art']} />
+                          <Stack gap='0' className={classes['queue-item-track-info']}>
+                            <Text lineClamp={1}>{track.name}</Text>
+                            <Text lineClamp={1} style={{ color: 'light-dark(#42443F, #CFD1CC)'}}>{track.artists[0]?.name}</Text>
+                          </Stack>
+                          <Text className={classes['queue-item-duration']} style={{ color: 'light-dark(#42443F, #CFD1CC)'}}>{formatTime(track.duration_ms)}</Text>
+                        </li>
+                    ))}
+                  </Box>
+                </Paper>
+              </Stack>
+            </Box>
           </Box>
   );
 }
