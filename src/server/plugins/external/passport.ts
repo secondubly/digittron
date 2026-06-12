@@ -11,38 +11,7 @@ import type { FastifyRequest } from 'fastify'
 import type { TokenStore } from '@lib/core/tokens/TokenStore'
 import type { ThirdPartyTokenRecord } from '@lib/core/tokens/types'
 
-async function upsertUser(
-    req: FastifyRequest,
-    tokenStore: TokenStore,
-    data: TwitchProfile,
-) {
-    req.log.debug(`Called in lifecycle: ${req.url}`)
-    if (!data._access_token || !data._refresh_token) {
-        throw Error('Missing values in token data')
-    }
-
-    const user = await req.em.findOne(User, {
-        twitch_id: data.id,
-    })
-
-    if (!user) {
-        await tokenStore.setTwitch(data.id, {
-            twitchId: data.id,
-            accessToken: data._access_token,
-            refreshToken: data._refresh_token,
-            expiresIn: data._expires_in,
-            obtainedAt: Date.now(),
-            scope: BROADCASTER_SCOPES.join(' '),
-            username: data.login,
-            avatar: data.profile_image_url,
-        })
-    } else {
-        user.username = data.login
-        user.avatar = data.profile_image_url
-        await req.em.flush()
-    }
-}
-
+// TODO: maybe make these config variables
 const BROADCASTER_SCOPES = [
     'bits:read',
     'channel:bot',
@@ -66,7 +35,29 @@ const BROADCASTER_SCOPES = [
     'user:read:subscriptions',
 ]
 
-// TODO: maybe make these config variables
+const BOT_SCOPES = [
+    'channel:edit:commercial',
+    'channel:moderate',
+    'chat:read',
+    'chat:edit',
+    'clips:edit',
+    'moderator:manage:announcements',
+    'moderator:manage:banned_users',
+    'moderator:manage:blocked_terms',
+    'moderator:manage:chat_messages',
+    'moderator:manage:shoutouts',
+    'moderator:manage:unban_requests',
+    'moderator:manage:warnings',
+    'moderator:read:chat_settings',
+    'moderator:read:chatters',
+    'moderator:read:followers',
+    'moderator:read:moderators',
+    'moderator:read:vips',
+    'user:bot',
+    'user:read:chat',
+    'user:write:chat',
+]
+
 const SPOTIFY_SCOPES = [
     'user-modify-playback-state',
     'user-read-currently-playing',
@@ -112,7 +103,6 @@ export default fp(
                     clientSecret: config.TWITCH_CLIENT_SECRET,
                     callbackURL:
                         'http://localhost:4000/api/auth/twitch/callback',
-                    scope: BROADCASTER_SCOPES,
                     passReqToCallback: true,
                 },
                 async (
@@ -127,19 +117,43 @@ export default fp(
                     ) => void,
                 ) => {
                     try {
-                        profile._access_token = accessToken
-                        profile._refresh_token = refreshToken
-                        profile._expires_in = 14_400 // 4 hours in seconds
+                        if (profile.id === config.TWITCH_BROADCASTER_ID) {
+                            profile._access_token = accessToken
+                            profile._refresh_token = refreshToken
+                            profile._expires_in = 14_400 // 4 hours in seconds
 
-                        // handle db updates here instead of the route
-                        await upsertUser(request, fastify.tokenStore, profile)
+                            // handle db updates here instead of the route
+                            await upsertUser(
+                                request,
+                                fastify.tokenStore,
+                                profile,
+                            )
 
-                        // automaticaly calls session login, so we don't need to
-                        done(null, {
-                            id: profile.id,
-                            displayName: profile.login,
-                            avatarUrl: profile.profile_image_url,
-                        })
+                            // automaticaly calls session login, so we don't need to
+                            done(null, {
+                                id: profile.id,
+                                displayName: profile.login,
+                                avatarUrl: profile.profile_image_url,
+                            })
+                        } else {
+                            // we're authenticating the bot, so all we need to do is save the token
+                            const botTokenRecord: ThirdPartyTokenRecord = {
+                                accessToken: accessToken,
+                                refreshToken: refreshToken,
+                                expiresIn: 14_400,
+                                obtainedAt: Date.now(),
+                                scope: BOT_SCOPES.join(' '),
+                                userId: profile.id,
+                                provider: 'twitch',
+                            }
+                            await fastify.tokenStore.set(
+                                `twitch:${profile.id}`,
+                                botTokenRecord,
+                            )
+
+                            // we don't need to store any session information
+                            done(null)
+                        }
                     } catch (err) {
                         done(err as Error)
                     }
@@ -167,7 +181,6 @@ export default fp(
                         done,
                     ) => {
                         try {
-                            // REVIEW: should we store by the spotify ID instead?
                             fastify.tokenStore.set(
                                 `spotify:${config.TWITCH_BROADCASTER_ID}`,
                                 {
@@ -190,3 +203,33 @@ export default fp(
     },
     { name: 'passport', dependencies: ['session', 'db'] },
 )
+
+async function upsertUser(
+    req: FastifyRequest,
+    tokenStore: TokenStore,
+    data: TwitchProfile,
+) {
+    req.log.debug(`Called in lifecycle: ${req.url}`)
+    if (!data._access_token || !data._refresh_token) {
+        throw Error('Missing values in token data')
+    }
+
+    const user = await req.em.findOne(User, {
+        twitch_id: data.id,
+    })
+
+    await tokenStore.set(`twitch:${data.id}`, {
+        twitchId: data.id,
+        accessToken: data._access_token,
+        refreshToken: data._refresh_token,
+        expiresIn: data._expires_in,
+        obtainedAt: Date.now(),
+        scope:
+            data.id === config.TWITCH_BROADCASTER_ID
+                ? BROADCASTER_SCOPES.join(' ')
+                : BOT_SCOPES.join(' '),
+        username: data.login,
+        avatar: data.profile_image_url,
+        provider: 'twitch',
+    })
+}

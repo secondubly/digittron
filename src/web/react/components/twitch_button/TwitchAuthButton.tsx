@@ -4,10 +4,7 @@ import { Button, Text, Badge, Stack,
 import { IconBrandTwitch }          from '@tabler/icons-react';
 import classes                      from './TwitchAuthButton.module.css';
 
-type AuthType = 'bot' | 'broadcaster';
-
 interface TwitchAuthButtonProps {
-    type: AuthType
     redirect: () => void
     loading?: boolean
 }
@@ -35,31 +32,7 @@ const BOT_SCOPES = [
   'user:write:chat',
 ]
 
-const BROADCASTER_SCOPES = [
-    'bits:read',
-    'channel:bot',
-    'channel:read:ads',
-    'channel:manage:broadcast',
-    'channel:manage:polls',
-    'channel:manage:predictions',
-    'channel:manage:raids',
-    'channel:manage:redemptions',
-    'channel:manage:schedule',
-    'channel:manage:videos',
-    'channel:read:editors',
-    'channel:read:hype_train',
-    'channel:read:polls',
-    'channel:read:predictions',
-    'channel:read:redemptions',
-    'channel:read:subscriptions',
-    'channel:read:vips',
-    'clips:edit',
-    'moderation:read',
-    'user:read:subscriptions',
-]
-
 export function TwitchAuthButton({
-    type,
     loading = false,
     redirect
 }: TwitchAuthButtonProps) {
@@ -83,18 +56,7 @@ export function TwitchAuthButton({
         </Stack>
 
         <Group gap={6} justify="center">
-          {type === 'bot' ? BOT_SCOPES.map(scope => (
-            <Badge
-              key={scope}
-              variant="light"
-              color="violet"
-              size="sm"
-              radius="sm"
-              ff="monospace"
-            >
-              {scope}
-            </Badge>
-          )) : BROADCASTER_SCOPES.map(scope => (
+          {BOT_SCOPES.map(scope => (
             <Badge
               key={scope}
               variant="light"
@@ -121,7 +83,7 @@ export function TwitchAuthButton({
           className={classes.button}
           onClick={redirect}
         >
-          { type === 'bot' ? 'Connect Bot Account' : 'Connect Broadcaster Account'}
+        Connect Bot Account
         </Button>
 
         {/* Footer */}

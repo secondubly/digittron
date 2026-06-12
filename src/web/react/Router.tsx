@@ -6,6 +6,7 @@ import Register from './pages/Register'
 import ChatModeration from './pages/ChatModeration'
 import SongRequests from './pages/SongRequests'
 import SpotifyLogin from './pages/SpotifyLogin'
+import TwitchLogin from './pages/TwitchLogin'
 import ProtectedRoute from "./components/protected_routes/ProtectedRoutes";
 import Giveaways from "./pages/Giveaways";
 
@@ -31,8 +32,13 @@ const AppRoutes = () => {
                 <SongRequests />
             } />
 
+            {/* TODO: create hidden page for bot authentication AND for audio alerts/general stream stuff */}
             <Route path="/spotify_login" element={
                 <SpotifyLogin />
+             } />
+
+            <Route path="/twitch_login" element={
+                <TwitchLogin />
              } />
             <Route path="*" element={<NotFound />} />
         </Routes>
