@@ -1,9 +1,9 @@
-import type { FastifyPluginAsync } from 'fastify'
-import { getToken, handleCallback } from '../../../controllers/spotify.js'
-import { callbackQuerySchema } from 'src/server/schemas/spotify.js'
+import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import fastifyPassport from '@fastify/passport'
+import { getTokenParamsSchema } from 'src/server/schemas/spotify'
+import { getToken } from 'src/server/controllers/spotify'
 
-const plugin: FastifyPluginAsync = async (fastify) => {
+const plugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     fastify.get(
         '/login',
         {
@@ -22,6 +22,16 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         async (_request, reply) => {
             reply.redirect('/')
         },
+    )
+
+    fastify.get(
+        '/token/:id',
+        {
+            schema: {
+                params: getTokenParamsSchema,
+            },
+        },
+        getToken(fastify),
     )
 }
 

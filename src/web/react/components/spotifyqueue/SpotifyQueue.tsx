@@ -10,8 +10,8 @@ const getToken = async () => {
       const twitchId = '89181064'
       const res = await fetch(`/api/spotify/token/${twitchId}`)
 
-      const token = await res.text()
-      return token
+      const { accessToken } = await res.json()
+      return accessToken
   } catch (error) {
       console.error('Failed to retrieve token', error)
   }

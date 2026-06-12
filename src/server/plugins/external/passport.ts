@@ -4,10 +4,12 @@ import {
     Strategy as TwitchStrategy,
     type TwitchProfile,
 } from 'passport-twitch-new'
+import { Strategy as SpotifyStrategy } from 'passport-spotify'
 import { config } from 'src/config'
 import { User } from '@lib/db/models/user.entity'
 import type { FastifyRequest } from 'fastify'
 import type { TokenStore } from '@lib/core/tokens/TokenStore'
+import type { ThirdPartyTokenRecord } from '@lib/core/tokens/types'
 
 async function upsertUser(
     req: FastifyRequest,
@@ -64,6 +66,18 @@ const BROADCASTER_SCOPES = [
     'user:read:subscriptions',
 ]
 
+// TODO: maybe make these config variables
+const SPOTIFY_SCOPES = [
+    'user-modify-playback-state',
+    'user-read-currently-playing',
+    'user-read-email',
+    'user-read-playback-state',
+    'user-read-private',
+    'user-read-recently-played',
+    'user-top-read',
+    'streaming',
+]
+
 export default fp(
     async (fastify) => {
         await fastify.register(fastifyPassport.initialize())
@@ -106,7 +120,11 @@ export default fp(
                     accessToken: string,
                     refreshToken: string,
                     profile: TwitchProfile,
-                    done,
+                    done: (
+                        error?: Error | null,
+                        user?: object,
+                        info?: object,
+                    ) => void,
                 ) => {
                     try {
                         profile._access_token = accessToken
@@ -128,6 +146,47 @@ export default fp(
                 },
             ),
         )
+
+        if (config.SPOTIFY_CLIENT_ID && config.SPOTIFY_CLIENT_SECRET)
+            fastifyPassport.use(
+                'spotify',
+                new SpotifyStrategy(
+                    {
+                        clientID: config.SPOTIFY_CLIENT_ID,
+                        clientSecret: config.SPOTIFY_CLIENT_SECRET,
+                        callbackURL:
+                            'http://127.0.0.1:4000/api/spotify/callback',
+                        // TODO: possible make this a config variable
+                        scope: SPOTIFY_SCOPES,
+                    },
+                    async (
+                        accessToken,
+                        refreshToken,
+                        expires_in,
+                        profile,
+                        done,
+                    ) => {
+                        try {
+                            // REVIEW: should we store by the spotify ID instead?
+                            fastify.tokenStore.set(
+                                `spotify:${config.TWITCH_BROADCASTER_ID}`,
+                                {
+                                    accessToken: accessToken,
+                                    refreshToken: refreshToken,
+                                    expiresIn: expires_in, // 1 hour in seconds
+                                    obtainedAt: Date.now(),
+                                    scope: SPOTIFY_SCOPES.join(' '),
+                                    userId: profile.id,
+                                    provider: 'spotify',
+                                } as ThirdPartyTokenRecord,
+                            )
+                            done(null)
+                        } catch (err) {
+                            done(err as Error, profile)
+                        }
+                    },
+                ),
+            )
     },
     { name: 'passport', dependencies: ['session', 'db'] },
 )
