@@ -1,5 +1,5 @@
 import type { Command, CommandContext } from '@lib/bot/types.js'
-import { config } from 'src/config'
+import { config } from 'src/config/env'
 
 const d20: Command = {
     name: 'd20',

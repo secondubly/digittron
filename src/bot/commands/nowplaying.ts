@@ -1,7 +1,7 @@
 import type { Command, CommandContext } from '@lib/bot/types'
 import { log } from '@lib/services/logger'
 import { getCurrentlyPlayingTrack } from '@lib/services/spotify'
-import { config } from 'src/config'
+import { config } from 'src/config/env'
 
 const nowplaying: Command = {
     name: 'nowplaying',

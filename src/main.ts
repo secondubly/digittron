@@ -2,7 +2,7 @@ import { init as apiInit } from './server/index.js'
 // import { init as webInit } from './web/index.js'
 import { init as botInit } from './lib/utils.js'
 import { log } from '@lib/services/logger.js'
-import { config } from './config.js'
+import { config } from './config/env.js'
 
 const main = async () => {
     const server = await apiInit()

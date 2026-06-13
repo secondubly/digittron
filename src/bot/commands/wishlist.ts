@@ -1,5 +1,5 @@
 import type { Command, CommandContext } from '@lib/bot/types.js'
-import { config } from 'src/config'
+import { config } from 'src/config/env'
 
 const wishlist: Command = {
     name: 'wishlist',

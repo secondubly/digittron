@@ -1,5 +1,5 @@
 import { log } from '@lib/services/logger'
-import { config } from 'src/config'
+import { config } from 'src/config/env'
 
 import { createClient, type RedisClientType } from 'redis'
 import { TokenStore } from '@lib/core/tokens/TokenStore.js'

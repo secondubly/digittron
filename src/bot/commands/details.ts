@@ -1,6 +1,6 @@
 import { log } from '@lib/services/logger.js'
 import type { Command, CommandDeps } from '@lib/bot/types.js'
-import { config } from 'src/config'
+import { config } from 'src/config/env'
 
 export default ({ tokenStore }: CommandDeps): Command => ({
     name: 'details',

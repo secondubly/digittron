@@ -1,6 +1,6 @@
 import { EventSubChannelRaidModerationEvent } from '@twurple/eventsub-base'
 import type { EventDeps, EventSubEvent } from '../types'
-import { config } from 'src/config'
+import { config } from 'src/config/env'
 import { log } from '@lib/services/logger'
 
 export default ({ apiClient }: EventDeps): EventSubEvent => ({

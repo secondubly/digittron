@@ -3,7 +3,8 @@
 import { RefreshingAuthProvider, type AccessToken } from '@twurple/auth'
 import { TokenStore } from './TokenStore'
 import type { TokenRecord, TokenKey } from './types'
-import { config } from 'src/config'
+import { config } from 'src/config/env'
+import { log } from '@lib/services/logger'
 
 function toTokenRecord(userId: string, token: AccessToken): TokenRecord {
     return {
@@ -39,22 +40,30 @@ export async function createAuthProvider(
         store.get(`twitch:${config.TWITCH_BOT_ID}`),
     ])
 
+    provider.onRefresh(async (userId, token) => {
+        const key: TokenKey = `twitch:${userId}`
+
+        if (userId === config.TWITCH_BOT_ID) {
+            await store.setBot(toTokenRecord(userId, token))
+        } else {
+            await store.set(key, toTokenRecord(userId, token))
+        }
+        log.bot.info(`Token refreshed and saved for ${key}`)
+    })
+
     if (broadcasterToken) {
+        // forcibly refresh token on bot startup
+        broadcasterToken.expiresIn = 0
         await provider.addUserForToken(toAccessToken(broadcasterToken), [
             'chat',
         ])
     }
 
     if (botToken) {
+        // forcibly refresh token on bot startup
+        botToken.expiresIn = 0
         await provider.addUserForToken(toAccessToken(botToken), ['chat'])
     }
-
-    provider.onRefresh(async (userId, token) => {
-        const key: TokenKey = `twitch:${userId}`
-
-        await store.set(key, toTokenRecord(userId, token))
-        console.log(`Token refreshed and saved for ${key}`)
-    })
 
     return provider
 }

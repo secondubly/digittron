@@ -4,7 +4,7 @@ import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 import type { Command, CommandContext } from './types.js'
 import type { ApiClient } from '@twurple/api'
 import { log } from '@lib/services/logger.js'
-import { config } from 'src/config.js'
+import { config } from 'src/config/env.js'
 import type { CommandDeps } from './types.js'
 
 export class CommandRegistry {

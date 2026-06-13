@@ -1,6 +1,6 @@
 import fastifyRateLimit from '@fastify/rate-limit'
 import { type FastifyInstance } from 'fastify'
-import { config } from 'src/config'
+import { config } from 'src/config/env'
 
 // TODO: set up config class for project
 export const autoConfig = (_fastify: FastifyInstance) => {

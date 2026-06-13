@@ -1,7 +1,7 @@
 import { TokenStore } from './TokenStore'
 import { log } from '../../../lib/services/logger.js'
 import type { OauthTokenRecord, TokenKey } from './types'
-import { config } from 'src/config'
+import { config } from 'src/config/env'
 
 const VALIDATE_URL = 'https://id.twitch.tv/oauth2/validate'
 const VALIDATE_INTERVAL_MS = 60 * 60 * 1000 // 1 hour

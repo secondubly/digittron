@@ -4,7 +4,7 @@ import { containsLink, isWhitelistedLink } from '@lib/utils'
 import { log } from '@lib/services/logger'
 import { isPermitted } from 'src/bot/commands/permit'
 import type { ApiClient } from '@twurple/api'
-import { config } from 'src/config'
+import { config } from 'src/config/env'
 
 export default ({ registry, apiClient }: EventDeps): EventSubEvent => ({
     type: 'eventsub',
@@ -59,7 +59,7 @@ async function moderate(
         })
     })
 
-    log.bot.info(`🔨 Timed out ${chatterDisplayName} for posting a link.`)
+    log.bot.info(`Timed out ${chatterDisplayName} for posting a link.`)
 
     await apiClient.chat.sendChatMessageAsApp(
         config.TWITCH_BOT_ID,

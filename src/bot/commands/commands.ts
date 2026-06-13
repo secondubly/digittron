@@ -1,5 +1,5 @@
 import type { CommandContext, CommandDeps } from '@lib/bot/types'
-import { config } from 'src/config'
+import { config } from 'src/config/env'
 
 const commands = ({ registry }: CommandDeps) => ({
     name: 'commands',

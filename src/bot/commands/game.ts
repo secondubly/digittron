@@ -1,7 +1,7 @@
 import type { Command, CommandContext } from '@lib/bot/types.js'
 import { log } from '@lib/services/logger.js'
 import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
-import { config } from 'src/config'
+import { config } from 'src/config/env'
 
 const isMod = (msg: EventSubChannelChatMessageEvent): boolean => {
     // broadcaster is considered a mod in almost all cases
