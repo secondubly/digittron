@@ -4,6 +4,7 @@ import { SqliteDriver, EntityManager } from '@mikro-orm/sqlite'
 import { TokenStore } from '@lib/core/tokens/TokenStore'
 import type { RedisClientType } from 'redis'
 import type { TwitchProfile } from 'passport-twitch-new'
+import type { AuthWaiter } from '@lib/core/tokens/AuthWait'
 
 declare module 'fastify' {
     interface FastifyInstance {
@@ -11,6 +12,7 @@ declare module 'fastify' {
         db: EntityManager // shorthand to access the entity manager
         tokenStore: TokenStore
         redis: RedisClientType
+        authWaiter: AuthWaiter
         isAuthenticated(): boolean
         logIn(): Promise<void>
         logOut(): Promise<void>
