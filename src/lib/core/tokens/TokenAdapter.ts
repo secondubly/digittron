@@ -51,6 +51,7 @@ export async function createAuthProvider(
         log.bot.info(`Token refreshed and saved for ${key}`)
     })
 
+    // we honestly don't need these if checks, but keep them for testing purposes
     if (broadcasterToken) {
         // forcibly refresh token on bot startup
         broadcasterToken.expiresIn = 0
@@ -60,7 +61,6 @@ export async function createAuthProvider(
     }
 
     if (botToken) {
-        // forcibly refresh token on bot startup
         botToken.expiresIn = 0
         await provider.addUserForToken(toAccessToken(botToken), ['chat'])
     }
