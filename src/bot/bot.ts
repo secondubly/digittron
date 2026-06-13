@@ -11,6 +11,8 @@ import { log } from '@lib/services/logger'
 import { config as envConfig } from 'src/config/env'
 import { TokenStore } from '@lib/core/tokens/TokenStore'
 import { createAuthProvider } from '@lib/core/tokens/TokenAdapter'
+import { AuthWaiter } from '@lib/core/tokens/AuthWait'
+import type { TokenKey } from '@lib/core/tokens/types'
 
 export class Bot {
     private chatClient?: ChatClient
@@ -19,6 +21,7 @@ export class Bot {
     private readonly channels: string[]
     private readonly commandRegistry: CommandRegistry
     private readonly eventRegistry: EventRegistry
+    private readonly authWaiter: AuthWaiter
     private botId: string
     private sessionChatters: Set<string> = new Set()
     private scheduledTimer: NodeJS.Timeout | null = null
@@ -35,6 +38,7 @@ export class Bot {
         this.botId = envConfig.TWITCH_BOT_ID
         this.commandRegistry = new CommandRegistry('!')
         this.eventRegistry = new EventRegistry()
+        this.authWaiter = new AuthWaiter()
     }
 
     private initializeClients(authProvider: RefreshingAuthProvider) {
@@ -197,7 +201,14 @@ export class Bot {
     }
 
     public async start(): Promise<void> {
-        // TODO: fix
+        // TODO: if we don't have broadcaster or bot tokens, we need to wait for authentication
+        const broadcasterKey =
+            `twitch:auth:${envConfig.TWITCH_BROADCASTER_ID}` as TokenKey
+        const botKey = `twitch:auth:${envConfig.TWITCH_BOT_ID}` as TokenKey
+
+        await this.ensureToken(broadcasterKey, 'Broadcaster')
+        await this.ensureToken(botKey, 'Bot account')
+
         const authProvider = await createAuthProvider(
             envConfig.TWITCH_CLIENT_ID,
             envConfig.TWITCH_CLIENT_SECRET,
@@ -224,9 +235,7 @@ export class Bot {
         )
 
         await this.apiClient?.eventSub.deleteAllSubscriptions()
-
         await this.chatClient?.connect()
-
         await this.eventSub?.start()
 
         await this.eventRegistry.registerAll({
@@ -244,5 +253,26 @@ export class Bot {
         this.clearFirstTimeChatters()
         await this.eventSub?.stop()
         await this.chatClient?.quit()
+    }
+
+    private async ensureToken(
+        tokenKey: TokenKey,
+        label: string,
+    ): Promise<void> {
+        const existing = await this.tokenStore.get(tokenKey)
+
+        if (existing) {
+            log.bot.info(`${label} token found.`)
+            return
+        }
+
+        log.bot.warn(`${label} token missing — waiting for authentication...`)
+        log.bot.warn(
+            `========== Visit http://localhost:4000/login to authenticate. ==========`,
+        )
+
+        await this.authWaiter.waitFor(tokenKey) // blocks here until notify() fires
+
+        log.bot.info(`${label} authenticated — continuing startup.`)
     }
 }
