@@ -20,8 +20,6 @@ import {
     TWITCH_BROADCASTER_SCOPE_STRING,
 } from 'src/config/scopes'
 
-// TODO: maybe make these config variables
-
 export default fp(
     async (fastify) => {
         await fastify.register(fastifyPassport.initialize())
@@ -81,13 +79,6 @@ export default fp(
                                 fastify.tokenStore,
                                 profile,
                             )
-
-                            // automaticaly calls session login, so we don't need to
-                            done(null, {
-                                id: profile.id,
-                                displayName: profile.login,
-                                avatarUrl: profile.profile_image_url,
-                            })
                         } else {
                             // we're authenticating the bot, so all we need to do is save the token
                             const botTokenRecord: ThirdPartyTokenRecord = {
@@ -103,8 +94,16 @@ export default fp(
                                 `twitch:${profile.id}`,
                                 botTokenRecord,
                             )
+                        }
 
-                            // we don't need to store any session information
+                        fastify.authWaiter.notify(`twitch:${profile.id}`)
+                        if (profile.id === config.TWITCH_BROADCASTER_ID) {
+                            done(null, {
+                                id: profile.id,
+                                displayName: profile.login,
+                                avatarUrl: profile.profile_image_url,
+                            })
+                        } else {
                             done(null)
                         }
                     } catch (err) {
@@ -123,7 +122,7 @@ export default fp(
                         clientSecret: config.SPOTIFY_CLIENT_SECRET,
                         callbackURL:
                             'http://127.0.0.1:4000/api/spotify/callback',
-                        // TODO: possible make this a config variable
+                        // @ts-expect-error(ignore call error, false positive)
                         scope: SPOTIFY_SCOPES,
                     },
                     async (
@@ -166,11 +165,6 @@ async function upsertUser(
     if (!data._access_token || !data._refresh_token) {
         throw Error('Missing values in token data')
     }
-
-    // REVIEW: check this functionality
-    const user = await req.em.findOne(User, {
-        twitch_id: data.id,
-    })
 
     await tokenStore.set(`twitch:${data.id}`, {
         twitchId: data.id,

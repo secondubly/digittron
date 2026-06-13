@@ -25,6 +25,7 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         '/twitch/bot-login',
         {
             preValidation: fastifyPassport.authenticate('twitch', {
+                // @ts-expect-error(ignore call error, false positive)
                 forceVerify: true,
                 scope: TWITCH_BOT_SCOPE_STRING,
             }),
