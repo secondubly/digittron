@@ -12,6 +12,7 @@ import { User } from '@lib/db/models/user.entity'
 import { OauthToken } from '@lib/db/models/OauthToken'
 import crypto from 'crypto'
 import { config } from 'src/config/env'
+import { TWITCH_BOT_SCOPE_STRING } from 'src/config/scopes'
 
 const TTL_BUFFER_S = 60
 const ALGORITHM = 'aes-256-gcm'
@@ -78,7 +79,7 @@ export class TokenStore {
         await Promise.all([this.deleteDb(key), this.redis.del(key)])
     }
 
-    async getTwitchBot(key: TokenKey): Promise<TokenRecord | null> {
+    private async getTwitchBot(key: TokenKey): Promise<TokenRecord | null> {
         const { userId } = this.parseKey(key)
         const row = await this.em.findOne(OauthToken, { id: Number(userId) })
 
@@ -247,7 +248,6 @@ export class TokenStore {
     private async setCache(key: TokenKey, token: TokenRecord): Promise<void> {
         const ttl = this.getTtl(token)
 
-        // REVIEW: we should cache the refresh token, right?
         await this.redis.set(key, JSON.stringify(token), ttl ? { EX: ttl } : {})
     }
 
