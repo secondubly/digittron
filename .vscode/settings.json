@@ -21,42 +21,42 @@
             "background": "#FF6188",
             "icon": "bug",
             "iconColour": "#FF6188",
-            "type": "label"
+            "type": "text"
         },
         "FIXME": {
             "foreground": "#2C292D",
             "background": "#FC9867",
             "icon": "tools",
             "iconColour": "#FC9867",
-            "type": "label"
+            "type": "text"
         },
         "TODO": {
             "foreground": "#2C292D",
             "background": "#FFD866",
             "icon": "check",
             "iconColour": "#FFD866",
-            "type": "label"
+            "type": "text"
         },
         "NOTE": {
             "foreground": "#2C292D",
             "background": "#A9DC76",
             "icon": "info",
             "iconColour": "#A9DC76",
-            "type": "label"
+            "type": "text"
         },
         "REVIEW": {
             "foreground": "#2C292D",
             "background": "#78DCE8",
             "icon": "eye",
             "iconColour": "#78DCE8",
-            "type": "label"
+            "type": "text"
         },
         "HACK": {
             "foreground": "#2C292D",
             "background": "#AB9DF2",
             "icon": "zap",
             "iconColour": "#AB9DF2",
-            "type": "label"
+            "type": "text"
         }
     }
 }
