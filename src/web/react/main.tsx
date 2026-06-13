@@ -8,14 +8,17 @@ import { AuthProvider } from './contexts/AuthContext.js'
 import '@mantine/core/styles.css';
 import './styles/global.css'
 import '@mantine/notifications/styles.css';
+import { ScopesProvider } from './hooks/useScopes.js'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <MantineProvider theme={theme}>
         <Notifications />
-            <BrowserRouter>
-                <AuthProvider>
-                    <App />
-                </AuthProvider>
-            </BrowserRouter>
+            <ScopesProvider>
+                <BrowserRouter>
+                    <AuthProvider>
+                        <App />
+                    </AuthProvider>
+                </BrowserRouter>
+            </ScopesProvider>
     </MantineProvider>
 )
