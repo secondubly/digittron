@@ -11,7 +11,6 @@ import { log } from '@lib/services/logger'
 import { config as envConfig } from 'src/config/env'
 import { TokenStore } from '@lib/core/tokens/TokenStore'
 import { createAuthProvider } from '@lib/core/tokens/TokenAdapter'
-import { TokenValidator } from '@lib/core/tokens/TokenValidator'
 
 export class Bot {
     private chatClient?: ChatClient
@@ -20,7 +19,6 @@ export class Bot {
     private readonly channels: string[]
     private readonly commandRegistry: CommandRegistry
     private readonly eventRegistry: EventRegistry
-    private readonly validator: TokenValidator
     private botId: string
     private sessionChatters: Set<string> = new Set()
     private scheduledTimer: NodeJS.Timeout | null = null
@@ -35,7 +33,6 @@ export class Bot {
     ) {
         this.channels = channels
         this.botId = envConfig.TWITCH_BOT_ID
-        this.validator = new TokenValidator(tokenStore)
         this.commandRegistry = new CommandRegistry('!')
         this.eventRegistry = new EventRegistry()
     }
@@ -238,9 +235,6 @@ export class Bot {
             broadcasterId: envConfig.TWITCH_BROADCASTER_ID,
             botUserId: this.botId,
         })
-
-        // REVIEW: do we really need to do this if twurple handles key refreshing?
-        // this.validator.start(tokenKeys)
 
         await this.checkInitialStreamState()
     }
