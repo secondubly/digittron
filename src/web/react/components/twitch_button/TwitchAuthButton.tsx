@@ -1,41 +1,21 @@
 // components/TwitchAuthButton.tsx
 import { Button, Text, Badge, Stack,
-         Group, Paper, Divider }    from '@mantine/core';
-import { IconBrandTwitch }          from '@tabler/icons-react';
-import classes                      from './TwitchAuthButton.module.css';
+         Group, Paper, Divider, 
+         Skeleton}    from '@mantine/core';
+import { IconBrandTwitch } from '@tabler/icons-react';
+import classes from './TwitchAuthButton.module.css';
+import {useScopes} from '../../hooks/useScopes'
 
 interface TwitchAuthButtonProps {
     redirect: () => void
-    loading?: boolean
 }
 
-const BOT_SCOPES = [
-  'channel:edit:commercial',
-  'channel:moderate',
-  'chat:read',
-  'chat:edit',
-  'clips:edit',
-  'moderator:manage:announcements',
-  'moderator:manage:banned_users',
-  'moderator:manage:blocked_terms',
-  'moderator:manage:chat_messages',
-  'moderator:manage:shoutouts',
-  'moderator:manage:unban_requests',
-  'moderator:manage:warnings',
-  'moderator:read:chat_settings',
-  'moderator:read:chatters',
-  'moderator:read:followers',
-  'moderator:read:moderators',
-  'moderator:read:vips',
-  'user:bot',
-  'user:read:chat',
-  'user:write:chat',
-]
-
 export function TwitchAuthButton({
-    loading = false,
     redirect
 }: TwitchAuthButtonProps) {
+  const { scopes, loading } = useScopes();
+  const scopeList = scopes?.twitch['bot'] ?? [];
+
   return (
     <Paper
       p="xl"
@@ -56,18 +36,22 @@ export function TwitchAuthButton({
         </Stack>
 
         <Group gap={6} justify="center">
-          {BOT_SCOPES.map(scope => (
-            <Badge
-              key={scope}
-              variant="light"
-              color="violet"
-              size="sm"
-              radius="sm"
-              ff="monospace"
-            >
-              {scope}
-            </Badge>
-          ))}
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} height={20} width={100} radius="sm" />
+              ))
+            : scopeList.map(scope => (
+                <Badge
+                  key={scope}
+                  variant="light"
+                  color="violet"
+                  size="sm"
+                  ff="monospace"
+                >
+                  {scope}
+                </Badge>
+              ))
+          }
         </Group>
 
         <Divider w="100%" color="dark.5" />

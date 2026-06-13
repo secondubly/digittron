@@ -1,42 +1,30 @@
-// components/SpotifyAuthButton.tsx
-import { useState }               from 'react';
+import { useState } from 'react';
 import { Button, Text, Stack,
          Paper, Divider, Group,
-         ThemeIcon, Box }         from '@mantine/core';
+         ThemeIcon, Box, Skeleton } from '@mantine/core';
 import { IconBrandSpotify,
-         IconCheck }   from '@tabler/icons-react';
-import classes                    from './SpotifyAuthButton.module.css';
-
-const SPOTIFY_SCOPES = [
-  'user-modify-playback-state',
-  'user-read-currently-playing',
-  'user-read-email',
-  'user-read-playback-state',
-  'user-read-private',
-  'user-read-recently-played',
-  'user-top-read',
-  'streaming'
-]
+         IconCheck } from '@tabler/icons-react';
+import { useScopes } from '../../hooks/useScopes';
+import classes from './SpotifyAuthButton.module.css';
 
 interface SpotifyAuthButtonProps {
-  scopes?:  readonly string[];
-  onAuth?:  () => void;
+  onAuth?: () => void;
 }
 
-export function SpotifyAuthButton({
-  scopes  = SPOTIFY_SCOPES,
-  onAuth,
-}: SpotifyAuthButtonProps) {
-  const [loading,  setLoading]  = useState(false);
-  const [success,  setSuccess]  = useState(false);
+export function SpotifyAuthButton({ onAuth }: SpotifyAuthButtonProps) {
+  const { scopes, loading: scopesLoading } = useScopes();
+  const [authLoading, setAuthLoading]      = useState(false);
+  const [success,     setSuccess]          = useState(false);
+
+  const scopeList = scopes?.spotify ?? [];
 
   const handleAuth = async () => {
-    setLoading(true);
+    setAuthLoading(true);
     try {
       await onAuth?.();
       setSuccess(true);
     } finally {
-      setLoading(false);
+      setAuthLoading(false);
     }
   };
 
@@ -46,43 +34,32 @@ export function SpotifyAuthButton({
 
         {/* Icon + title */}
         <Stack align="center" gap="xs">
-          <ThemeIcon
-            size={64}
-            radius="xl"
-            color="green"
-            className={classes.icon}
-          >
+          <ThemeIcon size={64} radius="xl" color="green" className={classes.icon}>
             <IconBrandSpotify size={36} />
           </ThemeIcon>
-          <Text fw={800} size="xl">Spotify</Text>
+          <Text fw={800} size="xl" c="white">Spotify</Text>
           <Text size="xs" c="dimmed" ff="monospace" tt="uppercase">
             Connect your account
           </Text>
-
-          {/* Equalizer bars */}
-          <Group gap={3} align="flex-end" h={20} className={classes.equalizer}>
-            {[...Array(5)].map((_, i) => (
-              <Box key={i} className={classes.eqBar} style={{ animationDelay: `${i * 0.15}s` }} />
-            ))}
-          </Group>
         </Stack>
 
-        {/* Permissions */}
+        {/* Permissions — fetched from /api/config/scopes */}
         <Stack w="100%" gap="xs">
           <Text size="xs" c="dimmed" ff="monospace" tt="uppercase">
             Permissions requested
           </Text>
-          {scopes.map(scope => (
-            <Group
-              key={scope}
-              gap="sm"
-              p="sm"
-              className={classes.permItem}
-            >
-              <Box className={classes.permDot} />
-              <Text size="xs" ff="monospace" c="dimmed">{scope}</Text>
-            </Group>
-          ))}
+
+          {scopesLoading
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} height={36} radius="md" />
+              ))
+            : scopeList.map(scope => (
+                <Group key={scope} gap="sm" p="sm" className={classes.permItem}>
+                  <Box className={classes.permDot} />
+                  <Text size="xs" ff="monospace" c="dimmed">{scope}</Text>
+                </Group>
+              ))
+          }
         </Stack>
 
         <Divider w="100%" color="dark.6" />
@@ -102,7 +79,7 @@ export function SpotifyAuthButton({
             size="md"
             radius="xl"
             color="green"
-            loading={loading}
+            loading={authLoading}
             leftSection={<IconBrandSpotify size={18} />}
             className={classes.button}
             onClick={handleAuth}
@@ -110,13 +87,6 @@ export function SpotifyAuthButton({
             Continue with Spotify
           </Button>
         )}
-
-        <Text size="xs" c="dimmed" ta="center" ff="monospace">
-          By connecting you agree to Spotify's{' '}
-          <Text component="a" href="#" size="xs" c="green.5">Terms of Service</Text>
-          {' '}&amp;{' '}
-          <Text component="a" href="#" size="xs" c="green.5">Privacy Policy</Text>
-        </Text>
 
       </Stack>
     </Paper>

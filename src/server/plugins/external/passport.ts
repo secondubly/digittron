@@ -4,70 +4,23 @@ import {
     Strategy as TwitchStrategy,
     type TwitchProfile,
 } from 'passport-twitch-new'
-import { Strategy as SpotifyStrategy } from 'passport-spotify'
-import { config } from 'src/config'
+import {
+    Strategy as SpotifyStrategy,
+    type Profile as SpotifyProfile,
+    type VerifyCallback,
+} from 'passport-spotify'
+import { config } from 'src/config/env'
 import { User } from '@lib/db/models/user.entity'
 import type { FastifyRequest } from 'fastify'
 import type { TokenStore } from '@lib/core/tokens/TokenStore'
 import type { ThirdPartyTokenRecord } from '@lib/core/tokens/types'
+import {
+    SPOTIFY_SCOPES,
+    TWITCH_BOT_SCOPE_STRING,
+    TWITCH_BROADCASTER_SCOPE_STRING,
+} from 'src/config/scopes'
 
 // TODO: maybe make these config variables
-const BROADCASTER_SCOPES = [
-    'bits:read',
-    'channel:bot',
-    'channel:read:ads',
-    'channel:manage:broadcast',
-    'channel:manage:polls',
-    'channel:manage:predictions',
-    'channel:manage:raids',
-    'channel:manage:redemptions',
-    'channel:manage:schedule',
-    'channel:manage:videos',
-    'channel:read:editors',
-    'channel:read:hype_train',
-    'channel:read:polls',
-    'channel:read:predictions',
-    'channel:read:redemptions',
-    'channel:read:subscriptions',
-    'channel:read:vips',
-    'clips:edit',
-    'moderation:read',
-    'user:read:subscriptions',
-]
-
-const BOT_SCOPES = [
-    'channel:edit:commercial',
-    'channel:moderate',
-    'chat:read',
-    'chat:edit',
-    'clips:edit',
-    'moderator:manage:announcements',
-    'moderator:manage:banned_users',
-    'moderator:manage:blocked_terms',
-    'moderator:manage:chat_messages',
-    'moderator:manage:shoutouts',
-    'moderator:manage:unban_requests',
-    'moderator:manage:warnings',
-    'moderator:read:chat_settings',
-    'moderator:read:chatters',
-    'moderator:read:followers',
-    'moderator:read:moderators',
-    'moderator:read:vips',
-    'user:bot',
-    'user:read:chat',
-    'user:write:chat',
-]
-
-const SPOTIFY_SCOPES = [
-    'user-modify-playback-state',
-    'user-read-currently-playing',
-    'user-read-email',
-    'user-read-playback-state',
-    'user-read-private',
-    'user-read-recently-played',
-    'user-top-read',
-    'streaming',
-]
 
 export default fp(
     async (fastify) => {
@@ -142,7 +95,7 @@ export default fp(
                                 refreshToken: refreshToken,
                                 expiresIn: 14_400,
                                 obtainedAt: Date.now(),
-                                scope: BOT_SCOPES.join(' '),
+                                scope: TWITCH_BOT_SCOPE_STRING,
                                 userId: profile.id,
                                 provider: 'twitch',
                             }
@@ -174,11 +127,11 @@ export default fp(
                         scope: SPOTIFY_SCOPES,
                     },
                     async (
-                        accessToken,
-                        refreshToken,
-                        expires_in,
-                        profile,
-                        done,
+                        accessToken: string,
+                        refreshToken: string,
+                        expires_in: number,
+                        profile: SpotifyProfile,
+                        done: VerifyCallback,
                     ) => {
                         try {
                             fastify.tokenStore.set(
@@ -214,6 +167,7 @@ async function upsertUser(
         throw Error('Missing values in token data')
     }
 
+    // REVIEW: check this functionality
     const user = await req.em.findOne(User, {
         twitch_id: data.id,
     })
@@ -226,8 +180,8 @@ async function upsertUser(
         obtainedAt: Date.now(),
         scope:
             data.id === config.TWITCH_BROADCASTER_ID
-                ? BROADCASTER_SCOPES.join(' ')
-                : BOT_SCOPES.join(' '),
+                ? TWITCH_BROADCASTER_SCOPE_STRING
+                : TWITCH_BOT_SCOPE_STRING,
         username: data.login,
         avatar: data.profile_image_url,
         provider: 'twitch',
