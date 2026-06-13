@@ -21,6 +21,10 @@
     "moduleResolution": "bundler",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "typeRoots": [
+      "node_modules/@types",
+      "src/server/types"
+    ],
     // "types": ["node"],
 
     // Other Outputs
@@ -48,7 +52,7 @@
     "skipLibCheck": true,
     "allowJs": true,
   },
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "src/config/scopes.ts"],
   "ts-node": {
     "esm": true,
     "transpileOnly": true
