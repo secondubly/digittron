@@ -7,7 +7,7 @@ export default ({ tokenStore }: CommandDeps): Command => ({
     aliases: [],
     // enabled: true,
     description: 'Description of currently streaming game',
-    execute: async ({ client, msg }) => {
+    async execute({ client, msg }) {
         /**
          * These game IDs are invalid for the purposes of querying the IGDB API
          * 509658 = Just Chatting
@@ -37,14 +37,25 @@ export default ({ tokenStore }: CommandDeps): Command => ({
             return
         }
 
-        const appAccessToken = await tokenStore.get(
+        const { accessToken } = await tokenStore.get(
             `twitch:${config.TWITCH_BOT_ID}`,
         )
+
+        if (!accessToken) {
+            log.bot.warn(
+                `Could not retrieve access token for ${this.name} request`,
+            )
+            return
+        }
+        // const { accessToken: appAccessToken } = await getAppToken(
+        //     config.TWITCH_CLIENT_ID,
+        //     config.TWITCH_CLIENT_SECRET,
+        // )
         const response = await fetch('https://api.igdb.com/v4/games', {
             method: 'POST',
             headers: {
-                'Client-ID': process.env.CLIENT_ID!,
-                Authorization: `Bearer ${appAccessToken}`,
+                'Client-ID': config.TWITCH_CLIENT_ID,
+                Authorization: `Bearer ${accessToken}`,
             },
             body: `fields storyline, summary; where id = ${game.igdbId};`,
         })
