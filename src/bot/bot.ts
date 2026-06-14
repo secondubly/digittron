@@ -203,8 +203,8 @@ export class Bot {
     public async start(): Promise<void> {
         // TODO: if we don't have broadcaster or bot tokens, we need to wait for authentication
         const broadcasterKey =
-            `twitch:auth:${envConfig.TWITCH_BROADCASTER_ID}` as TokenKey
-        const botKey = `twitch:auth:${envConfig.TWITCH_BOT_ID}` as TokenKey
+            `twitch:${envConfig.TWITCH_BROADCASTER_ID}` as TokenKey
+        const botKey = `twitch:${envConfig.TWITCH_BOT_ID}` as TokenKey
 
         await this.ensureToken(broadcasterKey, 'Broadcaster')
         await this.ensureToken(botKey, 'Bot account')
