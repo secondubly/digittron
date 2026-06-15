@@ -1,16 +1,6 @@
 import type { Command, CommandContext } from '@lib/bot/types.js'
-import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 import { config } from 'src/config/env'
-
-const isTrustedUser = (event: EventSubChannelChatMessageEvent) => {
-    const { chatterId, broadcasterId } = event
-
-    if (chatterId === broadcasterId) return true
-
-    return Object.keys(event.badges).some(
-        (b) => b === 'moderator' || b === 'subscriber',
-    )
-}
+import { isTrustedUser } from '../events/utils'
 
 const SHOT_TIMEOUT_DURATION_SECONDS = 60
 export default (): Command => ({
@@ -36,10 +26,13 @@ export default (): Command => ({
                     broadcasterId,
                     `${chatterDisplayName} was shot!`,
                 )
-                client.moderation.banUser(broadcasterId, {
-                    duration: SHOT_TIMEOUT_DURATION_SECONDS, // 10 minutes
-                    reason: 'lost the roulette game',
-                    user: chatterId,
+
+                client.asUser(config.TWITCH_BOT_ID, async ({ moderation }) => {
+                    moderation.banUser(broadcasterId, {
+                        duration: SHOT_TIMEOUT_DURATION_SECONDS, // 1 minute
+                        reason: 'lost the roulette game',
+                        user: chatterId,
+                    })
                 })
             }
         } else {
