@@ -1,15 +1,15 @@
-import type { Command, CommandContext } from '@lib/bot/types'
+import type { Command, CommandContext, CommandDeps } from '@lib/bot/types'
 import { log } from '@lib/services/logger'
 import { getCurrentlyPlayingTrack } from '@lib/services/spotify'
 import { config } from 'src/config/env'
 
-const nowplaying: Command = {
+export default ({ tokenStore }: CommandDeps): Command => ({
     name: 'nowplaying',
     aliases: ['np', 'playing'],
     description: 'Shows artist and title of currently playing song',
     async execute({ client, msg }: CommandContext) {
         const { chatterDisplayName, broadcasterId } = msg
-        const response = await getCurrentlyPlayingTrack()
+        const response = await getCurrentlyPlayingTrack(tokenStore)()
 
         if (typeof response === 'number') {
             if (response === 203) {
@@ -34,6 +34,4 @@ const nowplaying: Command = {
             )
         }
     },
-}
-
-export default nowplaying
+})
