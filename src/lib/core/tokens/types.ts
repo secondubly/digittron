@@ -28,6 +28,6 @@ export interface OauthTokenRecord {
  * twitch:12345
  * spotify:12345
  */
-export type TokenKey = `${'twitch' | 'spotify'}:${string}`
+export type TokenKey = `${'twitch' | 'spotify' | 'deadlock'}:${string}`
 
 export type TokenRecord = OauthTokenRecord | ThirdPartyTokenRecord
