@@ -8,12 +8,13 @@ const commands = ({ registry }: CommandDeps) => ({
     description: 'Lists all available commands',
     async execute({ client, msg }: CommandContext) {
         const { chatterDisplayName, broadcasterId } = msg
-        const commands = registry.list().join()
+        const commands = registry.list()
 
+        const commandNames = commands.map((c) => `!${c.name}`).join(', ')
         client.chat.sendChatMessageAsApp(
             config.TWITCH_BOT_ID,
             broadcasterId,
-            `@${chatterDisplayName} available commands: ${commands}`,
+            `@${chatterDisplayName} available commands: ${commandNames}`,
         )
     },
 })
