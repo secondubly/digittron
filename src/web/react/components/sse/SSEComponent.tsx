@@ -38,8 +38,5 @@ export const SSEComponent: React.FC<SSEComponentProps> = ({
         }
     }, [])
 
-    return (
-        <div>
-        </div>
-    )
+    return null
 }
