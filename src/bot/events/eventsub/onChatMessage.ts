@@ -6,8 +6,6 @@ import { isPermitted } from 'src/bot/commands/permit'
 import type { ApiClient } from '@twurple/api'
 import { config } from 'src/config/env'
 
-const firstTimeChatters = new Set<string>()
-// TODO: set audio alerts and such again, remove
 const audioAlertUsers = new Set(['89181064', '537326154']) // remove 89181064 after testing
 
 export default ({ registry, apiClient }: EventDeps): EventSubEvent => ({
@@ -27,7 +25,10 @@ export default ({ registry, apiClient }: EventDeps): EventSubEvent => ({
                     log.bot.info(
                         `👋  First message from ${chatterName} this stream`,
                     )
-                    // TODO: fire any audio events for this user
+
+                    if (audioAlertUsers.has(chatterId)) {
+                        playAudio(chatterId)
+                    }
                 }
 
                 if (isTrustedUser(event)) return
@@ -83,21 +84,5 @@ async function playAudio(userId: string): Promise<void> {
     if (!response.ok) {
         log.app.error(`Could not play audio file for twitch id: ${userId}`)
         return
-    }
-}
-
-async function addFirstTimeChatter(userId: string, username: string) {
-    if (firstTimeChatters.has(userId)) {
-        return
-    } else {
-        log.bot.info(
-            `First message from ${username} during stream, adding to first time chatters list.`,
-        )
-        firstTimeChatters.add(userId)
-
-        if (audioAlertUsers.has(userId)) {
-            // TODO: hook this up so it works properly
-            //    playAudio(userId)
-        }
     }
 }
