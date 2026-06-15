@@ -9,10 +9,11 @@ import type {
 import type { SqlEntityManager } from '@mikro-orm/sqlite'
 import { log } from '@lib/services/logger'
 import { User } from '@lib/db/models/user.entity'
-import { OauthToken } from '@lib/db/models/OauthToken'
+import { OauthToken } from '@lib/db/models/OauthToken.entity'
 import crypto from 'crypto'
 import { config } from 'src/config/env'
 import { TWITCH_BOT_SCOPE_STRING } from 'src/config/scopes'
+import type { MMRHistory } from 'src/bot/commands/rank'
 
 const TTL_BUFFER_S = 60
 const ALGORITHM = 'aes-256-gcm'
@@ -27,6 +28,8 @@ type ProviderEntity =
           | 'twitch_id'
       >
     | Omit<OauthToken, 'updatedAt' | 'token_type' | 'updated_at'>
+
+type DeadlockKey = `deadlock:${string}`
 
 export class TokenStore {
     constructor(
@@ -43,8 +46,12 @@ export class TokenStore {
         await this.redis.destroy()
     }
 
-    async set(key: TokenKey, token: TokenRecord): Promise<void> {
-        Promise.all([this.setDb(key, token), this.setCache(key, token)])
+    async set(key: TokenKey, data: TokenRecord | MMRHistory): Promise<void> {
+        if (this.isTokenRecord(data)) {
+            Promise.all([this.setDb(key, data), this.setCache(key, data)])
+        } else {
+            this.setCache(key, data)
+        }
     }
 
     async setBot(token: TokenRecord): Promise<void> {
@@ -52,27 +59,33 @@ export class TokenStore {
         Promise.all([this.setBotDB(key, token), this.setCache(key, token)])
     }
 
-    async get(key: TokenKey): Promise<TokenRecord | null> {
-        try {
+    public async get(key: TokenKey): Promise<TokenRecord | MMRHistory | null> {
+        if (key.includes('deadlock')) {
             const cached = await this.redis.get(key)
-            if (cached) return JSON.parse(cached) as TokenRecord
-        } catch (err) {
-            log.app.error({ err }, 'Redis get token error')
-        }
-
-        const { userId } = this.parseKey(key)
-        let record: TokenRecord | null
-        if (userId === config.TWITCH_BOT_ID) {
-            // twitch bot key retrieval operates a little differet
-            record = await this.getTwitchBot(key)
+            if (cached) return JSON.parse(cached) as MMRHistory
+            return null
         } else {
-            record = await this.getDb(key)
+            try {
+                const cached = await this.redis.get(key)
+                if (cached) return JSON.parse(cached) as TokenRecord
+            } catch (err) {
+                log.app.error({ err }, 'Redis get token error')
+            }
+
+            const { userId } = this.parseKey(key)
+            let record: TokenRecord | null
+            if (userId === config.TWITCH_BOT_ID) {
+                // twitch bot key retrieval operates a little differet
+                record = await this.getTwitchBot(key)
+            } else {
+                record = await this.getDb(key)
+            }
+
+            if (!record) return null
+
+            await this.setCache(key, record)
+            return record
         }
-
-        if (!record) return null
-
-        await this.setCache(key, record)
-        return record
     }
 
     async delete(key: TokenKey) {
@@ -245,10 +258,28 @@ export class TokenStore {
         if (row) await this.em.remove(row).flush()
     }
 
-    private async setCache(key: TokenKey, token: TokenRecord): Promise<void> {
-        const ttl = this.getTtl(token)
+    private isTokenRecord(data: TokenRecord | MMRHistory): data is TokenRecord {
+        return 'accessToken' in data
+    }
 
-        await this.redis.set(key, JSON.stringify(token), ttl ? { EX: ttl } : {})
+    private async setCache(key: TokenKey, token: TokenRecord): Promise<void>
+    private async setCache(key: TokenKey, rank: MMRHistory): Promise<void>
+
+    private async setCache(
+        key: TokenKey,
+        data: TokenRecord | MMRHistory,
+    ): Promise<void> {
+        if (this.isTokenRecord(data)) {
+            const ttl = this.getTtl(data)
+
+            await this.redis.set(
+                key,
+                JSON.stringify(data),
+                ttl ? { EX: ttl } : {},
+            )
+        } else {
+            await this.redis.set(key, JSON.stringify(data), { EX: 60 * 60 * 3 })
+        }
     }
 
     private createRecord(provider: TokenProvider, tokenRecord: TokenRecord) {
