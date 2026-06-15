@@ -27,7 +27,6 @@ export class Bot {
     private readonly authWaiter: AuthWaiter
     readonly firstMessageTracker: FirstMessageTracker
     private botId: string
-    private sessionChatters: Set<string> = new Set()
     private scheduledTimer: NodeJS.Timeout | null = null
     private pollInterval: NodeJS.Timeout | null = null
 
@@ -54,11 +53,18 @@ export class Bot {
         })
 
         if (process.env.NODE_ENV === 'development') {
+            if (!envConfig.NGROK_AUTH_TOKEN || !envConfig.EVENT_SUB_SECRET) {
+                log.bot.warn(
+                    'Missing NGROK_AUTH and/or EVENT_SUB_SECRET keys, the bot might be running in an insecure state.',
+                )
+            }
             this.eventSub = new EventSubHttpListener({
                 apiClient: this.apiClient,
                 adapter: new NgrokAdapter({
                     ngrokConfig: {
-                        authtoken: process.env.NGROK_AUTH_TOKEN ?? '',
+                        authtoken:
+                            envConfig.NGROK_AUTH_TOKEN ??
+                            'thisShouldBeARandomlyGeneratedFixedString',
                     },
                 }),
                 logger: { minLevel: 'debug' },
