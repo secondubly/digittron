@@ -1,50 +1,55 @@
+import type { TokenStore } from '@lib/core/tokens/TokenStore'
 import { Value } from '@sinclair/typebox/value'
+import { config } from 'src/config/env'
 import { currentlyPlayingSchema } from 'src/server/schemas/spotify'
+import { log } from './logger'
+import type { TokenRecord } from '@lib/core/tokens/types'
 
-const BASE_URL = 'http://localhost:4000'
+// TODO: rewrite all this functionality
+const getAccessToken = async (
+    tokenStore: TokenStore,
+): Promise<string | null> => {
+    // TODO: use token store to fetch access token instead of hitting the API
+    const token = await tokenStore.get(
+        `spotify:${config.TWITCH_BROADCASTER_ID}`,
+    )
 
-const getAccessToken = async (): Promise<string | null> => {
-    const twitchId = process.env.TWITCH_ID
-    const url = new URL(`api/spotify/token/${twitchId}`, BASE_URL).toString()
-
-    const response = await fetch(url, {
-        method: 'GET',
-    })
-
-    if (!response.ok && response.status === 404) {
-        throw Error('Something went wrong')
+    if (!token) {
+        log.app.warn(
+            `No spotify token found for ${config.TWITCH_BROADCASTER_ID}`,
+        )
     }
-
-    const accessToken = await response.text()
-
-    return accessToken
+    return (token as TokenRecord).accessToken
 }
 
 const callWithTokenRevalidation =
     <T, P extends unknown[]>(
-        f: (token: string, ...rest: P) => Promise<T | number>,
+        f: (
+            token: string,
+            tokenStore: TokenStore,
+            ...rest: P
+        ) => Promise<T | number>,
         revalidateCall: boolean = false,
     ) =>
+    (tokenStore: TokenStore) =>
     async (...params: P): Promise<T | number> => {
-        const token = await getAccessToken()
-        if (!token) {
-            return 404
-        }
+        const token = await getAccessToken(tokenStore)
 
-        const status = await f(token, ...params)
+        if (!token) return 404
 
-        if (typeof status === 'number') {
-            if (status === 401) {
-                if (!revalidateCall) {
-                    return callWithTokenRevalidation(f, true)(...params)
-                }
-            }
+        const status = await f(token, tokenStore, ...params)
+
+        if (typeof status === 'number' && status === 401 && !revalidateCall) {
+            return callWithTokenRevalidation(f, true)(tokenStore)(...params)
         }
 
         return status
     }
 
-const fetchCurrentlyPlaying = async (accessToken: string) => {
+const fetchCurrentlyPlaying = async (
+    accessToken: string,
+    _tokenStore: TokenStore,
+) => {
     const playingOptions = {
         url: 'https://api.spotify.com/v1/me/player/currently-playing',
         headers: {
@@ -68,6 +73,5 @@ const fetchCurrentlyPlaying = async (accessToken: string) => {
     return playingData
 }
 
-export const getCurrentlyPlayingTrack = callWithTokenRevalidation(
-    fetchCurrentlyPlaying,
-)
+export const getCurrentlyPlayingTrack = (tokenStore: TokenStore) =>
+    callWithTokenRevalidation(fetchCurrentlyPlaying)(tokenStore)
