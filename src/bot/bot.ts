@@ -12,23 +12,24 @@ import { config as envConfig } from 'src/config/env'
 import { TokenStore } from '@lib/core/tokens/TokenStore'
 import { createAuthProvider } from '@lib/core/tokens/TokenAdapter'
 import { AuthWaiter } from '@lib/core/tokens/AuthWait'
-import type { TokenKey } from '@lib/core/tokens/types'
+import type { OauthTokenRecord, TokenKey } from '@lib/core/tokens/types'
+import { SpotifyFetcher } from '@lib/services/spotify'
+import { FirstMessageTracker } from '@lib/bot/FirstMessageTracker'
 
 export class Bot {
     private chatClient?: ChatClient
     private apiClient?: ApiClient
     private eventSub?: EventSubHttpListener | EventSubWsListener
+    private spotifyFetcher?: SpotifyFetcher
     private readonly channels: string[]
     private readonly commandRegistry: CommandRegistry
     private readonly eventRegistry: EventRegistry
     private readonly authWaiter: AuthWaiter
+    readonly firstMessageTracker: FirstMessageTracker
     private botId: string
     private sessionChatters: Set<string> = new Set()
     private scheduledTimer: NodeJS.Timeout | null = null
     private pollInterval: NodeJS.Timeout | null = null
-
-    // TODO: set audio alerts and such again
-    private audioAlertUsers = new Set(['89181064', '537326154']) // remove 89181064 after testing
 
     constructor(
         channels: string[],
@@ -39,6 +40,7 @@ export class Bot {
         this.commandRegistry = new CommandRegistry('!')
         this.eventRegistry = new EventRegistry()
         this.authWaiter = new AuthWaiter()
+        this.firstMessageTracker = new FirstMessageTracker()
     }
 
     private initializeClients(authProvider: RefreshingAuthProvider) {
@@ -94,35 +96,6 @@ export class Bot {
         this.scheduledTimer = null
     }
 
-    public addFirstTimeChatter(userId: string) {
-        log.bot.warn(
-            `First message from ${userId} during stream, adding to list...`,
-        )
-        if (this.sessionChatters.has(userId)) {
-            return
-        } else {
-            this.sessionChatters.add(userId)
-
-            if (this.audioAlertUsers.has(userId)) {
-                this.playAudio(userId)
-            }
-        }
-    }
-
-    public clearFirstTimeChatters() {
-        this.sessionChatters.clear()
-    }
-
-    private async playAudio(userId: string): Promise<void> {
-        const url = `http://localhost:4000/api/audio/${userId}`
-        const response = await fetch(url)
-
-        if (!response.ok) {
-            log.app.error(`Could not play audio file for twitch id: ${userId}`)
-            return
-        }
-    }
-
     // if the bot restarts mid-stream, we don't want to miss any ads, so start polling again
     private async checkInitialStreamState(): Promise<void> {
         try {
@@ -132,13 +105,15 @@ export class Bot {
 
             if (stream) {
                 log.bot.info(
-                    'Stream already live on startup — starting ad poller.',
+                    'Stream already live on startup — starting services (ad poller, first message tracker).',
                 )
+                this.firstMessageTracker.setOnline()
                 this.startAdPoller()
             } else {
                 log.bot.info(
-                    'Stream offline on startup — ad poller standing by.',
+                    'Stream offline on startup — services (ad poller, first message tracker) standing by.',
                 )
+                this.firstMessageTracker.setOffline()
             }
         } catch (err) {
             log.bot.error({ err }, 'Failed to check initial stream state')
@@ -201,7 +176,6 @@ export class Bot {
     }
 
     public async start(): Promise<void> {
-        // TODO: if we don't have broadcaster or bot tokens, we need to wait for authentication
         const broadcasterKey =
             `twitch:${envConfig.TWITCH_BROADCASTER_ID}` as TokenKey
         const botKey = `twitch:${envConfig.TWITCH_BOT_ID}` as TokenKey
@@ -217,11 +191,31 @@ export class Bot {
 
         this.initializeClients(authProvider)
 
+        if (envConfig.SPOTIFY_CLIENT_ID && envConfig.SPOTIFY_CLIENT_SECRET) {
+            const spotifyToken = (await this.tokenStore.get(
+                `spotify:${envConfig.TWITCH_BROADCASTER_ID}`,
+            )) as OauthTokenRecord | null
+
+            if (!spotifyToken || !spotifyToken.refreshToken) {
+                log.bot.warn(
+                    'Spotify token missing or malformed — Spotify commands unavailable',
+                )
+            } else {
+                this.spotifyFetcher = new SpotifyFetcher({
+                    tokenStore: this.tokenStore,
+                    twitchId: envConfig.TWITCH_BROADCASTER_ID,
+                    maxRetries: 3,
+                })
+                log.bot.info('Spotify fetcher initialized')
+            }
+        }
+
         await this.commandRegistry.loadCommands(
             path.join(import.meta.dirname, 'commands'),
             {
                 registry: this.commandRegistry,
                 tokenStore: this.tokenStore,
+                spotifyFetcher: this.spotifyFetcher,
             },
         )
 
@@ -243,6 +237,7 @@ export class Bot {
             eventSub: this.eventSub!,
             broadcasterId: envConfig.TWITCH_BROADCASTER_ID,
             botUserId: this.botId,
+            firstMessageTracker: this.firstMessageTracker,
         })
 
         await this.checkInitialStreamState()
@@ -250,7 +245,6 @@ export class Bot {
 
     public async stop(): Promise<void> {
         this.stopAdPoller()
-        this.clearFirstTimeChatters()
         await this.eventSub?.stop()
         await this.chatClient?.quit()
     }

@@ -4,11 +4,13 @@ import type { ChatClient } from '@twurple/chat'
 import type { EventSubHttpListener } from '@twurple/eventsub-http'
 import type { EventSubWsListener } from '@twurple/eventsub-ws'
 import type { Bot } from '../bot'
+import type { FirstMessageTracker } from '@lib/bot/FirstMessageTracker'
 
 export interface EventDeps {
     registry: CommandRegistry
     bot: Bot
     apiClient: ApiClient
+    firstMessageTracker: FirstMessageTracker
 }
 
 export interface BotContext {
@@ -16,6 +18,7 @@ export interface BotContext {
     eventSub: EventSubWsListener | EventSubHttpListener
     broadcasterId: string
     botUserId: string
+    firstMessageTracker: FirstMessageTracker
 }
 
 export interface ChatEvent {
