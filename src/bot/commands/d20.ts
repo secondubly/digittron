@@ -13,7 +13,7 @@ const d20: Command = {
             config.TWITCH_BROADCASTER_ID,
             `${displayName} rolled a ${roll}${roll === 20 ? '! 🎉' : ''}`,
         )
-        // TODO: if user rolled a 1, timeout for 1 minute
+        // TODO: track nat 20s and nat 1s
     },
 }
 
