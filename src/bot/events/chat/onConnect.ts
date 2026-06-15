@@ -1,14 +1,17 @@
 import { log } from '@lib/services/logger'
 import type { ChatEvent } from '../types'
+import { config } from 'src/config/env'
+
+const isFirstConnection = true
 
 export default {
     type: 'chat',
     name: 'onDisconnect',
     register({ chatClient }) {
         chatClient.onConnect(() => {
-            const connectedCount = chatClient.currentChannels.length
+            // TODO: make special startup messages for the bot
             log.bot.info(
-                `Connected to ${connectedCount} ${connectedCount === 1 ? 'channel' : 'channels'}: ${chatClient.currentChannels.join(', ')}`,
+                `${isFirstConnection ? 'Connected' : 'Reconnected'} to Twitch, requesting ${config.TWITCH_CHANNELS.length} channels: ${config.TWITCH_CHANNELS.join(', ')}`,
             )
         })
     },
