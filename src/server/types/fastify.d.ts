@@ -5,6 +5,7 @@ import { TokenStore } from '@lib/core/tokens/TokenStore'
 import type { RedisClientType } from 'redis'
 import type { TwitchProfile } from 'passport-twitch-new'
 import type { AuthWaiter } from '@lib/core/tokens/AuthWait'
+import type { Bot } from 'src/bot/bot'
 
 declare module 'fastify' {
     interface FastifyInstance {
@@ -13,6 +14,7 @@ declare module 'fastify' {
         tokenStore: TokenStore
         redis: RedisClientType
         authWaiter: AuthWaiter
+        bot: Bot
         isAuthenticated(): boolean
         logIn(): Promise<void>
         logOut(): Promise<void>
