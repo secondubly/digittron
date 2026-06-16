@@ -1,13 +1,14 @@
 import type { TokenStore } from '@lib/core/tokens/TokenStore'
 import type { ApiClient } from '@twurple/api'
 import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
-import type { CommandRegistry } from './CommandRegistry'
 import type { SpotifyFetcher } from '@lib/services/spotify'
+import type { Bot } from 'src/bot/bot'
 
 export interface CommandDeps {
     tokenStore: TokenStore
-    registry: CommandRegistry
     spotifyFetcher: SpotifyFetcher | undefined
+    say: Bot['say']
+    getCommands: () => Command[]
 }
 
 export interface CommandContext {
@@ -16,6 +17,7 @@ export interface CommandContext {
     msg: EventSubChannelChatMessageEvent
     args: string[]
     rawMsg: string
+    say: (message: string) => Promise<void>
 }
 
 export interface Command {
