@@ -2,7 +2,6 @@ import { Text, Container, Box, Title, SimpleGrid } from '@mantine/core';
 import React, { useEffect, useRef, useState } from 'react';
 import { ModerationPanelCard } from '../components/ModerationPanelCard';
 import { IconCancel, IconCodeAsterisk, IconLetterD, IconLinkFilled, IconMoodSmile, IconRepeat } from '@tabler/icons-react';
-import { WebSocket } from 'node:http';
 
 const ChatModeration: React.FC = () => {
 
