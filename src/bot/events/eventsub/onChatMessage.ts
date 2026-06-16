@@ -8,7 +8,7 @@ import { config } from 'src/config/env'
 
 const audioAlertUsers = new Set(['89181064', '537326154']) // remove 89181064 after testing
 
-export default ({ registry, apiClient }: EventDeps): EventSubEvent => ({
+export default ({ registry, apiClient, bot }: EventDeps): EventSubEvent => ({
     type: 'eventsub',
     name: 'onChatMessage',
     register({ eventSub, broadcasterId, botUserId, firstMessageTracker }) {
@@ -16,18 +16,23 @@ export default ({ registry, apiClient }: EventDeps): EventSubEvent => ({
             broadcasterId,
             botUserId,
             async (event) => {
-                const { chatterId, messageText, chatterName } = event
+                const { chatterId, messageText, chatterDisplayName } = event
                 // handle commands first
                 // REVIEW: should we time out users who post links in commands?
                 registry.dispatch(event, apiClient)
 
                 if (firstMessageTracker.isFirstMessage(chatterId)) {
                     log.bot.info(
-                        `👋  First message from ${chatterName} this stream`,
+                        `👋  First message from ${chatterDisplayName} this stream`,
                     )
 
                     if (audioAlertUsers.has(chatterId)) {
-                        playAudio(chatterId)
+                        bot.emit('firstMessage', {
+                            chatterId,
+                            chatterName: chatterDisplayName,
+                            message: messageText,
+                            timestamp: new Date().toISOString(),
+                        })
                     }
                 }
 
