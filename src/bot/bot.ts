@@ -16,6 +16,7 @@ import type { OauthTokenRecord, TokenKey } from '@lib/core/tokens/types'
 import { SpotifyFetcher } from '@lib/services/spotify'
 import { FirstMessageTracker } from '@lib/bot/FirstMessageTracker'
 import { EventEmitter } from 'events'
+import type { CommandDeps } from '@lib/bot/types'
 
 export class Bot extends EventEmitter {
     private chatClient?: ChatClient
@@ -23,7 +24,7 @@ export class Bot extends EventEmitter {
     private eventSub?: EventSubHttpListener | EventSubWsListener
     private spotifyFetcher?: SpotifyFetcher
     private readonly channels: string[]
-    private readonly commandRegistry: CommandRegistry
+    private readonly commandRegistry: CommandRegistry // this should never be null but we're setting it as null to avoid typescript complaints
     private readonly eventRegistry: EventRegistry
     private readonly authWaiter: AuthWaiter
     readonly firstMessageTracker: FirstMessageTracker
@@ -38,10 +39,10 @@ export class Bot extends EventEmitter {
         super()
         this.channels = channels
         this.botId = envConfig.TWITCH_BOT_ID
-        this.commandRegistry = new CommandRegistry('!')
         this.eventRegistry = new EventRegistry()
         this.authWaiter = new AuthWaiter()
         this.firstMessageTracker = new FirstMessageTracker()
+        this.commandRegistry = new CommandRegistry('!', this.say.bind(this))
     }
 
     private initializeClients(authProvider: RefreshingAuthProvider) {
@@ -166,6 +167,27 @@ export class Bot extends EventEmitter {
         }, delayMs)
     }
 
+    async say(channel: string, message: string): Promise<void> {
+        try {
+            const broadcasterId = await this.apiClient?.users
+                .getUserByName(channel.replace('#', ''))
+                .then((u) => u?.id)
+
+            await this.apiClient?.chat.sendChatMessageAsApp(
+                this.botId,
+                broadcasterId ?? envConfig.TWITCH_BROADCASTER_ID,
+                message,
+            )
+            log.bot.info(`[${channel}] ${message}`)
+        } catch (err) {
+            log.bot.error({ err }, `Failed to send message to ${channel}`)
+        }
+    }
+
+    async sayInChannel(message: string): Promise<void> {
+        return this.say(envConfig.TWITCH_BROADCASTER_ID, message)
+    }
+
     private async onAdWarning(nextAdAt: Date, durationSeconds: number) {
         // we need to use valueOf so TS doesn't complain about arithmetic
         const secsUntil = Math.round(
@@ -218,13 +240,15 @@ export class Bot extends EventEmitter {
             }
         }
 
+        const deps: CommandDeps = {
+            tokenStore: this.tokenStore,
+            spotifyFetcher: this.spotifyFetcher,
+            say: this.say.bind(this),
+            getCommands: () => this.commandRegistry.list(),
+        }
         await this.commandRegistry.loadCommands(
             path.join(import.meta.dirname, 'commands'),
-            {
-                registry: this.commandRegistry,
-                tokenStore: this.tokenStore,
-                spotifyFetcher: this.spotifyFetcher,
-            },
+            deps,
         )
 
         await this.eventRegistry.loadEvents(
@@ -233,6 +257,7 @@ export class Bot extends EventEmitter {
                 registry: this.commandRegistry,
                 bot: this,
                 apiClient: this.apiClient,
+                say: this.say.bind(this),
             },
         )
 
