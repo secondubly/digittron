@@ -5,11 +5,8 @@ const raidmsg: Command = {
     aliases: [],
 
     description: 'the channel’s raid message',
-    async execute({ msg, client }: CommandContext) {
-        const { broadcasterId } = msg
-        client.chat.sendChatMessageAsApp(
-            process.env.BOT_ID!,
-            broadcasterId,
+    async execute({ say }: CommandContext) {
+        say(
             'raid message: second15Raid 01010010 01000001 01001001 01000100 00100001 00100001 00100001 second15Raid',
         )
     },

@@ -1,12 +1,11 @@
 import type { Command, CommandContext } from '@lib/bot/types.js'
-import { config } from 'src/config/env'
 
 const title: Command = {
     name: 'title',
     aliases: [],
     description:
         'Show stream title (for viwers) or change stream title (for moderators and up)',
-    async execute({ msg, args, client }: CommandContext) {
+    async execute({ msg, args, client, say }: CommandContext) {
         const { broadcasterId, chatterId, chatterDisplayName } = msg
         const channelInfo =
             await client.channels.getChannelInfoById(broadcasterId)
@@ -15,11 +14,7 @@ const title: Command = {
         }
 
         if (!args.length) {
-            client.chat.sendChatMessageAsApp(
-                config.TWITCH_BOT_ID,
-                broadcasterId,
-                `@${chatterDisplayName}, title: ${channelInfo.title}`,
-            )
+            say(`@${chatterDisplayName}, title: ${channelInfo.title}`)
         } else {
             const isMod = await client.moderation.checkUserMod(
                 broadcasterId,
@@ -36,9 +31,7 @@ const title: Command = {
                 title: streamTitle,
             })
 
-            client.chat.sendChatMessageAsApp(
-                config.TWITCH_BOT_ID,
-                msg.broadcasterId,
+            say(
                 `@${msg.chatterDisplayName} updated game title to: ${streamTitle}.`,
             )
         }

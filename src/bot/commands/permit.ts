@@ -21,34 +21,25 @@ export default (): Command => ({
     aliases: ['allow'],
     description: 'Allow a user to post a link',
     modOnly: true,
-    async execute({ client, msg, args }: CommandContext) {
+    async execute({ client, msg, args, say }: CommandContext) {
         const target = args[0]?.replace('@', '').toLocaleLowerCase()
         const { broadcasterId } = msg
         if (!target) {
-            client.chat.sendChatMessageAsApp(
-                config.TWITCH_BOT_ID,
-                broadcasterId,
-                `Invalid command! Usage: !permit @username`,
-            )
+            say(`Invalid command! Usage: !permit @username`)
             return
         }
 
         const targetUser = await client.users.getUserByName(target)
         if (!targetUser) {
-            client.chat.sendChatMessageAsApp(
-                config.TWITCH_BOT_ID,
-                broadcasterId,
-                `User @${target} not found.`,
-            )
+            say(`User @${target} not found.`)
             return
         }
 
         permitList.set(targetUser.id, Date.now() + PERMIT_DURATION_MS)
-        await client.chat.sendChatMessageAsApp(
-            config.TWITCH_BOT_ID,
-            broadcasterId,
+        say(
             `@${targetUser.displayName}, you may post one link in the next 60 seconds.`,
         )
+
         log.bot.info(`Permit granted to ${targetUser.displayName}`)
     },
 })

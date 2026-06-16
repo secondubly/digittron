@@ -1,21 +1,16 @@
 import type { CommandContext, CommandDeps } from '@lib/bot/types'
-import { config } from 'src/config/env'
 
-const commands = ({ registry }: CommandDeps) => ({
+const commands = ({ getCommands }: CommandDeps) => ({
     name: 'commands',
     aliases: [],
     enabled: true,
     description: 'Lists all available commands',
-    async execute({ client, msg }: CommandContext) {
-        const { chatterDisplayName, broadcasterId } = msg
-        const commands = registry.list()
+    async execute({ msg, say }: CommandContext) {
+        const { chatterDisplayName } = msg
+        const commands = getCommands()
 
         const commandNames = commands.map((c) => `!${c.name}`).join(', ')
-        client.chat.sendChatMessageAsApp(
-            config.TWITCH_BOT_ID,
-            broadcasterId,
-            `@${chatterDisplayName} available commands: ${commandNames}`,
-        )
+        say(`@${chatterDisplayName} available commands: ${commandNames}`)
     },
 })
 

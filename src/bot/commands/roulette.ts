@@ -7,7 +7,7 @@ export default (): Command => ({
     name: 'roulette',
     aliases: [],
     description: 'Play russian roulette! Good luck!',
-    async execute({ msg, client }: CommandContext) {
+    async execute({ msg, client, say }: CommandContext) {
         const { broadcasterId, chatterId, chatterDisplayName } = msg
         const bullet = Math.floor(Math.random() * 6 + 1)
 
@@ -15,17 +15,11 @@ export default (): Command => ({
 
         if (bullet === 1) {
             if (isTrusted) {
-                client.chat.sendChatMessageAsApp(
-                    process.env.BOT_ID!,
-                    broadcasterId,
+                say(
                     `The gun fired, but ${chatterDisplayName} caught the bullet!`,
                 )
             } else {
-                await client.chat.sendChatMessageAsApp(
-                    process.env.BOT_ID!,
-                    broadcasterId,
-                    `${chatterDisplayName} was shot!`,
-                )
+                say(`${chatterDisplayName} was shot!`)
 
                 client.asUser(config.TWITCH_BOT_ID, async ({ moderation }) => {
                     moderation.banUser(broadcasterId, {
@@ -36,11 +30,7 @@ export default (): Command => ({
                 })
             }
         } else {
-            client.chat.sendChatMessageAsApp(
-                config.TWITCH_BOT_ID!,
-                broadcasterId,
-                `${chatterDisplayName} was spared!`,
-            )
+            say(`${chatterDisplayName} was spared!`)
         }
     },
 })

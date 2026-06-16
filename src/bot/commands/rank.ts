@@ -32,35 +32,25 @@ const rank = ({ tokenStore }: CommandDeps) => ({
     name: 'rank',
     aliases: [],
     description: 'Show Daedlock rank',
-    async execute({ msg, client }: CommandContext) {
+    async execute({ msg, say }: CommandContext) {
         if (!config.STEAM_ID) {
             log.bot.warn(
-                `${msg.chatterName} tried to execute !${this.name} but steam id is not configured, exiting early...`,
+                `${msg.chatterName} tried to execute !${this.name} but steam id is not configured.`,
             )
             return
         }
 
-        const { broadcasterId } = msg
         const deadlockData = await getDeadlockRank(config.STEAM_ID, tokenStore)
 
         if (!deadlockData) {
-            client.chat.sendChatMessageAsApp(
-                config.TWITCH_BOT_ID,
-                broadcasterId,
-                'No rank found!',
-            )
-
+            say('No rank found!')
             return
         }
 
         tokenStore.set(`deadlock:${config.STEAM_ID}`, deadlockData)
         const { division, division_tier } = deadlockData
         const namedRank = DEADLOCK_RANKS.get(division)
-        client.chat.sendChatMessageAsApp(
-            config.TWITCH_BOT_ID,
-            broadcasterId,
-            `Rank: ${namedRank} (Division: ${division_tier})`,
-        )
+        say(`Rank: ${namedRank} (Division: ${division_tier})`)
     },
 })
 

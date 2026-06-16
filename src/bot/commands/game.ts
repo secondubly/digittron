@@ -1,7 +1,6 @@
 import type { Command, CommandContext } from '@lib/bot/types.js'
 import { log } from '@lib/services/logger.js'
 import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
-import { config } from 'src/config/env'
 
 const isMod = (msg: EventSubChannelChatMessageEvent): boolean => {
     // broadcaster is considered a mod in almost all cases
@@ -16,7 +15,7 @@ const game: Command = {
     aliases: [],
     description:
         'Show currently streaming game (for viewers) OR change the current game.',
-    async execute({ client, msg, args }: CommandContext) {
+    async execute({ client, msg, args, say }: CommandContext) {
         const { broadcasterId, chatterDisplayName } = msg
         if (args.length === 0) {
             const channelInfo =
@@ -28,11 +27,7 @@ const game: Command = {
                 return
             }
 
-            client.chat.sendChatMessageAsApp(
-                config.TWITCH_BOT_ID,
-                broadcasterId,
-                `@${chatterDisplayName}, current game: ${channelInfo.gameName}`,
-            )
+            say(`@${chatterDisplayName}, current game: ${channelInfo.gameName}`)
         } else {
             if (!isMod(msg)) {
                 return
@@ -44,9 +39,8 @@ const game: Command = {
                 log.bot.warn(
                     `Could not find any games with the title ${gameTitle}`,
                 )
-                client.chat.sendChatMessageAsApp(
-                    process.env.BOT_ID!,
-                    broadcasterId,
+
+                say(
                     `@${chatterDisplayName} could not find any games with that title. Please check your input and try again.`,
                 )
                 return
@@ -56,11 +50,7 @@ const game: Command = {
                 gameId: gameData[0].id,
             })
 
-            client.chat.sendChatMessageAsApp(
-                config.TWITCH_BOT_ID,
-                broadcasterId,
-                `Successfully updated game to ${gameTitle}.`,
-            )
+            say(`Successfully updated game to ${gameTitle}.`)
         }
     },
 }
