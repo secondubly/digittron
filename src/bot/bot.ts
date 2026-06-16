@@ -15,8 +15,9 @@ import { AuthWaiter } from '@lib/core/tokens/AuthWait'
 import type { OauthTokenRecord, TokenKey } from '@lib/core/tokens/types'
 import { SpotifyFetcher } from '@lib/services/spotify'
 import { FirstMessageTracker } from '@lib/bot/FirstMessageTracker'
+import { EventEmitter } from 'events'
 
-export class Bot {
+export class Bot extends EventEmitter {
     private chatClient?: ChatClient
     private apiClient?: ApiClient
     private eventSub?: EventSubHttpListener | EventSubWsListener
@@ -34,6 +35,7 @@ export class Bot {
         channels: string[],
         private readonly tokenStore: TokenStore,
     ) {
+        super()
         this.channels = channels
         this.botId = envConfig.TWITCH_BOT_ID
         this.commandRegistry = new CommandRegistry('!')
