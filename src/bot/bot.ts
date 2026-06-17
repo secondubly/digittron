@@ -24,13 +24,14 @@ export class Bot extends EventEmitter {
     private eventSub?: EventSubHttpListener | EventSubWsListener
     private spotifyFetcher?: SpotifyFetcher
     private readonly channels: string[]
-    private readonly commandRegistry: CommandRegistry // this should never be null but we're setting it as null to avoid typescript complaints
+    readonly commandRegistry: CommandRegistry
     private readonly eventRegistry: EventRegistry
     private readonly authWaiter: AuthWaiter
     readonly firstMessageTracker: FirstMessageTracker
     private botId: string
     private scheduledTimer: NodeJS.Timeout | null = null
     private pollInterval: NodeJS.Timeout | null = null
+    private running = false
 
     constructor(
         channels: string[],
@@ -273,6 +274,7 @@ export class Bot extends EventEmitter {
             firstMessageTracker: this.firstMessageTracker,
         })
 
+        this.running = true
         await this.checkInitialStreamState()
     }
 
@@ -280,6 +282,7 @@ export class Bot extends EventEmitter {
         this.stopAdPoller()
         await this.eventSub?.stop()
         await this.chatClient?.quit()
+        this.running = false
     }
 
     private async ensureToken(
@@ -301,5 +304,9 @@ export class Bot extends EventEmitter {
         await this.authWaiter.waitFor(tokenKey) // blocks here until notify() fires
 
         log.bot.info(`${label} authenticated — continuing startup.`)
+    }
+
+    isRunning() {
+        return this.running
     }
 }
