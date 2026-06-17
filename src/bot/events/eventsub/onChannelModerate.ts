@@ -3,7 +3,7 @@ import type { EventDeps, EventSubEvent } from '../types'
 import { config } from 'src/config/env'
 import { log } from '@lib/services/logger'
 
-export default ({ apiClient }: EventDeps): EventSubEvent => ({
+export default ({ say }: EventDeps): EventSubEvent => ({
     type: 'eventsub',
     name: 'onChannelModerate',
     register({ eventSub, broadcasterId, botUserId }) {
@@ -17,11 +17,7 @@ export default ({ apiClient }: EventDeps): EventSubEvent => ({
                 `Use this as the raid message: second15Raid 01010010 01000001 01001001 01000100 00100001 00100001 00100001 second15Raid`,
             ]
             for (const message of messages) {
-                await apiClient.chat.sendChatMessageAsApp(
-                    botUserId,
-                    broadcasterId,
-                    message,
-                )
+                say(event.broadcasterName, message)
                 // wait a bit before sending the next message
                 await new Promise((resolve) => setTimeout(resolve, 1500))
             }

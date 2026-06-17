@@ -1,7 +1,7 @@
 import { log } from '@lib/services/logger'
 import type { EventDeps, EventSubEvent } from '../types'
 
-export default ({ apiClient }: EventDeps): EventSubEvent => ({
+export default ({ apiClient, say }: EventDeps): EventSubEvent => ({
     type: 'eventsub',
     name: 'onChannelRaidIn',
     register({ eventSub, broadcasterId, botUserId }) {
@@ -30,11 +30,7 @@ export default ({ apiClient }: EventDeps): EventSubEvent => ({
             })
 
             const raidMsg = `Everyone say hi to ${event.raidingBroadcasterDisplayName}! They were playing ${gameInfo.name}!`
-            apiClient.chat.sendChatMessageAsApp(
-                botUserId,
-                broadcasterId,
-                raidMsg,
-            )
+            say(event.raidedBroadcasterName, raidMsg)
         })
     },
 })

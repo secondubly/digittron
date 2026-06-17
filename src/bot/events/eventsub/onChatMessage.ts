@@ -8,7 +8,12 @@ import { config } from 'src/config/env'
 
 const audioAlertUsers = new Set(['89181064', '537326154']) // remove 89181064 after testing
 
-export default ({ registry, apiClient, bot }: EventDeps): EventSubEvent => ({
+export default ({
+    registry,
+    apiClient,
+    bot,
+    say,
+}: EventDeps): EventSubEvent => ({
     type: 'eventsub',
     name: 'onChatMessage',
     register({ eventSub, broadcasterId, botUserId, firstMessageTracker }) {
@@ -42,7 +47,7 @@ export default ({ registry, apiClient, bot }: EventDeps): EventSubEvent => ({
                 if (isWhitelistedLink(messageText)) return
                 if (isPermitted(chatterId)) return
 
-                moderate(apiClient, event)
+                moderate(apiClient, event, say)
             },
         )
     },
@@ -62,6 +67,7 @@ function isTrustedUser(event: EventSubChannelChatMessageEvent): boolean {
 async function moderate(
     apiClient: ApiClient,
     event: EventSubChannelChatMessageEvent,
+    say: (channel: string, message: string) => Promise<void>,
 ) {
     const { chatterId, broadcasterId: channel, chatterDisplayName } = event
 
@@ -75,19 +81,8 @@ async function moderate(
 
     log.bot.info(`Timed out ${chatterDisplayName} for posting a link.`)
 
-    await apiClient.chat.sendChatMessageAsApp(
-        config.TWITCH_BOT_ID,
-        channel,
+    say(
+        config.TWITCH_BROADCASTER_ID,
         `@${chatterDisplayName} please don’t post links in chat!`,
     )
-}
-
-async function playAudio(userId: string): Promise<void> {
-    const url = `http://localhost:4000/api/audio/${userId}`
-    const response = await fetch(url)
-
-    if (!response.ok) {
-        log.app.error(`Could not play audio file for twitch id: ${userId}`)
-        return
-    }
 }
