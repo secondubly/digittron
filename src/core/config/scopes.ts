@@ -36,8 +36,6 @@ export const TWITCH_BOT_SCOPES = [
     'user:write:chat',
 ] as const
 
-// ── Spotify ──────────────────────────────────────────────────────────────────
-
 export const SPOTIFY_SCOPES = [
     'user-modify-playback-state',
     'user-read-currently-playing',
@@ -49,21 +47,19 @@ export const SPOTIFY_SCOPES = [
     'streaming',
 ] as const
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
 export type TwitchBroadcasterScope = (typeof TWITCH_BROADCASTER_SCOPES)[number]
 export type TwitchBotScope = (typeof TWITCH_BOT_SCOPES)[number]
 export type TwitchScope = TwitchBroadcasterScope | TwitchBotScope
 export type SpotifyScope = (typeof SPOTIFY_SCOPES)[number]
 
-// ── Joined strings for OAuth URLs ───────────────────────────────────────────
+// Used for Oauth URLs
 
 export const TWITCH_BROADCASTER_SCOPE_STRING =
     TWITCH_BROADCASTER_SCOPES.join(' ')
 export const TWITCH_BOT_SCOPE_STRING = TWITCH_BOT_SCOPES.join(' ')
 export const SPOTIFY_SCOPE_STRING = SPOTIFY_SCOPES.join(' ')
 
-// ── Combined export for easy access ─────────────────────────────────────────
+// ease of use export
 
 export const SCOPES = {
     twitch: {

@@ -3,8 +3,8 @@
 import { RefreshingAuthProvider, type AccessToken } from '@twurple/auth'
 import { TokenStore } from './TokenStore'
 import type { TokenRecord, TokenKey } from './types'
-import { config } from 'src/config/env'
-import { log } from '@lib/services/logger'
+import { config } from 'src/core/config/env'
+import { log } from 'src/core/utils/logger'
 
 function toTokenRecord(userId: string, token: AccessToken): TokenRecord {
     return {

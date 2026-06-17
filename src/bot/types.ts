@@ -1,7 +1,7 @@
-import type { TokenStore } from '@lib/core/tokens/TokenStore'
+import type { TokenStore } from 'src/core/tokens/TokenStore'
 import type { ApiClient } from '@twurple/api'
 import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
-import type { SpotifyFetcher } from '@lib/services/spotify'
+import type { SpotifyFetcher } from 'src/bot/services/SpotifyFetcher'
 import type { Bot } from 'src/bot/bot'
 
 export interface CommandDeps {

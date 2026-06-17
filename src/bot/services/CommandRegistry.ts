@@ -1,10 +1,10 @@
 import path from 'path'
 import fs from 'fs/promises'
 import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
-import type { Command, CommandContext, CommandDeps } from './types.js'
+import type { Command, CommandContext, CommandDeps } from '../types.js'
 import type { ApiClient } from '@twurple/api'
-import { log } from '@lib/services/logger.js'
-import { config } from 'src/config/env.js'
+import { log } from 'src/core/utils/logger.js'
+import { config } from 'src/core/config/env.js'
 
 type SayFn = (channel: string, message: string) => Promise<void>
 

@@ -7,12 +7,12 @@ import type {
     OauthTokenRecord,
 } from './types'
 import type { SqlEntityManager } from '@mikro-orm/sqlite'
-import { log } from '@lib/services/logger'
-import { User } from '@lib/db/models/user.entity'
-import { OauthToken } from '@lib/db/models/OauthToken.entity'
+import { log } from 'src/core/utils/logger'
+import { User } from 'src/core/db/models/user.entity'
+import { OauthToken } from 'src/core/db/models/OauthToken.entity'
 import crypto from 'crypto'
-import { config } from 'src/config/env'
-import { TWITCH_BOT_SCOPE_STRING } from 'src/config/scopes'
+import { config } from 'src/core/config/env'
+import { TWITCH_BOT_SCOPE_STRING } from 'src/core/config/scopes'
 import type { MMRHistory } from 'src/bot/commands/rank'
 
 const TTL_BUFFER_S = 60
@@ -21,19 +21,19 @@ const IV_LENGTH = 12
 
 type ProviderEntity =
     | Pick<
-        User,
-        | 'access_token_encrypted'
-        | 'refresh_token_encrypted'
-        | 'expires_in'
-        | 'twitch_id'
-    >
+          User,
+          | 'access_token_encrypted'
+          | 'refresh_token_encrypted'
+          | 'expires_in'
+          | 'twitch_id'
+      >
     | Omit<OauthToken, 'updatedAt' | 'token_type' | 'updated_at'>
 
 export class TokenStore {
     constructor(
         private readonly redis: RedisClientType,
         private readonly em: SqlEntityManager,
-    ) { }
+    ) {}
 
     async connect(): Promise<void> {
         await this.redis.connect()

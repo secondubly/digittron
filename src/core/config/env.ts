@@ -1,4 +1,4 @@
-import { log } from '@lib/services/logger'
+import { log } from 'src/core/utils/logger'
 import { Type, type StaticDecode } from '@sinclair/typebox'
 import { Value } from '@sinclair/typebox/value'
 
@@ -11,6 +11,8 @@ const SpaceSeparatedChannels = Type.Transform(Type.String({ minLength: 1 }))
     .Encode((channels) => channels.join(','))
 
 const EnvSchema = Type.Object({
+    API_PORT: Type.Number({ default: 4000 }),
+    WEB_PORT: Type.Number({ default: 5000 }),
     TWITCH_CLIENT_ID: Type.String({ minLength: 1 }),
     TWITCH_CLIENT_SECRET: Type.String({ minLength: 1 }),
     TWITCH_BROADCASTER_ID: Type.String({ minLength: 1 }),

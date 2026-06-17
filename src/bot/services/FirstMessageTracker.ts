@@ -1,4 +1,4 @@
-import { log } from '@lib/services/logger'
+import { log } from 'src/core/utils/logger'
 
 export class FirstMessageTracker {
     private readonly seen = new Set<string>()

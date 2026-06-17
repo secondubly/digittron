@@ -1,6 +1,5 @@
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
 import { Migrator } from '@mikro-orm/migrations'
-import { SeedManager } from '@mikro-orm/seeder'
 import { defineConfig } from '@mikro-orm/sqlite'
 // import { config } from './config.js'
 
@@ -13,8 +12,8 @@ export default defineConfig({
     // check the documentation for their differences: https://mikro-orm.io/docs/metadata-providers
     metadataProvider: TsMorphMetadataProvider,
     // enable debug to log sql queries and discovery information
-    // debug: config.NODE_ENV === 'development' ? true : false,
-    extensions: [Migrator, SeedManager],
+    debug: process.env.NODE_ENV === 'development' ? true : false,
+    extensions: [Migrator],
     migrations: {
         tableName: 'digittron_migrations',
         path: './build/lib/db/migrations',

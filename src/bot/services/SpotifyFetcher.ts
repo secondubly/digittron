@@ -1,8 +1,7 @@
-// utils/SpotifyFetcher.ts
-import type { TokenStore } from '@lib/core/tokens/TokenStore'
-import { config } from 'src/config/env'
-import { log } from './logger'
-import type { OauthTokenRecord } from '@lib/core/tokens/types'
+import type { TokenStore } from 'src/core/tokens/TokenStore'
+import { config } from 'src/core/config/env'
+import { log } from '../../core/utils/logger'
+import type { OauthTokenRecord } from 'src/core/tokens/types'
 
 interface SpotifyFetcherOptions {
     tokenStore: TokenStore
@@ -116,8 +115,6 @@ export class SpotifyFetcher {
     async getPlaybackState<T>(): Promise<SpotifyResponse<T>> {
         return this.fetch<T>('https://api.spotify.com/v1/me/player')
     }
-
-    // ── Private helpers ────────────────────────────────────────────────────────
 
     private async getAccessToken(): Promise<string | null> {
         const token = await this.tokenStore.get(`spotify:${this.twitchId}`)
