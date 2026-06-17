@@ -1,23 +1,8 @@
-import { Bot } from 'src/bot/bot.js'
-import { registerShutdownHandlers } from './bot/utils.js'
-import { TokenStore } from './core/tokens/TokenStore.js'
-
 const URL_PATTERN =
     /(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z]{2,6}\b(?:[-a-zA-Z0-9@:%_+.~#?&/=]*)/gi
 // allow twitch or youtube links
 const WHITELIST_PATTERN =
     /(?:twitch\.tv|clips\.twitch\.tv|youtube\.com|youtu\.be)/i
-
-// TODO: move this into another file, it doesn't need to stay here
-export const init = async (
-    twitchChannels: string[],
-    tokenStore: TokenStore,
-) => {
-    const bot = new Bot(twitchChannels, tokenStore)
-    registerShutdownHandlers(bot)
-    bot.start()
-    return bot
-}
 
 export function containsLink(message: string) {
     return URL_PATTERN.test(message)
