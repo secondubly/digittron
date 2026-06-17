@@ -21,21 +21,19 @@ const IV_LENGTH = 12
 
 type ProviderEntity =
     | Pick<
-          User,
-          | 'access_token_encrypted'
-          | 'refresh_token_encrypted'
-          | 'expires_in'
-          | 'twitch_id'
-      >
+        User,
+        | 'access_token_encrypted'
+        | 'refresh_token_encrypted'
+        | 'expires_in'
+        | 'twitch_id'
+    >
     | Omit<OauthToken, 'updatedAt' | 'token_type' | 'updated_at'>
-
-type DeadlockKey = `deadlock:${string}`
 
 export class TokenStore {
     constructor(
         private readonly redis: RedisClientType,
         private readonly em: SqlEntityManager,
-    ) {}
+    ) { }
 
     async connect(): Promise<void> {
         await this.redis.connect()
