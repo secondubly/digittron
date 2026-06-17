@@ -1,4 +1,3 @@
-// entities/AudioAlert.ts
 import {
     Entity,
     PrimaryKey,
@@ -13,11 +12,9 @@ export class AudioAlert {
     @PrimaryKey()
     id!: number
 
-    // the broadcaster who owns this alert config
     @ManyToOne(() => User)
     owner!: Rel<User>
 
-    // the chatter this alert is for
     @Property()
     chatterId!: string
 
@@ -25,10 +22,10 @@ export class AudioAlert {
     chatterName!: string
 
     @Property({ columnType: 'text' })
-    audioUrl!: string // /uploads/audio/uuid.mp3
+    audioUrl!: string
 
     @Property({ columnType: 'text' })
-    filename!: string // original filename for display
+    filename!: string
 
     @Property()
     volume: number = 0.5
