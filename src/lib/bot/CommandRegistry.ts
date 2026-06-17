@@ -1,22 +1,23 @@
 import path from 'path'
 import fs from 'fs/promises'
 import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
-import type { Command, CommandContext } from './types.js'
+import type { Command, CommandContext, CommandDeps } from './types.js'
 import type { ApiClient } from '@twurple/api'
 import { log } from '@lib/services/logger.js'
 import { config } from 'src/config/env.js'
-import type { CommandDeps } from './types.js'
+
+type SayFn = (channel: string, message: string) => Promise<void>
 
 export class CommandRegistry {
     private readonly commands = new Map<string, Command>()
     // structure: Map<commandName, Map<username, Date>>
     // TODO: this should be a global cooldown, not per-user
     private readonly cooldowns = new Map<string, Map<string, number>>()
-    private readonly prefix: string
 
-    constructor(prefix = '!') {
-        this.prefix = prefix
-    }
+    constructor(
+        private readonly prefix: string = '!',
+        private readonly say: SayFn,
+    ) {}
 
     async loadCommands(dir: string, deps: CommandDeps): Promise<void> {
         const files = await fs.readdir(dir)
@@ -45,6 +46,7 @@ export class CommandRegistry {
                 }
 
                 this.register(command)
+                log.bot.debug(`Loaded command: !${command.name}`)
             }),
         )
     }
@@ -74,6 +76,9 @@ export class CommandRegistry {
 
         // mod-only check
         if (command.modOnly && !this.isMod(msg)) {
+            log.bot.warn(
+                `${msg.chatterName} tried to execute a mod-only command`,
+            )
             return
         }
 
@@ -89,6 +94,7 @@ export class CommandRegistry {
             msg: msg,
             args,
             rawMsg: text,
+            say: (message: string) => this.say(msg.broadcasterName, message),
         }
         await command.execute(ctx)
     }
