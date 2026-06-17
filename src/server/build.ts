@@ -17,6 +17,12 @@ export default async function bootstrap(
     await fastify.register(fastifyAutoload, {
         dir: path.join(import.meta.dirname, 'plugins/external'),
         options: { ...opts },
+        matchFilter: (pathToFile) => {
+            if (pathToFile.endsWith('bot.ts') && !fastify.withBot) {
+                return false
+            }
+            return true
+        },
     })
 
     fastify.register(fastifyAutoload, {
