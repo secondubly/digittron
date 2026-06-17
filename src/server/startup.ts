@@ -25,7 +25,7 @@ function getLoggerOptions() {
     return { level: process.env.LOG_LEVEL ?? 'silent' }
 }
 
-export async function init({ withBot = true }: ServerBuildOptions) {
+export async function init({ withBot = true }: ServerBuildOptions = {}) {
     const server = Fastify({
         logger: getLoggerOptions(),
         // these are recommended values based on best practices
