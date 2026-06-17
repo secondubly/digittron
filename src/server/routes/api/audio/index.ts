@@ -1,5 +1,18 @@
+import { AudioAlert } from '@lib/db/models/audio_alert.entity'
 import { log } from '@lib/services/logger'
 import type { FastifyPluginAsync } from 'fastify'
+import {
+    deleteFile,
+    getFile,
+    updateFile,
+    uploadFile,
+} from 'src/server/controllers/audio'
+import {
+    audioIdSchema,
+    audioOptionsSchema,
+    filenameSchema,
+    uploadFileSchema,
+} from 'src/server/schemas/audio_alerts'
 
 const plugin: FastifyPluginAsync = async (fastify) => {
     fastify.get(
@@ -39,6 +52,57 @@ const plugin: FastifyPluginAsync = async (fastify) => {
                 request.raw.on('close', resolve),
             )
         },
+    )
+
+    fastify.get('/alerts', async (req, reply) => {
+        if (!req.isAuthenticated()) return reply.code(401).send()
+
+        const alerts = await req.em.find(
+            AudioAlert,
+            { owner: { owner: req.user?.id } },
+            { orderBy: { chatterName: 'asc' } },
+        )
+
+        return { alerts }
+    })
+
+    fastify.post(
+        '/alerts',
+        {
+            schema: {
+                body: uploadFileSchema,
+            },
+        },
+        uploadFile,
+    )
+
+    fastify.patch(
+        'alerts/:id',
+        {
+            schema: {
+                params: audioIdSchema,
+                body: audioOptionsSchema,
+            },
+        },
+        updateFile,
+    )
+
+    fastify.delete(
+        '/alerts/:id',
+        {
+            schema: {
+                params: audioIdSchema,
+            },
+        },
+        deleteFile,
+    )
+
+    fastify.get(
+        '/alerts/:filename',
+        {
+            schema: filenameSchema,
+        },
+        getFile,
     )
 }
 
