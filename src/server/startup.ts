@@ -3,6 +3,10 @@ import fp from 'fastify-plugin'
 import closeWithGrace from 'close-with-grace'
 import bootstrap from './build'
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
+
+interface ServerBuildOptions {
+    withBot?: boolean
+}
 function getLoggerOptions() {
     if (process.stdout.isTTY || process.env.NODE_ENV === 'development') {
         return {
@@ -21,18 +25,20 @@ function getLoggerOptions() {
     return { level: process.env.LOG_LEVEL ?? 'silent' }
 }
 
-const server = Fastify({
-    logger: getLoggerOptions(),
-    // these are recommended values based on best practices
-    connectionTimeout: 120_000,
-    requestTimeout: 60_000,
-    keepAliveTimeout: 10_000,
-    http: {
-        headersTimeout: 15_000,
-    },
-}).withTypeProvider<TypeBoxTypeProvider>()
+export async function init({ withBot = true }: ServerBuildOptions) {
+    const server = Fastify({
+        logger: getLoggerOptions(),
+        // these are recommended values based on best practices
+        connectionTimeout: 120_000,
+        requestTimeout: 60_000,
+        keepAliveTimeout: 10_000,
+        http: {
+            headersTimeout: 15_000,
+        },
+    }).withTypeProvider<TypeBoxTypeProvider>()
 
-export async function init() {
+    // used to deteermine whether to load bot plugin or not
+    server.decorate('withBot', withBot)
     server.register(fp(bootstrap))
 
     closeWithGrace(
@@ -71,8 +77,4 @@ export async function init() {
     }
 
     return server
-}
-
-if (import.meta.main) {
-    init()
 }
