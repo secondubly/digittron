@@ -11,6 +11,7 @@ export interface EventDeps {
     bot: Bot
     apiClient: ApiClient
     firstMessageTracker: FirstMessageTracker
+    say: Bot['say']
 }
 
 export interface BotContext {
