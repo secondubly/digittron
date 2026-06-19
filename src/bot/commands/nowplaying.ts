@@ -4,7 +4,7 @@ import type { SpotifyFetcher } from '../services/SpotifyFetcher'
 import { parseCurrentlyPlaying } from '@core/utils/spotify/parseArtist'
 import { Value } from '@sinclair/typebox/value'
 // REVIEW: move this into shared folder?
-import { currentlyPlayingSchema } from '../../server/schemas/spotify'
+import { currentlyPlayingSchema } from '@server/schemas/spotify'
 
 export default ({ spotifyFetcher }: CommandDeps): Command => ({
     name: 'nowplaying',

@@ -252,7 +252,6 @@ export class TokenStore {
         const Entity = this.getEntity(provider)
         const userIdField = this.getUserIdField(provider)
 
-        // REVIEW: check if this works
         const row = await this.em.findOne(Entity as any, {
             [userIdField]: userId,
         })

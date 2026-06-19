@@ -44,7 +44,6 @@ if (!Value.Check(EnvSchema, withDefaults)) {
     const errors = [...Value.Errors(EnvSchema, withDefaults)]
 
     log.app.error('Invalid environment variables')
-    // REVIEW: check this
     errors.forEach(({ path, message }) =>
         log.app.error(`   ${path}: ${message}`),
     )
