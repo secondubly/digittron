@@ -2,12 +2,14 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    "rootDir": "./src",
+    "rootDir": "./",
     "outDir": "./build",
-    "baseUrl": ".",
     "paths": {
-      "@lib/*": ["src/lib/*"],
-      "@files/*": ["digittron-files/*"]
+      "@bot_services/*": ["./src/bot/services/*"],
+      "@core/*": ["./src/core/*"],
+      "@commands/*": ["./src/bot/commands/*"],
+      "@root/*": ["./*"],
+      "@server/*": ["./src/server/*"]
     },
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
@@ -25,7 +27,6 @@
       "node_modules/@types",
       "src/server/types"
     ],
-    // "types": ["node"],
 
     // Other Outputs
     "sourceMap": true,
@@ -37,14 +38,12 @@
     // Style Options
     "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
-    // "noImplicitReturns": true,
-    // "noImplicitOverride": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
 
     // Recommended Options
     "strict": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
@@ -52,7 +51,7 @@
     "skipLibCheck": true,
     "allowJs": true,
   },
-  "include": ["./src/**/*.ts", "src/config/scopes.ts"],
+  "include": ["./src/**/*.ts", "src/core/config/scopes.ts"],
   "ts-node": {
     "esm": true,
     "transpileOnly": true
