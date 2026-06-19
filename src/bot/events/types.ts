@@ -1,10 +1,10 @@
-import type { CommandRegistry } from '@lib/bot/CommandRegistry'
+import type { CommandRegistry } from '@bot_services/CommandRegistry'
 import type { ApiClient } from '@twurple/api'
 import type { ChatClient } from '@twurple/chat'
 import type { EventSubHttpListener } from '@twurple/eventsub-http'
 import type { EventSubWsListener } from '@twurple/eventsub-ws'
 import type { Bot } from '../bot'
-import type { FirstMessageTracker } from '@lib/bot/FirstMessageTracker'
+import type { FirstMessageTracker } from '@bot_services/FirstMessageTracker'
 
 export interface EventDeps {
     registry: CommandRegistry

@@ -1,10 +1,10 @@
 import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 import type { EventSubEvent, EventDeps } from '../types'
-import { containsLink, isWhitelistedLink } from '@lib/utils'
-import { log } from '@lib/services/logger'
-import { isPermitted } from 'src/bot/commands/permit'
+import { containsLink, isWhitelistedLink } from '@core/utils/url'
+import { log } from '@core/utils/logger'
+import { isPermitted } from '@commands/permit'
 import type { ApiClient } from '@twurple/api'
-import { config } from 'src/config/env'
+import { config } from '@core/config/env'
 
 const audioAlertUsers = new Set(['89181064', '537326154']) // remove 89181064 after testing
 

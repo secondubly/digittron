@@ -1,4 +1,4 @@
-import type { CommandContext, CommandDeps } from '@lib/bot/types'
+import type { CommandContext, CommandDeps } from '../types'
 
 const commands = ({ getCommands }: CommandDeps) => ({
     name: 'commands',

@@ -1,7 +1,7 @@
 import path from 'path'
 import fs from 'fs/promises'
 import type { BotEvent, BotContext } from '../events/types'
-import { log } from 'src/core/utils/logger'
+import { log } from '@core/utils/logger'
 
 export class EventRegistry {
     private readonly events: BotEvent[] = []

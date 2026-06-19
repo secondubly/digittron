@@ -1,7 +1,7 @@
-import type { TokenStore } from 'src/core/tokens/TokenStore'
-import { config } from 'src/core/config/env'
-import { log } from '../../core/utils/logger'
-import type { OauthTokenRecord } from 'src/core/tokens/types'
+import type { TokenStore } from '@core/tokens/TokenStore'
+import { config } from '@core/config/env'
+import { log } from '@core/utils/logger'
+import type { OauthTokenRecord } from '@core/tokens/types'
 
 interface SpotifyFetcherOptions {
     tokenStore: TokenStore

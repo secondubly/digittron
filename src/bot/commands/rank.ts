@@ -1,7 +1,7 @@
-import type { CommandContext, CommandDeps } from '@lib/bot/types'
-import type { TokenStore } from '@lib/core/tokens/TokenStore'
-import { log } from '@lib/services/logger'
-import { config } from 'src/config/env'
+import type { CommandContext, CommandDeps } from '../types'
+import type { TokenStore } from '@core/tokens/TokenStore'
+import { log } from '@core/utils/logger'
+import { config } from '@core/config/env'
 
 export interface MMRHistory {
     account_id: number

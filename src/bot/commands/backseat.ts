@@ -1,5 +1,4 @@
-import type { Command } from '@lib/bot/types.js'
-import { config } from 'src/config/env'
+import type { Command } from '../types.js'
 
 const backseat: Command = {
     name: 'backseat',

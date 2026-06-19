@@ -1,8 +1,8 @@
-import type { TokenStore } from 'src/core/tokens/TokenStore'
+import type { TokenStore } from '@core/tokens/TokenStore'
 import type { ApiClient } from '@twurple/api'
 import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
-import type { SpotifyFetcher } from 'src/bot/services/SpotifyFetcher'
-import type { Bot } from 'src/bot/bot'
+import type { SpotifyFetcher } from './services/SpotifyFetcher'
+import type { Bot } from './bot'
 
 export interface CommandDeps {
     tokenStore: TokenStore
@@ -27,4 +27,12 @@ export interface Command {
     cooldownMs?: number // per-user cooldown
     modOnly?: boolean
     execute(ctx: CommandContext): Promise<void>
+}
+
+export interface BotConfig {
+    broadcasterId: string
+    botId: string
+    channels: string[]
+    // if we're running the bot by itself, this should be true
+    isStandalone?: boolean
 }

@@ -1,6 +1,5 @@
-import type { Command, CommandContext } from '@lib/bot/types'
-import { log } from '@lib/services/logger'
-import { config } from 'src/config/env'
+import type { Command, CommandContext } from '../types'
+import { log } from '@core/utils/logger'
 
 const permitList = new Map<string, number>()
 const PERMIT_DURATION_MS = 60_999

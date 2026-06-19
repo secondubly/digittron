@@ -1,6 +1,6 @@
-import type { Command, CommandContext } from '@lib/bot/types.js'
-import { config } from 'src/config/env'
-import { isTrustedUser } from '../events/utils'
+import type { Command, CommandContext } from '../types.js'
+import { config } from '@core/config/env'
+import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 
 const SHOT_TIMEOUT_DURATION_SECONDS = 60
 export default (): Command => ({
@@ -34,3 +34,13 @@ export default (): Command => ({
         }
     },
 })
+
+export const isTrustedUser = (event: EventSubChannelChatMessageEvent) => {
+    const { chatterId, broadcasterId } = event
+
+    if (chatterId === broadcasterId) return true
+
+    return Object.keys(event.badges).some(
+        (b) => b === 'moderator' || b === 'subscriber',
+    )
+}

@@ -1,5 +1,4 @@
-import type { CommandContext } from '@lib/bot/types'
-import type { Command } from '@lib/bot/types.js'
+import type { CommandContext, Command } from '../types.js'
 
 const discord: Command = {
     name: 'discord',

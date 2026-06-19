@@ -1,4 +1,4 @@
-import { log } from '@lib/services/logger'
+import { log } from '@core/utils/logger'
 import type { ChatEvent } from '../types'
 
 export default {

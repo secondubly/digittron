@@ -1,6 +1,6 @@
-import { log } from '@lib/services/logger'
+import { log } from '@core/utils/logger'
 import type { ChatEvent } from '../types'
-import { config } from 'src/config/env'
+import { config } from '@core/config/env'
 
 const joinedChannels = new Set<string>()
 const expectedChannels = new Set<string>(

@@ -1,16 +1,17 @@
-import { TokenStore } from '@lib/core/tokens/TokenStore'
-import { log } from '@lib/services/logger'
+import { TokenStore } from '@core/tokens/TokenStore'
+import { log } from '@core/utils/logger'
 import { MikroORM } from '@mikro-orm/core'
 import type { SqlEntityManager, SqliteDriver } from '@mikro-orm/sqlite'
 import { createClient, type RedisClientType } from 'redis'
-import { Bot } from 'src/bot/bot'
-import { config } from 'src/config/env'
+import { Bot } from '../bot/bot'
+import { config } from '@core/config/env'
+import mikroOrmConfig from '@root/mikro-orm.config'
 
 export async function startBot(): Promise<Bot> {
     log.bot.info('Starting bot in standalone mode...')
 
     // ── 1. Database ───────────────────────────────────────────────────────────
-    const orm = await MikroORM.init<SqliteDriver>()
+    const orm = await MikroORM.init<SqliteDriver>(mikroOrmConfig)
     const em = orm.em.fork() as SqlEntityManager<SqliteDriver>
     log.bot.info('Database connected')
 

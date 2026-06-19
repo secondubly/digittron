@@ -1,5 +1,5 @@
-import type { Command, CommandContext } from '@lib/bot/types.js'
-import { log } from '@lib/services/logger.js'
+import type { Command, CommandContext } from '../types.js'
+import { log } from '@core/utils/logger.js'
 import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 
 const isMod = (msg: EventSubChannelChatMessageEvent): boolean => {

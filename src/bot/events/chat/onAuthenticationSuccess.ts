@@ -1,6 +1,6 @@
-import { log } from '@lib/services/logger'
+import { log } from '@core/utils/logger'
 import type { EventDeps, EventSubEvent } from '../types'
-import { config } from 'src/config/env'
+import { config } from '@core/config/env'
 
 let isFirstConnection = true
 

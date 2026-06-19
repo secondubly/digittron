@@ -1,7 +1,7 @@
-import { log } from '@lib/services/logger.js'
-import type { Command, CommandDeps } from '@lib/bot/types.js'
-import { config } from 'src/config/env'
-import type { TokenRecord } from '@lib/core/tokens/types'
+import { log } from '@core/utils/logger.js'
+import type { Command, CommandDeps } from '../types.js'
+import { config } from '@core/config/env'
+import type { TokenRecord } from '@core/tokens/types'
 
 export default ({ tokenStore }: CommandDeps): Command => ({
     name: 'details',

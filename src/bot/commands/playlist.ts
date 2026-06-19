@@ -1,4 +1,4 @@
-import type { Command, CommandContext } from '@lib/bot/types.js'
+import type { Command, CommandContext } from '../types.js'
 
 const playlist: Command = {
     name: 'playlist',

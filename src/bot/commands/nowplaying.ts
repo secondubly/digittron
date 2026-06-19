@@ -1,9 +1,10 @@
-import type { Command, CommandContext, CommandDeps } from '@lib/bot/types'
-import { log } from '@lib/services/logger'
-import type { SpotifyFetcher } from '@lib/services/spotify'
-import { parseCurrentlyPlaying } from '@lib/utils/spotify/parseArtist'
+import type { Command, CommandContext, CommandDeps } from '../types'
+import { log } from '@core/utils/logger'
+import type { SpotifyFetcher } from '../services/SpotifyFetcher'
+import { parseCurrentlyPlaying } from '@core/utils/spotify/parseArtist'
 import { Value } from '@sinclair/typebox/value'
-import { currentlyPlayingSchema } from 'src/server/schemas/spotify'
+// REVIEW: move this into shared folder?
+import { currentlyPlayingSchema } from '../../server/schemas/spotify'
 
 export default ({ spotifyFetcher }: CommandDeps): Command => ({
     name: 'nowplaying',

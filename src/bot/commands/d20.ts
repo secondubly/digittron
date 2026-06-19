@@ -1,5 +1,4 @@
-import type { Command, CommandContext } from '@lib/bot/types.js'
-import { config } from 'src/config/env'
+import type { Command, CommandContext } from '../types.js'
 
 const d20: Command = {
     name: 'd20',
