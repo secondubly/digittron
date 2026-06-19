@@ -26,7 +26,7 @@
             "request": "launch",
             "name": "Launch Program - Bot",
             "skipFiles": ["<node_internals>/**"],
-            "runtimeArgs": ["run", "bot"],
+            "runtimeArgs": ["run", "dev:bot"],
             "runtimeExecutable": "pnpm",
             "outputCapture": "std", // enables pino logging to appear in console
             "envFile": "${workspaceFolder}/.env"
@@ -49,7 +49,7 @@
             "request": "launch",
             "name": "Launch Program - Web",
             "skipFiles": ["<node_internals>/**"],
-            "runtimeArgs": ["run", "web:dev"],
+            "runtimeArgs": ["run", "dev:web"],
             "runtimeExecutable": "pnpm",
             "outputCapture": "std", // enables pino logging to appear in console
             "envFile": "${workspaceFolder}/.env"
@@ -61,7 +61,7 @@
             "skipFiles": ["<node_internals>/**"],
             "runtimeArgs": ["run", "test"],
             "runtimeExecutable": "pnpm",
-            "outputCapture": "std", // enables pino logging to appear in console
+            "outputCapture": "std",
             "envFile": "${workspaceFolder}/.env"
         }
     ]
