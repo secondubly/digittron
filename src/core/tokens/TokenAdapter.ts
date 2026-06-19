@@ -3,8 +3,8 @@
 import { RefreshingAuthProvider, type AccessToken } from '@twurple/auth'
 import { TokenStore } from './TokenStore'
 import type { TokenRecord, TokenKey } from './types'
-import { config } from 'src/core/config/env'
-import { log } from 'src/core/utils/logger'
+import { config } from '../config/env'
+import { log } from '../utils/logger'
 
 function toTokenRecord(userId: string, token: AccessToken): TokenRecord {
     return {
@@ -35,35 +35,28 @@ export async function createAuthProvider(
 ): Promise<RefreshingAuthProvider> {
     const provider = new RefreshingAuthProvider({ clientId, clientSecret })
 
-    const [broadcasterToken, botToken] = await Promise.all([
+    const [broadcasterToken, botToken] = (await Promise.all([
         store.get(`twitch:${config.TWITCH_BROADCASTER_ID}`),
         store.get(`twitch:${config.TWITCH_BOT_ID}`),
-    ])
+    ])) as TokenRecord[]
 
     provider.onRefresh(async (userId, token) => {
         const key: TokenKey = `twitch:${userId}`
 
-        if (userId === config.TWITCH_BOT_ID) {
-            await store.setBot(toTokenRecord(userId, token))
-        } else {
-            await store.set(key, toTokenRecord(userId, token))
-        }
+        await store.set(key, toTokenRecord(userId, token))
         log.bot.info(`Token refreshed and saved for ${key}`)
     })
 
-    // we honestly don't need these if checks, but keep them for testing purposes
-    if (broadcasterToken) {
-        // forcibly refresh token on bot startup
-        broadcasterToken.expiresIn = 0
-        await provider.addUserForToken(toAccessToken(broadcasterToken), [
-            'chat',
-        ])
-    }
+    broadcasterToken.expiresIn = 0
+    await provider.addUserForToken(
+        toAccessToken(broadcasterToken as TokenRecord),
+        ['chat'],
+    )
 
-    if (botToken) {
-        botToken.expiresIn = 0
-        await provider.addUserForToken(toAccessToken(botToken), ['chat'])
-    }
+    botToken.expiresIn = 0
+    await provider.addUserForToken(toAccessToken(botToken as TokenRecord), [
+        'chat',
+    ])
 
     return provider
 }

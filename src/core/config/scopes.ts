@@ -34,6 +34,8 @@ export const TWITCH_BOT_SCOPES = [
     'user:bot',
     'user:read:chat',
     'user:write:chat',
+    'chat:read',
+    'chat:edit',
 ] as const
 
 export const SPOTIFY_SCOPES = [

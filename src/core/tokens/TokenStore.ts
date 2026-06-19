@@ -7,13 +7,13 @@ import type {
     OauthTokenRecord,
 } from './types'
 import type { SqlEntityManager } from '@mikro-orm/sqlite'
-import { log } from 'src/core/utils/logger'
-import { User } from 'src/core/db/models/user.entity'
-import { OauthToken } from 'src/core/db/models/OauthToken.entity'
+import { log } from '../utils/logger'
+import { User } from '../db/models/user.entity'
+import { OauthToken } from '../db/models/OauthToken.entity'
 import crypto from 'crypto'
-import { config } from 'src/core/config/env'
-import { TWITCH_BOT_SCOPE_STRING } from 'src/core/config/scopes'
-import type { MMRHistory } from 'src/bot/commands/rank'
+import { config } from '../config/env'
+import { TWITCH_BOT_SCOPE_STRING } from '../config/scopes'
+import type { MMRHistory } from '@commands/rank'
 
 const TTL_BUFFER_S = 60
 const ALGORITHM = 'aes-256-gcm'
@@ -48,6 +48,7 @@ export class TokenStore {
         if (this.isTokenRecord(data)) {
             Promise.all([this.setDb(key, data), this.setCache(key, data)])
         } else {
+            // only used for deadlock tokens
             this.setCache(key, data)
         }
     }
@@ -218,7 +219,10 @@ export class TokenStore {
             [userIdField]: userId,
         })
 
-        if (existing instanceof OauthToken) {
+        if (
+            existing instanceof OauthToken &&
+            existing.provider_name === provider
+        ) {
             existing.access_token_encrypted = this.encryptToken(
                 token.accessToken,
             )
@@ -282,7 +286,6 @@ export class TokenStore {
 
     private createRecord(provider: TokenProvider, tokenRecord: TokenRecord) {
         if ('avatar' in tokenRecord) {
-            // this is a user record
             this.em.create(User, {
                 twitch_id: tokenRecord.twitchId,
                 username: tokenRecord.username,
@@ -298,7 +301,6 @@ export class TokenStore {
             })
         } else {
             this.em.create(OauthToken, {
-                id: Number(tokenRecord.userId),
                 user_id: config.TWITCH_BROADCASTER_ID,
                 access_token_encrypted: this.encryptToken(
                     tokenRecord.accessToken,

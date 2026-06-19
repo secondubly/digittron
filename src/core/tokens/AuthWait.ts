@@ -1,4 +1,4 @@
-import { log } from 'src/core/utils/logger'
+import { log } from '../utils/logger'
 import { EventEmitter } from 'events'
 
 export class AuthWaiter extends EventEmitter {

@@ -1,4 +1,4 @@
-import { log } from 'src/core/utils/logger'
+import { log } from '../utils/logger'
 import { Type, type StaticDecode } from '@sinclair/typebox'
 import { Value } from '@sinclair/typebox/value'
 

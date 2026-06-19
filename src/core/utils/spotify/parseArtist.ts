@@ -1,5 +1,5 @@
 import type { Static } from '@sinclair/typebox'
-import { trackSchema, currentlyPlayingSchema } from 'src/server/schemas/spotify'
+import { trackSchema, currentlyPlayingSchema } from '@server/schemas/spotify'
 
 type Track = Static<typeof trackSchema>
 type CurrentlyPlaying = Static<typeof currentlyPlayingSchema>
