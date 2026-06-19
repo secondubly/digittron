@@ -1,7 +1,7 @@
 import { init as buildServer } from './server/startup.js'
 import { init as webInit } from './web/index.js'
-import { log } from '@lib/services/logger.js'
-import { config } from './config/env.js'
+import { log } from '@core/utils/logger.js'
+import { config } from '@core/config/env.js'
 
 // server controls bot as well
 const main = async () => {
