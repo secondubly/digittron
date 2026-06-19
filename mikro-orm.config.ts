@@ -4,10 +4,10 @@ import { defineConfig } from '@mikro-orm/sqlite'
 // import { config } from './config.js'
 
 export default defineConfig({
-    dbName: './db/sqlite.db',
+    dbName: 'src/core/db/sqlite.db',
     // folder-based discovery setup, using common filename suffix
     entities: ['build/lib/db/models/*.entity.js'],
-    entitiesTs: ['src/lib/db/models/*.entity.ts'],
+    entitiesTs: ['src/core/db/models/*.entity.ts'],
     // we will use the ts-morph reflection, an alternative to the default reflect-metadata provider
     // check the documentation for their differences: https://mikro-orm.io/docs/metadata-providers
     metadataProvider: TsMorphMetadataProvider,
@@ -16,8 +16,8 @@ export default defineConfig({
     extensions: [Migrator],
     migrations: {
         tableName: 'digittron_migrations',
-        path: './build/lib/db/migrations',
-        pathTs: './src/lib/db/migrations',
+        path: './src/core/db/migrations',
+        pathTs: './src/core/db/migrations',
         glob: '*.{js,ts}',
     },
 })
