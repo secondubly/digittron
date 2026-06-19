@@ -9,16 +9,17 @@ import {
     type Profile as SpotifyProfile,
     type VerifyCallback,
 } from 'passport-spotify'
-import { config } from 'src/config/env'
-import { User } from '@lib/db/models/user.entity'
+import { config } from '@core/config/env'
+import { User } from '@core/db/models/user.entity'
 import type { FastifyRequest } from 'fastify'
-import type { TokenStore } from '@lib/core/tokens/TokenStore'
-import type { ThirdPartyTokenRecord } from '@lib/core/tokens/types'
+import type { TokenStore } from '@core/tokens/TokenStore'
+import type { ThirdPartyTokenRecord } from '@core/tokens/types'
 import {
+    SPOTIFY_SCOPE_STRING,
     SPOTIFY_SCOPES,
     TWITCH_BOT_SCOPE_STRING,
     TWITCH_BROADCASTER_SCOPE_STRING,
-} from 'src/config/scopes'
+} from '@core/config/scopes'
 
 export default fp(
     async (fastify) => {
@@ -68,35 +69,16 @@ export default fp(
                     ) => void,
                 ) => {
                     try {
-                        if (profile.id === config.TWITCH_BROADCASTER_ID) {
-                            profile._access_token = accessToken
-                            profile._refresh_token = refreshToken
-                            profile._expires_in = 14_400 // 4 hours in seconds
+                        profile._access_token = accessToken
+                        profile._refresh_token = refreshToken
+                        profile._expires_in = 14_400 // 4 hours in seconds
 
-                            // handle db updates here instead of the route
-                            await upsertUser(
-                                request,
-                                fastify.tokenStore,
-                                profile,
-                            )
-                        } else {
-                            // we're authenticating the bot, so all we need to do is save the token
-                            const botTokenRecord: ThirdPartyTokenRecord = {
-                                accessToken: accessToken,
-                                refreshToken: refreshToken,
-                                expiresIn: 14_400,
-                                obtainedAt: Date.now(),
-                                scope: TWITCH_BOT_SCOPE_STRING,
-                                userId: profile.id,
-                                provider: 'twitch',
-                            }
-                            await fastify.tokenStore.set(
-                                `twitch:${profile.id}`,
-                                botTokenRecord,
-                            )
-                        }
+                        // handle db updates here instead of the route
+                        await upsertUser(request, fastify.tokenStore, profile)
 
+                        // notify bot that a token has been set (so we can continue startup)
                         fastify.authWaiter.notify(`twitch:${profile.id}`)
+                        // only create login sessions for a non-bot account
                         if (profile.id === config.TWITCH_BROADCASTER_ID) {
                             done(null, {
                                 id: profile.id,
@@ -140,7 +122,7 @@ export default fp(
                                     refreshToken: refreshToken,
                                     expiresIn: expires_in, // 1 hour in seconds
                                     obtainedAt: Date.now(),
-                                    scope: SPOTIFY_SCOPES.join(' '),
+                                    scope: SPOTIFY_SCOPE_STRING,
                                     userId: profile.id,
                                     provider: 'spotify',
                                 } as ThirdPartyTokenRecord,
