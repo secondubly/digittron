@@ -1,11 +1,10 @@
-// types/fastify.d.ts
 import 'fastify'
 import { MikroORM } from '@mikro-orm/core'
 import { SqliteDriver, EntityManager } from '@mikro-orm/sqlite'
-import { TokenStore } from '@lib/core/tokens/TokenStore'
+import { TokenStore } from '@core/TokenStore'
 import type { RedisClientType } from 'redis'
 import type { TwitchProfile } from 'passport-twitch-new'
-import type { AuthWaiter } from '@lib/core/tokens/AuthWait'
+import type { AuthWaiter } from '@core/AuthWait'
 import type { Bot } from 'src/bot/bot'
 import type { CommandRegistry } from '@lib/bot/CommandRegistry'
 
