@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import fastifyPassport from '@fastify/passport'
-import { getTokenParamsSchema } from 'src/server/schemas/spotify'
-import { getToken } from 'src/server/controllers/spotify'
+import { getTokenParamsSchema } from '@server/schemas/spotify'
+import { getToken } from '@server/controllers/spotify'
 
 const plugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     fastify.get(

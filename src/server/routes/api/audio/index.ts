@@ -1,18 +1,18 @@
-import { AudioAlert } from '@lib/db/models/audio_alert.entity'
-import { log } from '@lib/services/logger'
+import { AudioAlert } from '@core/db/models/audio_alert.entity'
+import { log } from '@core/utils/logger'
 import type { FastifyPluginAsync } from 'fastify'
 import {
     deleteFile,
     getFile,
     updateFile,
     uploadFile,
-} from 'src/server/controllers/audio'
+} from '@server/controllers/audio'
 import {
     audioIdSchema,
     audioOptionsSchema,
     filenameSchema,
     uploadFileSchema,
-} from 'src/server/schemas/audio_alerts'
+} from '@server/schemas/audio_alerts'
 
 const plugin: FastifyPluginAsync = async (fastify) => {
     fastify.get(

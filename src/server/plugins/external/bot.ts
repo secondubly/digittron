@@ -1,7 +1,7 @@
 import fp from 'fastify-plugin'
 import type { FastifyInstance } from 'fastify'
-import { Bot } from 'src/bot/bot'
-import { config } from 'src/config/env'
+import { Bot } from '../../../bot/bot'
+import { config } from '@core/config/env'
 
 export default fp(
     async (server: FastifyInstance) => {

@@ -1,5 +1,5 @@
 // plugins/authWaiter.ts
-import { AuthWaiter } from '@lib/core/tokens/AuthWait'
+import { AuthWaiter } from '@core/tokens/AuthWait'
 import fp from 'fastify-plugin'
 
 export default fp(

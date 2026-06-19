@@ -2,7 +2,7 @@ import fp from 'fastify-plugin'
 import type { FastifyInstance } from 'fastify'
 import { MikroORM } from '@mikro-orm/core'
 import type { EntityManager } from '@mikro-orm/sqlite'
-import mikroOrmConfig from 'src/mikro-orm.config'
+import mikroOrmConfig from '@root/mikro-orm.config'
 
 export default fp(
     async (server: FastifyInstance) => {

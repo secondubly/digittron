@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
-import { config } from 'src/config/env'
+import { config } from '@core/config/env'
 
 const plugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
     fastify.get(

@@ -1,7 +1,7 @@
 import fp from 'fastify-plugin'
 import type { FastifyInstance } from 'fastify'
 import { createClient, type RedisClientType } from 'redis'
-import { TokenStore } from '@lib/core/tokens/TokenStore'
+import { TokenStore } from '@core/tokens/TokenStore'
 
 interface TokenStorePluginOptions {
     redisUrl: string
@@ -14,14 +14,16 @@ export default fp(
             socket: {
                 reconnectStrategy: (retries) => {
                     if (retries > 5) {
-                        console.error('Redis connection failed: Max retries reached.');
-                        throw new Error('Max retries reached'); // Stops reconnection attempts
+                        console.error(
+                            'Redis connection failed: Max retries reached.',
+                        )
+                        throw new Error('Max retries reached') // Stops reconnection attempts
                     }
 
                     // Explicitly wait 1000ms (1 second) between remaining attempts
-                    return 1000;
-                }
-            }
+                    return 1000
+                },
+            },
         }) as RedisClientType
 
         redis.on('error', (err) => fastify.log.error({ err }, 'Redis error'))

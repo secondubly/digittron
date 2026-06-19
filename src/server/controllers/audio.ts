@@ -1,11 +1,11 @@
-import { AudioAlert } from '@lib/db/models/audio_alert.entity'
+import { AudioAlert } from '@core/db/models/audio_alert.entity'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import path from 'node:path'
 import { createWriteStream } from 'fs'
 import { promises as fs } from 'fs'
 import type { audioId, audioOptions, filename } from '../schemas/audio_alerts'
 import { pipeline } from 'node:stream'
-import type { User } from '@lib/db/models/user.entity'
+import type { User } from '@core/db/models/user.entity'
 import type { TwitchProfile } from 'passport-twitch-new'
 
 const UPLOAD_DIR = path.join(import.meta.dirname, '../', 'uploads', 'audio')

@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
-import { log } from '@lib/services/logger.js'
+import { log } from '@core/utils/logger.js'
 import { type getTokenParams } from '../schemas/spotify.js'
 // import { config } from 'src/config.js'
 

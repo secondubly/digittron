@@ -1,6 +1,6 @@
 import fp from 'fastify-plugin'
 import fastifySession from '@fastify/session'
-import { config } from 'src/config/env'
+import { config } from '@core/config/env'
 import { RedisStore } from 'connect-redis'
 
 const SESSION_TTL_S = 7 * 24 * 60 * 60 // 7 days

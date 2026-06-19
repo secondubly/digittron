@@ -4,7 +4,7 @@ import type { TwitchProfile } from 'passport-twitch-new'
 import {
     TWITCH_BOT_SCOPE_STRING,
     TWITCH_BROADCASTER_SCOPE_STRING,
-} from 'src/config/scopes'
+} from '@core/config/scopes'
 
 const plugin: FastifyPluginAsync = async (fastify) => {
     fastify.get('/', async function (_req, reply) {
