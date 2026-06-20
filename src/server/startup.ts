@@ -27,6 +27,7 @@ function getLoggerOptions() {
 
 export async function init({ withBot = true }: ServerBuildOptions = {}) {
     const server = Fastify({
+        withBot,
         logger: getLoggerOptions(),
         // these are recommended values based on best practices
         connectionTimeout: 120_000,
