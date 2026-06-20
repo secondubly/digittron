@@ -17,12 +17,8 @@ export const UserButton = forwardRef<HTMLButtonElement, React.ComponentPropsWith
 
           <div style={{ flex: 1 }}>
             <Text size="sm" fw={500}>
-              {user?.displayName}
+              {user?.username}
             </Text>
-
-            {/* <Text c="dimmed" size="xs">
-              hiromihiguruma@outlook.jp
-            </Text> */}
           </div>
 
           <IconChevronRight size={14} stroke={1.5} />
