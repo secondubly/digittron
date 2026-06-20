@@ -8,7 +8,7 @@ const d20: Command = {
         const displayName = msg.chatterDisplayName
         const roll = Math.floor(Math.random() * 20 + 1)
         say(`${displayName} rolled a ${roll}${roll === 20 ? '! 🎉' : ''}`)
-        // TODO: track nat 20s and nat 1s
+        //  TODO: track nat 20s and nat 1s
     },
 }
 
