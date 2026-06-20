@@ -5,10 +5,10 @@ import {
     ManyToOne,
 } from '@mikro-orm/decorators/legacy'
 import type { Rel } from '@mikro-orm/core'
-import { User } from './user.entity'
+import { BaseEntity, User } from './user.entity'
 
 @Entity()
-export class AudioAlert {
+export class AudioAlert extends BaseEntity {
     @PrimaryKey()
     id!: number
 
@@ -32,10 +32,4 @@ export class AudioAlert {
 
     @Property()
     enabled: boolean = true
-
-    @Property()
-    createdAt: Date = new Date()
-
-    @Property({ onUpdate: () => new Date() })
-    updatedAt: Date = new Date()
 }
