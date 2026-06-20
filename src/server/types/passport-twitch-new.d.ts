@@ -11,9 +11,6 @@ declare module 'passport-twitch-new' {
         forceVerify: boolean
     }
 
-    /**
-     * Twitch-specific profile returned after a successful OAuth flow.
-     */
     export interface TwitchProfile extends PassportProfile {
         id: string
         login: string
@@ -89,59 +86,3 @@ declare module 'passport-twitch-new' {
         ): void | Promise<void>
     }
 }
-
-// declare module 'passport-twitch-new' {
-//     import {
-//         Strategy as OAuth2Strategy,
-//         VerifyFunction,
-//         _StrategyOptionsBase,
-//     } from '@fastify/passport'
-//     import { FastifyRequest } from 'fastify'
-
-//     export interface TwitchProfile {
-//         id: string
-//         login: string
-//         display_name: string
-//         type: string
-//         broadcaster_type: string
-//         description: string
-//         profile_image_url: string
-//         offline_image_url: string
-//         view_count: number
-//         email?: string
-//         provider: 'twitch'
-//         _access_token: string
-//         _raw: string
-//         _json: any
-//     }
-
-//     export interface TwitchStrategyOptions extends _StrategyOptionsBase {
-//         clientID: string
-//         clientSecret: string
-//         callbackURL: string
-//         scope?: string | string[]
-//         forceVerify?: boolean
-//     }
-
-//     export interface StrategyOptionsWithRequest extends StrategyOptions {
-//         passReqToCallback: true
-//     }
-
-//     export type TwitchVerifyFunction = (
-//         req: Fastif,
-//         accessToken: string,
-//         refreshToken: string,
-//         profile: TwitchProfile,
-//         done: (error: Error | null | unknown, user?: Fastify.User) => void,
-//     ) => void
-
-//     export class Strategy extends OAuth2Strategy {
-//         constructor(options: StrategyOptions, verify: VerifyFunction)
-//         constructor(
-//             options: StrategyOptionsWithRequest,
-//             verify: TwitchVerifyFunction,
-//         )
-
-//         authenticate(req: Request, options?: TwitchStrategyOptions): void
-//     }
-// }
