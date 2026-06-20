@@ -2,7 +2,7 @@ import { init as buildServer } from './startup'
 
 async function main() {
     // disable bot by overriding NODE_ENV check in buildApp
-    const app = await buildServer({ withBot: false })
+    const app = await buildServer({ withBot: true })
 
     await app.listen({
         port: (process.env.API_PORT as unknown as number) ?? 4001,
