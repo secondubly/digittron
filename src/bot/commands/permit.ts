@@ -20,9 +20,8 @@ export default (): Command => ({
     aliases: ['allow'],
     description: 'Allow a user to post a link',
     modOnly: true,
-    async execute({ client, msg, args, say }: CommandContext) {
+    async execute({ client, args, say }: CommandContext) {
         const target = args[0]?.replace('@', '').toLocaleLowerCase()
-        const { broadcasterId } = msg
         if (!target) {
             say(`Invalid command! Usage: !permit @username`)
             return

@@ -4,8 +4,10 @@ const discord: Command = {
     name: 'discord',
     aliases: [],
     description: 'the stream discord url',
-    async execute({ msg, say }: CommandContext) {
-        say(`join the discord here: ${process.env.DISCORD_URL}`)
+    async execute({ say }: CommandContext) {
+        say(
+            `join the discord here: ${process.env.DISCORD_URL ?? 'http://discord.gg/6EtUH9X'}`,
+        )
     },
 }
 
