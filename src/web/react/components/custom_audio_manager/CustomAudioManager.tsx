@@ -1,8 +1,8 @@
-import { useState }               from 'react';
 import { Stack, TextInput, Text,
          Button, Group, Paper,
          ActionIcon, Slider,
          FileButton, Badge }      from '@mantine/core';
+import { useForm } from '@mantine/form';
 import { IconTrash,
          IconUpload,
          IconPlayerPlay }         from '@tabler/icons-react';
@@ -13,18 +13,29 @@ interface CustomAudioManagerProps {
 }
 
 export function CustomAudioManager({ customAudio }: CustomAudioManagerProps) {
-  const [chatterId,   setChatterId]   = useState('');
-  const [chatterName, setChatterName] = useState('');
-  const [audioUrl,    setAudioUrl]    = useState('');
+  const form = useForm({
+    mode: 'uncontrolled',
+    initialValues: {
+      chatterId: '',
+      chatterName: '',
+      audioUrl: '',
+      audioFile: null as File | null
+    },
+    validate: {
+      audioFile: (value) => (value === null ? 'Audio file is required' : null),
+    }
+  })
 
   const handleFileUpload = (file: File | null) => {
     if (!file) return;
     // create object URL for local file
     const url = URL.createObjectURL(file);
-    setAudioUrl(url);
+    form.setFieldValue('audioUrl', url);
+    form.setFieldValue('audioFile', file)
   };
 
-  const handleAdd = () => {
+  const handleAdd = async (values: typeof form.values) => {
+    const { chatterId, audioUrl, chatterName, audioFile } = values
     if (!chatterId || !audioUrl) return;
 
     customAudio.addEntry({
@@ -33,9 +44,38 @@ export function CustomAudioManager({ customAudio }: CustomAudioManagerProps) {
       audioUrl,
     });
 
-    setChatterId('');
-    setChatterName('');
-    setAudioUrl('');
+    const formData = new FormData()
+    formData.append('chatterId', chatterId)
+    formData.append('chatterName', chatterName)
+    
+    if (audioFile) {
+      formData.append('audioUrl', audioUrl)
+      formData.append('audioFile', audioFile, audioFile.name)
+    }
+
+    try {
+      const res = await fetch('http://localhost:4000/api/audio/alerts', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      })
+
+      if (!res.ok) {
+        const text = await res.text()
+        console.error('Upload failed', text)
+        return
+      }
+
+      const contentType = res.headers.get('content-type');
+      if (contentType?.includes('application/json')) {
+          const data = await res.text();
+          console.log("Response object", res)
+          console.log('raw response: ', data);
+      }
+    } catch (err) {
+      console.log(err)
+      console.log('Error', err)
+    }
   };
 
   return (
@@ -43,53 +83,54 @@ export function CustomAudioManager({ customAudio }: CustomAudioManagerProps) {
       <Stack gap="md">
 
         <Text fw={600} c="white">Custom Entry Sounds</Text>
-
-        {/* Add new entry */}
-        <Stack gap="xs">
-          <TextInput
-            placeholder="Twitch user ID"
-            label="Chatter ID"
-            value={chatterId}
-            onChange={e => setChatterId(e.currentTarget.value)}
-            ff="monospace"
-          />
-          <TextInput
-            placeholder="Display name (optional)"
-            label="Chatter Name"
-            value={chatterName}
-            onChange={e => setChatterName(e.currentTarget.value)}
-          />
-          <TextInput
-            placeholder="https://... or upload below"
-            label="Audio URL"
-            value={audioUrl}
-            onChange={e => setAudioUrl(e.currentTarget.value)}
-            ff="monospace"
-          />
-          <Group>
-            <FileButton onChange={handleFileUpload} accept="audio/*">
-              {(props) => (
-                <Button
-                  {...props}
-                  variant="outline"
-                  color="violet"
-                  leftSection={<IconUpload size={14} />}
-                  size="xs"
-                >
-                  Upload file
-                </Button>
-              )}
-            </FileButton>
-            <Button
-              color="violet"
-              size="xs"
-              onClick={handleAdd}
-              disabled={!chatterId || !audioUrl}
-            >
-              Add
-            </Button>
-          </Group>
-        </Stack>
+        
+        <form onSubmit={form.onSubmit(handleAdd)}>
+          <Stack gap="xs">
+            <TextInput
+              placeholder="Twitch user ID"
+              label="Chatter ID"
+              ff="monospace"
+              key={form.key('chatterId')}
+              {...form.getInputProps('chatterId')}
+            />
+            <TextInput
+              placeholder="Display name (optional)"
+              label="Chatter Name"
+              key={form.key('chatterName')}
+              {...form.getInputProps('chatterName')}
+            />
+            <TextInput
+              placeholder="https://... or upload below"
+              label="Audio URL"
+              ff="monospace"
+              key={form.key('audioUrl')}
+              {...form.getInputProps('audioUrl')}
+            />
+            <Group>
+              <FileButton onChange={handleFileUpload} accept="audio/*">
+                {(props) => (
+                  <Button
+                    {...props}
+                    variant="outline"
+                    color="violet"
+                    leftSection={<IconUpload size={14} />}
+                    size="xs"
+                  >
+                    Upload file
+                  </Button>
+                )}
+              </FileButton>
+              <Button
+                type='submit'
+                color="violet"
+                size="xs"
+                disabled={!form.values.chatterId || !form.values.audioUrl}
+              >
+                Add
+              </Button>
+            </Group>
+          </Stack>
+        </form>
 
         {/* Entry list */}
         {[...customAudio.entries.values()].map(entry => (
