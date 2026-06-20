@@ -27,23 +27,25 @@ export default fp(
         await fastify.register(fastifyPassport.secureSession())
 
         // what gets stored in the session
-        fastifyPassport.registerUserSerializer(async (user: TwitchProfile) => {
-            return user.id
+        fastifyPassport.registerUserSerializer(async (user: User) => {
+            return user.twitch_id
         })
 
         // what gets loaded from the session on each request
         fastifyPassport.registerUserDeserializer(async (id: number, req) => {
-            const user = await req.em.findOne(User, {
-                twitch_id: id.toString(),
-            })
+            const user = await req.em.findOne(
+                User,
+                {
+                    twitch_id: id.toString(),
+                },
+                {
+                    fields: ['twitch_id', 'username', 'avatar'],
+                },
+            )
             if (!user) {
                 return
             } else {
-                return {
-                    id: user.twitch_id,
-                    displayName: user.username,
-                    profile_image_url: user.avatar,
-                }
+                return user
             }
         })
 
@@ -80,11 +82,11 @@ export default fp(
                         fastify.authWaiter.notify(`twitch:${profile.id}`)
                         // only create login sessions for a non-bot account
                         if (profile.id === config.TWITCH_BROADCASTER_ID) {
-                            done(null, {
-                                id: profile.id,
-                                displayName: profile.login,
-                                avatarUrl: profile.profile_image_url,
-                            })
+                            const user = (await request.em.findOne(User, {
+                                twitch_id: profile.id,
+                            })) as User
+                            // object that is passed to registerUserSerializer
+                            done(null, user)
                         } else {
                             done(null)
                         }
