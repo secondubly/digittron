@@ -1,6 +1,5 @@
 import type { FastifyPluginAsync } from 'fastify'
 import fastifyPassport from '@fastify/passport'
-import type { TwitchProfile } from 'passport-twitch-new'
 import {
     TWITCH_BOT_SCOPE_STRING,
     TWITCH_BROADCASTER_SCOPE_STRING,
@@ -47,17 +46,17 @@ const plugin: FastifyPluginAsync = async (fastify) => {
     )
 
     fastify.get('/me', async function (req, reply) {
-        if (!req.isAuthenticated()) {
+        if (!req.user || !req.isAuthenticated()) {
             return reply.code(401).send({ user: null })
         }
 
-        const user = req.user as TwitchProfile
+        const user = req.user
 
         return {
             user: {
-                id: user.id,
-                displayName: user.displayName,
-                avatar: user.profile_image_url,
+                id: user.twitch_id,
+                username: user.username,
+                avatar: user.avatar,
             },
         }
     })
