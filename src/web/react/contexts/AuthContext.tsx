@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 
 export interface User {
     id: number
-    displayName: string
+    username: string
     avatar: string
 }
 
@@ -32,6 +32,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         fetch(`http://localhost:4000/api/auth/me`, { credentials: 'include' })
             .then((r) => r.json())
             .then(({ user }) => {
+                console.log('user response: ', user)
                 setUser(user ?? null)
             })
             .catch(() => setUser(null))
