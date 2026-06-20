@@ -5,61 +5,76 @@ import { createWriteStream } from 'fs'
 import { promises as fs } from 'fs'
 import type { audioId, audioOptions, filename } from '../schemas/audio_alerts'
 import { pipeline } from 'node:stream'
-import type { User } from '@core/db/models/user.entity'
-import type { TwitchProfile } from 'passport-twitch-new'
+import type { MultipartValue } from '@fastify/multipart'
+import { promisify } from 'node:util'
+import { User } from '@core/db/models/user.entity'
 
 const UPLOAD_DIR = path.join(import.meta.dirname, '../', 'uploads', 'audio')
 
-export function uploadFile() {
-    return async (req: FastifyRequest, reply: FastifyReply) => {
-        if (!req.isAuthenticated()) return reply.code(401).send()
+export async function uploadFile(req: FastifyRequest, reply: FastifyReply) {
+    if (!req.isAuthenticated()) return reply.code(401).send()
 
-        const data = await req.file()
+    const data = await req.file()
 
-        if (!data) {
-            return reply.code(400).send({ error: 'file data is required' })
-        }
-        const chatterId = data.fields.chatterId as unknown as string
-        const chatterName = data.fields.chatterName as unknown as string
-        const volume = data.fields.volume as unknown as string
-
-        if (!chatterId) {
-            return reply.code(400).send({ error: 'chatterId is required' })
-        }
-
-        // check if alert already exists for this chatter
-        const existing = await req.em.findOne(AudioAlert, {
-            owner: { id: (req.user as TwitchProfile).id },
-            chatterId,
-        })
-
-        // delete old file if replacing
-        if (existing) {
-            const oldPath = path.join(process.cwd(), existing.audioUrl)
-            await fs.unlink(oldPath).catch(() => {})
-            await req.em.remove(existing).flush()
-        }
-
-        // save new file
-        const ext = path.extname(data.filename)
-        const filename = `${crypto.randomUUID()}${ext}`
-        const filePath = path.join(UPLOAD_DIR, filename)
-
-        await pipeline(data.file, () => createWriteStream(filePath))
-
-        const alert = req.em.create(AudioAlert, {
-            owner: req.user as User,
-            chatterId,
-            chatterName: chatterName || chatterId,
-            audioUrl: `/uploads/audio/${filename}`,
-            filename: data.filename,
-            volume: volume ? parseFloat(volume) : 0.5,
-        })
-
-        await req.em.flush()
-
-        return reply.code(201).send({ alert })
+    if (!data) {
+        return reply.code(400).send({ error: 'file data is required' })
     }
+
+    const chatterId = (data.fields.chatterId as MultipartValue<string>).value
+    const chatterName = (data.fields.chatterName as MultipartValue<string>)
+        .value
+
+    let volume: string
+    if (!data.fields.volume) {
+        volume = '0.5'
+    } else {
+        volume = (data.fields.volume as MultipartValue<string>).value
+    }
+
+    if (!chatterId) {
+        return reply.code(400).send({ error: 'chatterId is required' })
+    }
+
+    // check if alert already exists for this chatter
+    const existing = await req.em.findOne(AudioAlert, {
+        owner: { twitch_id: req.user!.twitch_id },
+        chatterId,
+    })
+
+    // delete old file if replacing
+    if (existing) {
+        const oldPath = path.join(process.cwd(), existing.audioUrl)
+        await fs.unlink(oldPath).catch(() => {})
+        await req.em.remove(existing).flush()
+    }
+
+    // save new file
+    const ext = path.extname(data.filename)
+    const filename = `${crypto.randomUUID()}${ext}`
+    const filePath = path.join(UPLOAD_DIR, filename)
+
+    /**
+     * Manually promisify pipeline because newer versions of pipeline expect a function as the final param,
+     */
+    await promisify(pipeline)(data.file, createWriteStream(filePath))
+
+    const owner = await req.em.findOneOrFail(User, {
+        twitch_id: req.user!.twitch_id,
+    })
+
+    const alert = req.em.create(AudioAlert, {
+        owner,
+        chatterId,
+        chatterName: chatterName || chatterId,
+        audioUrl: `/uploads/audio/${filename}`,
+        filename: data.filename,
+        volume: volume ? parseFloat(volume) : 0.5,
+        enabled: true,
+    })
+
+    await req.em.flush()
+
+    return reply.code(201).send({ alert })
 }
 
 export function updateFile() {
@@ -76,7 +91,7 @@ export function updateFile() {
 
             const alert = await req.em.findOne(AudioAlert, {
                 id: Number(id),
-                owner: { id: (req.user as TwitchProfile).id },
+                owner: { twitch_id: req.user!.twitch_id },
             })
 
             if (!alert) return reply.code(404).send({ error: 'Not found' })
@@ -101,7 +116,7 @@ export function deleteFile() {
 
         const alert = await req.em.findOne(AudioAlert, {
             id: Number(req.params.id),
-            owner: { id: (req.user as TwitchProfile).id },
+            owner: { twitch_id: req.user!.twitch_id },
         })
 
         if (!alert) return reply.code(404).send({ error: 'Not found' })

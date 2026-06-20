@@ -11,7 +11,6 @@ import {
     audioIdSchema,
     audioOptionsSchema,
     filenameSchema,
-    uploadFileSchema,
 } from '@server/schemas/audio_alerts'
 
 const plugin: FastifyPluginAsync = async (fastify) => {
@@ -22,8 +21,12 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         },
         async (request, reply) => {
             reply.raw.writeHead(200, {
+                'Access-Control-Allow-Credentials': 'true', // TODO: remove before release
                 'Content-Type': 'text/event-stream',
                 'Cache-Control': 'no-cache',
+                // TODO:L remove before release
+                'Access-Control-Allow-Origin':
+                    request.headers.origin ?? 'http://localhost:5000',
                 Connection: 'keep-alive',
                 'X-Accel-Buffering': 'no', // disable nginx buffering
             })
@@ -41,6 +44,7 @@ const plugin: FastifyPluginAsync = async (fastify) => {
             }
 
             // attach event listener
+            if (!fastify.bot) return
             fastify.bot.on('firstMessage', (data) => send('firstMessage', data))
 
             request.raw.on('close', () => {
@@ -51,6 +55,8 @@ const plugin: FastifyPluginAsync = async (fastify) => {
             await new Promise<void>((resolve) =>
                 request.raw.on('close', resolve),
             )
+
+            return reply
         },
     )
 
@@ -59,7 +65,7 @@ const plugin: FastifyPluginAsync = async (fastify) => {
 
         const alerts = await req.em.find(
             AudioAlert,
-            { owner: { owner: req.user?.id } },
+            { owner: { twitch_id: req.user!.id } },
             { orderBy: { chatterName: 'asc' } },
         )
 
@@ -69,8 +75,9 @@ const plugin: FastifyPluginAsync = async (fastify) => {
     fastify.post(
         '/alerts',
         {
+            bodyLimit: 26_214_400, // ~25 MB in bytes
             schema: {
-                body: uploadFileSchema,
+                body: { type: 'null' }, // tells Fastify not to validate the body
             },
         },
         uploadFile,
