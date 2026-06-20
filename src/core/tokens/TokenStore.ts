@@ -12,7 +12,6 @@ import { User } from '../db/models/user.entity'
 import { OauthToken } from '../db/models/OauthToken.entity'
 import crypto from 'crypto'
 import { config } from '../config/env'
-import { TWITCH_BOT_SCOPE_STRING } from '../config/scopes'
 import type { MMRHistory } from '@commands/rank'
 
 const TTL_BUFFER_S = 60
@@ -33,7 +32,12 @@ export class TokenStore {
     constructor(
         private readonly redis: RedisClientType,
         private readonly em: SqlEntityManager,
-    ) {}
+    ) {
+        if (em.global) {
+            // if we were passed a global entity manager, we need to fork it
+            this.em = em.fork()
+        }
+    }
 
     async connect(): Promise<void> {
         await this.redis.connect()
@@ -53,11 +57,6 @@ export class TokenStore {
         }
     }
 
-    async setBot(token: TokenRecord): Promise<void> {
-        const key: TokenKey = `twitch:${config.TWITCH_BOT_ID}`
-        Promise.all([this.setBotDB(key, token), this.setCache(key, token)])
-    }
-
     public async get(key: TokenKey): Promise<TokenRecord | MMRHistory | null> {
         if (key.includes('deadlock')) {
             const cached = await this.redis.get(key)
@@ -71,15 +70,7 @@ export class TokenStore {
                 log.app.error({ err }, 'Redis get token error')
             }
 
-            const { userId } = this.parseKey(key)
-            let record: TokenRecord | null
-            if (userId === config.TWITCH_BOT_ID) {
-                // twitch bot key retrieval operates a little differet
-                record = await this.getTwitchBot(key)
-            } else {
-                record = await this.getDb(key)
-            }
-
+            const record = await this.getDb(key)
             if (!record) return null
 
             await this.setCache(key, record)
@@ -89,62 +80,6 @@ export class TokenStore {
 
     async delete(key: TokenKey) {
         await Promise.all([this.deleteDb(key), this.redis.del(key)])
-    }
-
-    private async getTwitchBot(key: TokenKey): Promise<TokenRecord | null> {
-        const { userId } = this.parseKey(key)
-        const row = await this.em.findOne(OauthToken, { id: Number(userId) })
-
-        if (!row) return null
-
-        if (!row.refresh_token_encrypted)
-            throw Error('Bot token is missing refresh token - re-auth required')
-
-        const botTokenRecord = {
-            accessToken: this.decryptToken(row.access_token_encrypted),
-            refreshToken: this.decryptToken(row.refresh_token_encrypted),
-            expiresIn: row.expires_in ?? 0,
-            obtainedAt: new Date(row.created_at).getTime(),
-            scope: TWITCH_BOT_SCOPE_STRING,
-            provider: 'twitch',
-            userId: userId,
-        } as ThirdPartyTokenRecord
-
-        return botTokenRecord
-    }
-
-    private async setBotDB(key: TokenKey, token: TokenRecord): Promise<void> {
-        const typedToken = token as OauthTokenRecord
-        const { userId } = this.parseKey(key)
-        let row: OauthToken | null = null
-        row = await this.em.findOne(OauthToken, { id: Number(userId) })
-
-        if (!row) {
-            this.em.create(OauthToken, {
-                id: Number(userId),
-                access_token_encrypted: this.encryptToken(
-                    typedToken.accessToken,
-                ),
-                refresh_token_encrypted: this.encryptToken(
-                    typedToken.refreshToken,
-                ),
-                provider_name: 'twitch',
-                token_type: null,
-                expires_in: typedToken.expiresIn,
-            })
-        } else {
-            row.access_token_encrypted = this.encryptToken(
-                typedToken.accessToken,
-            )
-            row.refresh_token_encrypted = this.encryptToken(
-                typedToken.refreshToken,
-            )
-            row.created_at = new Date(typedToken.obtainedAt)
-            row.expires_in = typedToken.expiresIn
-        }
-
-        await this.em.flush()
-        return
     }
 
     private encryptToken(token: string) {
