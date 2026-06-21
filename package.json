@@ -12,18 +12,20 @@
     ]
   },
   "scripts": {
-    "build": "vite build && tsc -p tsconfig.json && tsc-alias",
+    "build": "pnpm clean && vite build && tsc -p tsconfig.json && tsc-alias && pnpm make:dirs",
     "build:web": "vite build",
+    "clean": "rm -rf build",
     "dev": "tsx watch --env-file=.env src/main.ts",
     "dev:bot": "tsx watch --env-file=.env src/bot/main.ts",
     "dev:server": "tsx watch --env-file=.env src/server/main.ts",
     "dev:web": "concurrently -c magenta,#7700cf -n API,WEB \"pnpm:dev:server\" \"vite\"",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
+    "make:dirs": "pnpm exec mkdir -p build/server/public/assets build/server/uploads/audio",
     "mikro-orm": "mikro-orm",
     "seed": "mikro-orm-esm seeder:run",
     "test": "node --import tsx --test \"./tests/**/*.test.ts\"",
-    "start": "node build/main.js",
+    "start": "node --env-file=.env build/main.js",
     "web": "vite"
   },
   "keywords": [],
