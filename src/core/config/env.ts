@@ -31,10 +31,9 @@ const EnvSchema = Type.Object({
   NGROK_AUTH_TOKEN: Type.Optional(Type.String({ minLength: 1 })),
   EVENT_SUB_SECRET: Type.Optional(Type.String({ minLength: 1 })),
   CLIENT_URL: Type.Optional(Type.String()),
-  NODE_ENV: Type.Union(
-    [Type.Literal('development'), Type.Literal('production')],
-    { default: 'development' },
-  ),
+  NODE_ENV: Type.Union([Type.Literal('development'), Type.Literal('production')], {
+    default: 'development',
+  }),
 })
 
 type Env = StaticDecode<typeof EnvSchema>

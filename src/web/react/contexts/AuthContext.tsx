@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = async () => {
-    await fetch(`${API}/api/auth/logout`, {
+    await fetch(`/api/auth/logout`, {
       method: 'DELETE',
       credentials: 'include',
     })
