@@ -1,17 +1,9 @@
 import { AudioAlert } from '@core/db/models/audio_alert.entity'
 import { log } from '@core/utils/logger'
 import type { FastifyPluginAsync } from 'fastify'
-import {
-  deleteFile,
-  getFile,
-  updateFile,
-  uploadFile,
-} from '@server/controllers/audio'
-import {
-  audioIdSchema,
-  audioOptionsSchema,
-  filenameSchema,
-} from '@server/schemas/audio_alerts'
+import { deleteFile, getFile, updateFile, uploadFile } from '@server/controllers/audio'
+import { audioIdSchema, audioOptionsSchema, filenameSchema } from '@server/schemas/audio_alerts'
+import type { FirstMessageEvent } from '@root/src/bot/types'
 
 const plugin: FastifyPluginAsync = async (fastify) => {
   fastify.get(
@@ -25,8 +17,7 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         'Content-Type': 'text/event-stream',
         'Cache-Control': 'no-cache',
         // TODO:L remove before release
-        'Access-Control-Allow-Origin':
-          request.headers.origin ?? 'http://localhost:5000',
+        'Access-Control-Allow-Origin': request.headers.origin ?? 'http://localhost:5000',
         Connection: 'keep-alive',
         'X-Accel-Buffering': 'no', // disable nginx buffering
       })
@@ -43,7 +34,8 @@ const plugin: FastifyPluginAsync = async (fastify) => {
 
       // attach event listener
       if (!fastify.bot) return
-      fastify.bot.on('firstMessage', (data) => send('firstMessage', data))
+      // REVIEW: check this
+      fastify.bot.on('firstMessage', (data: FirstMessageEvent) => send('firstMessage', data))
 
       request.raw.on('close', () => {
         clearInterval(keepAlive)

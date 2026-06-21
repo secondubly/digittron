@@ -5,15 +5,11 @@ import { log } from '@core/utils/logger'
 import { isPermitted } from '@commands/permit'
 import type { ApiClient } from '@twurple/api'
 import { config } from '@core/config/env'
+import type { FirstMessageEvent } from '../../types'
 
 const audioAlertUsers = new Set(['89181064', '537326154']) // remove 89181064 after testing
 
-export default ({
-  registry,
-  apiClient,
-  bot,
-  say,
-}: EventDeps): EventSubEvent => ({
+export default ({ registry, apiClient, bot, say }: EventDeps): EventSubEvent => ({
   type: 'eventsub',
   name: 'onChatMessage',
   register({ eventSub, broadcasterId, botUserId, firstMessageTracker }) {
@@ -32,7 +28,7 @@ export default ({
             chatterName: chatterDisplayName,
             message: messageText,
             timestamp: new Date().toISOString(),
-          })
+          } as FirstMessageEvent)
         }
       }
 
@@ -75,8 +71,5 @@ async function moderate(
 
   log.bot.info(`Timed out ${chatterDisplayName} for posting a link.`)
 
-  say(
-    config.TWITCH_BROADCASTER_ID,
-    `@${chatterDisplayName} please don’t post links in chat!`,
-  )
+  say(config.TWITCH_BROADCASTER_ID, `@${chatterDisplayName} please don’t post links in chat!`)
 }

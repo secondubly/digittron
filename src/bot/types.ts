@@ -36,3 +36,10 @@ export interface BotConfig {
   // if we're running the bot by itself, this should be true
   isStandalone?: boolean
 }
+
+export interface FirstMessageEvent {
+  chatterId: string
+  chatterName: string
+  message: string
+  timestamp: string // a date in ISO format
+}
