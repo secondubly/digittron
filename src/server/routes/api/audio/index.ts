@@ -61,11 +61,11 @@ const plugin: FastifyPluginAsync = async (fastify) => {
     )
 
     fastify.get('/alerts', async (req, reply) => {
-        if (!req.isAuthenticated()) return reply.code(401).send()
+        if (!req.user || !req.isAuthenticated()) return reply.code(401).send()
 
         const alerts = await req.em.find(
             AudioAlert,
-            { owner: { twitch_id: req.user!.id } },
+            { owner: { twitch_id: req.user.twitch_id } },
             { orderBy: { chatterName: 'asc' } },
         )
 
