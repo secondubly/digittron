@@ -51,7 +51,7 @@
     "skipLibCheck": true,
     "allowJs": true,
   },
-  "include": ["./src/**/*.ts", "src/core/config/scopes.ts"],
+  "include": ["./src/**/*.ts", "src/core/config/scopes.ts", "vite-env.d.ts"],
   "ts-node": {
     "esm": true,
     "transpileOnly": true
