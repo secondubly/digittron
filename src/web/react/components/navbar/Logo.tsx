@@ -21,5 +21,5 @@ export function Logo(props: React.ComponentPropsWithoutRef<'svg'>) {
         />
       </g>
     </svg>
-  );
+  )
 }

@@ -5,11 +5,11 @@ import type { FastifyRegisterOptions } from 'fastify'
 
 const dirPath = path.join(import.meta.dirname, '../../', 'uploads', 'audio')
 const staticOpts: FastifyRegisterOptions<FastifyStaticOptions> = {
-    root: dirPath,
-    prefix: '/uploads/audio',
-    decorateReply: false,
+  root: dirPath,
+  prefix: '/uploads/audio',
+  decorateReply: false,
 }
 
 export default fp(async (fastify) => {
-    fastify.register(fastifyStatic, staticOpts)
+  fastify.register(fastifyStatic, staticOpts)
 })

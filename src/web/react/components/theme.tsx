@@ -1,10 +1,15 @@
-import { createTheme, type MantineColorsTuple, type MantineThemeOverride, type CSSVariablesResolver } from '@mantine/core';
- 
+import {
+  createTheme,
+  type MantineColorsTuple,
+  type MantineThemeOverride,
+  type CSSVariablesResolver,
+} from '@mantine/core'
+
 // ─── Color palettes ───────────────────────────────────────────────────────────
 // Mantine requires a 10-stop tuple per color key.
 // The seed was #964f00 (split-complementary scheme).
 // Stops are approximated from the light/dark token pair for each role.
- 
+
 const primaryColors: MantineColorsTuple = [
   '#FFF3E8', // 0 – lightest tint
   '#FFE0C2',
@@ -16,8 +21,8 @@ const primaryColors: MantineColorsTuple = [
   '#A04510',
   '#863309',
   '#6B2303', // 9 – deepest shade
-];
- 
+]
+
 const secondaryColors: MantineColorsTuple = [
   '#E6F8FB',
   '#BFF0F6',
@@ -29,8 +34,8 @@ const secondaryColors: MantineColorsTuple = [
   '#107A8C',
   '#085768',
   '#003544',
-];
- 
+]
+
 const accentColors: MantineColorsTuple = [
   '#F5EEFF',
   '#E6D5FF',
@@ -42,8 +47,8 @@ const accentColors: MantineColorsTuple = [
   '#4A2DA8',
   '#361E8C',
   '#221070',
-];
- 
+]
+
 const successColors: MantineColorsTuple = [
   '#E6FAF5',
   '#BFF2E8',
@@ -55,8 +60,8 @@ const successColors: MantineColorsTuple = [
   '#136B5A',
   '#09483C',
   '#002820',
-];
- 
+]
+
 const errorColors: MantineColorsTuple = [
   '#FFF0EE',
   '#FFD5CF',
@@ -68,8 +73,8 @@ const errorColors: MantineColorsTuple = [
   '#B81610',
   '#8E0A09',
   '#5A0000',
-];
- 
+]
+
 const warningColors: MantineColorsTuple = [
   '#FFF5E6',
   '#FFE3BE',
@@ -81,44 +86,44 @@ const warningColors: MantineColorsTuple = [
   '#BB5408',
   '#953E03',
   '#5E2500',
-];
- 
+]
+
 // ─── CSS variable overrides for light / dark modes ────────────────────────────
 // These map the design-token semantics onto Mantine's CSS variable layer so
 // that both the component system and your own code can consume them.
- 
+
 const lightCssVariables = {
-  '--mantine-color-body':          '#F3F6F0',
-  '--mantine-color-default-bg':    '#ECEFE9',
-  '--mantine-color-text':          '#000000',
-  '--mantine-color-dimmed':        '#42443F',
-  '--mantine-color-border':        '#DFE2DC',
-  '--mantine-color-ring':          '#E47412',
+  '--mantine-color-body': '#F3F6F0',
+  '--mantine-color-default-bg': '#ECEFE9',
+  '--mantine-color-text': '#000000',
+  '--mantine-color-dimmed': '#42443F',
+  '--mantine-color-border': '#DFE2DC',
+  '--mantine-color-ring': '#E47412',
   // Semantic foreground tokens exposed as CSS variables for custom use
-  '--color-text-on-color':         '#FFFFFF',
-  '--color-primary-fg':            '#FFFFFF',
-  '--color-secondary-fg':          '#002027',
-  '--color-accent-fg':             '#FBEBFF',
-  '--color-good-fg':               '#001D15',
-  '--color-warn-fg':               '#300F00',
-  '--color-bad-fg':                '#FFFFFF',
-} as Record<string, string>;
- 
+  '--color-text-on-color': '#FFFFFF',
+  '--color-primary-fg': '#FFFFFF',
+  '--color-secondary-fg': '#002027',
+  '--color-accent-fg': '#FBEBFF',
+  '--color-good-fg': '#001D15',
+  '--color-warn-fg': '#300F00',
+  '--color-bad-fg': '#FFFFFF',
+} as Record<string, string>
+
 const darkCssVariables = {
-  '--mantine-color-body':          '#686A66',
-  '--mantine-color-default-bg':    '#60625D',
-  '--mantine-color-text':          '#F6F9F2',
-  '--mantine-color-dimmed':        '#CFD1CC',
-  '--mantine-color-border':        '#71736E',
-  '--mantine-color-ring':          '#D2936F',
-  '--color-text-on-color':         '#310F00',
-  '--color-primary-fg':            '#310F00',
-  '--color-secondary-fg':          '#002127',
-  '--color-accent-fg':             '#240331',
-  '--color-good-fg':               '#00231B',
-  '--color-warn-fg':               '#2E1100',
-  '--color-bad-fg':                '#3A0000',
-} as Record<string, string>;
+  '--mantine-color-body': '#686A66',
+  '--mantine-color-default-bg': '#60625D',
+  '--mantine-color-text': '#F6F9F2',
+  '--mantine-color-dimmed': '#CFD1CC',
+  '--mantine-color-border': '#71736E',
+  '--mantine-color-ring': '#D2936F',
+  '--color-text-on-color': '#310F00',
+  '--color-primary-fg': '#310F00',
+  '--color-secondary-fg': '#002127',
+  '--color-accent-fg': '#240331',
+  '--color-good-fg': '#00231B',
+  '--color-warn-fg': '#2E1100',
+  '--color-bad-fg': '#3A0000',
+} as Record<string, string>
 
 const darkColors: MantineColorsTuple = [
   '#F2F3F0', // [0] lightest tint
@@ -131,7 +136,7 @@ const darkColors: MantineColorsTuple = [
   '#565853', // [7]
   '#434640', // [8]
   '#2E302B', // [9] deepest shade
-];
+]
 
 // const lightColors: MantineColorsTuple = [
 //   '#FFFFFF', // [0] lightest tint
@@ -145,29 +150,28 @@ const darkColors: MantineColorsTuple = [
 //   '#5E6359', // [8]
 //   '#363B32', // [9] deepest shade
 // ];
- 
+
 // ─── Theme ────────────────────────────────────────────────────────────────────
- 
 
 export const resolver: CSSVariablesResolver = (_theme) => ({
-  variables:      {},          // shared (scheme-agnostic)
-  light:          lightCssVariables,
-  dark:           darkCssVariables,
+  variables: {}, // shared (scheme-agnostic)
+  light: lightCssVariables,
+  dark: darkCssVariables,
 })
 
 const theme: MantineThemeOverride = createTheme({
   /** Colour palette */
   colors: {
-    primary:   primaryColors,
+    primary: primaryColors,
     secondary: secondaryColors,
-    accent:    accentColors,
-    success:   successColors,
-    error:     errorColors,
-    warning:   warningColors,
+    accent: accentColors,
+    success: successColors,
+    error: errorColors,
+    warning: warningColors,
     dark: darkColors,
-    orange: primaryColors
+    orange: primaryColors,
   },
- 
+
   /** Active roles */
   primaryColor: 'orange',
   primaryShade: { light: 6, dark: 3 },
@@ -189,8 +193,8 @@ const theme: MantineThemeOverride = createTheme({
     },
     Paper: {
       defaultProps: {
-        bg: "light-dark(#ECEFE9,#60625D)"
-      }
+        bg: 'light-dark(#ECEFE9,#60625D)',
+      },
     },
   },
   fontFamily: 'Rubik',
@@ -202,34 +206,34 @@ const theme: MantineThemeOverride = createTheme({
       h1: {
         fontSize: 'calc(2.125rem * var(--mantine-scale))',
         lineHeight: '1.3',
-        fontWeight: '300'
+        fontWeight: '300',
       },
       h2: {
         fontSize: 'calc(1.625rem * var(--mantine-scale))',
         lineHeight: '1.35',
-        fontWeight: '300'
+        fontWeight: '300',
       },
       h3: {
         fontSize: 'calc(1.375rem * var(--mantine-scale))',
         lineHeight: '1.4',
-        fontWeight: '300'
+        fontWeight: '300',
       },
       h4: {
         fontSize: 'calc(1.125rem * var(--mantine-scale))',
         lineHeight: '1.45',
-        fontWeight: '500'
+        fontWeight: '500',
       },
       h5: {
         fontSize: 'calc(1rem * var(--mantine-scale))',
         lineHeight: '1.5',
-        fontWeight: '400'
+        fontWeight: '400',
       },
       h6: {
         fontSize: 'calc(0.875rem * var(--mantine-scale))',
         lineHeight: '1.5',
-        fontWeight: '400'
-      }
-    }
+        fontWeight: '400',
+      },
+    },
   },
   scale: 1,
   radius: {
@@ -237,14 +241,14 @@ const theme: MantineThemeOverride = createTheme({
     sm: 'calc(0.25rem * var(--mantine-scale))',
     md: 'calc(0.5rem * var(--mantine-scale))',
     lg: 'calc(1rem * var(--mantine-scale))',
-    xl: 'calc(2rem * var(--mantine-scale))'
+    xl: 'calc(2rem * var(--mantine-scale))',
   },
   spacing: {
     xs: 'calc(0.625rem * var(--mantine-scale))',
     sm: 'calc(0.75rem * var(--mantine-scale))',
     md: 'calc(1rem * var(--mantine-scale))',
     lg: 'calc(1.25rem * var(--mantine-scale))',
-    xl: 'calc(2rem * var(--mantine-scale))'
+    xl: 'calc(2rem * var(--mantine-scale))',
   },
   defaultRadius: 'md',
   breakpoints: {
@@ -252,9 +256,9 @@ const theme: MantineThemeOverride = createTheme({
     sm: '48em',
     md: '62em',
     lg: '75em',
-    xl: '88em'
+    xl: '88em',
   },
-});
+})
 
 export default theme
 

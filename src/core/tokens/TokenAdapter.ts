@@ -7,56 +7,56 @@ import { config } from '../config/env'
 import { log } from '../utils/logger'
 
 function toTokenRecord(userId: string, token: AccessToken): TokenRecord {
-    return {
-        accessToken: token.accessToken,
-        refreshToken: token.refreshToken!,
-        expiresIn: token.expiresIn ?? 0,
-        obtainedAt: token.obtainmentTimestamp,
-        scope: token.scope.join(' '),
-        provider: 'twitch',
-        userId,
-    }
+  return {
+    accessToken: token.accessToken,
+    refreshToken: token.refreshToken!,
+    expiresIn: token.expiresIn ?? 0,
+    obtainedAt: token.obtainmentTimestamp,
+    scope: token.scope.join(' '),
+    provider: 'twitch',
+    userId,
+  }
 }
 
 function toAccessToken(record: TokenRecord): AccessToken {
-    return {
-        accessToken: record.accessToken,
-        refreshToken: record.refreshToken ?? null,
-        expiresIn: record.expiresIn,
-        obtainmentTimestamp: record.obtainedAt,
-        scope: record.scope.split(' '),
-    }
+  return {
+    accessToken: record.accessToken,
+    refreshToken: record.refreshToken ?? null,
+    expiresIn: record.expiresIn,
+    obtainmentTimestamp: record.obtainedAt,
+    scope: record.scope.split(' '),
+  }
 }
 
 export async function createAuthProvider(
-    clientId: string,
-    clientSecret: string,
-    store: TokenStore,
+  clientId: string,
+  clientSecret: string,
+  store: TokenStore,
 ): Promise<RefreshingAuthProvider> {
-    const provider = new RefreshingAuthProvider({ clientId, clientSecret })
+  const provider = new RefreshingAuthProvider({ clientId, clientSecret })
 
-    const [broadcasterToken, botToken] = (await Promise.all([
-        store.get(`twitch:${config.TWITCH_BROADCASTER_ID}`),
-        store.get(`twitch:${config.TWITCH_BOT_ID}`),
-    ])) as TokenRecord[]
+  const [broadcasterToken, botToken] = (await Promise.all([
+    store.get(`twitch:${config.TWITCH_BROADCASTER_ID}`),
+    store.get(`twitch:${config.TWITCH_BOT_ID}`),
+  ])) as TokenRecord[]
 
-    provider.onRefresh(async (userId, token) => {
-        const key: TokenKey = `twitch:${userId}`
+  provider.onRefresh(async (userId, token) => {
+    const key: TokenKey = `twitch:${userId}`
 
-        await store.set(key, toTokenRecord(userId, token))
-        log.bot.info(`Token refreshed and saved for ${key}`)
-    })
+    await store.set(key, toTokenRecord(userId, token))
+    log.bot.info(`Token refreshed and saved for ${key}`)
+  })
 
-    broadcasterToken.expiresIn = 0
-    await provider.addUserForToken(
-        toAccessToken(broadcasterToken as TokenRecord),
-        ['chat'],
-    )
+  broadcasterToken.expiresIn = 0
+  await provider.addUserForToken(
+    toAccessToken(broadcasterToken as TokenRecord),
+    ['chat'],
+  )
 
-    botToken.expiresIn = 0
-    await provider.addUserForToken(toAccessToken(botToken as TokenRecord), [
-        'chat',
-    ])
+  botToken.expiresIn = 0
+  await provider.addUserForToken(toAccessToken(botToken as TokenRecord), [
+    'chat',
+  ])
 
-    return provider
+  return provider
 }

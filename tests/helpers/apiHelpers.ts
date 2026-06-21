@@ -5,30 +5,30 @@ import fp from 'fastify-plugin'
 import { TestContext } from 'node:test'
 
 declare module 'fastify' {
-    interface FastifyInstance {
-        authenticate: preHandlerAsyncHookHandler
-        orm: MikroORM
-    }
+  interface FastifyInstance {
+    authenticate: preHandlerAsyncHookHandler
+    orm: MikroORM
+  }
 }
 
 export function config() {
-    return {
-        skipOverride: true,
-    }
+  return {
+    skipOverride: true,
+  }
 }
 
 export async function build(t?: TestContext) {
-    const server = Fastify()
-    server.register(fp(bootstrap), config())
+  const server = Fastify()
+  server.register(fp(bootstrap), config())
 
-    await server.ready()
+  await server.ready()
 
-    if (t) {
-        t.after(() => {
-            server.orm.close()
-            server.close()
-        })
-    }
+  if (t) {
+    t.after(() => {
+      server.orm.close()
+      server.close()
+    })
+  }
 
-    return server
+  return server
 }

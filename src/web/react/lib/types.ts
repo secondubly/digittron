@@ -1,12 +1,12 @@
 export interface GiveawayFormValues {
-    giveawayType: string
-    participants?: string[]
-    keyword?: string
-    minRange?: number
-    maxRange?: number
+  giveawayType: string
+  participants?: string[]
+  keyword?: string
+  minRange?: number
+  maxRange?: number
 }
 
 export interface ParticipantCheckbox {
-    label: string
-    value: string
+  label: string
+  value: string
 }

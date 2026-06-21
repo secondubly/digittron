@@ -1,21 +1,21 @@
 .card {
-    background: var(--mantine-color-dark-8);
-    border: 1px solid rgba(145, 70, 255, 0.2);
-    box-shadow:
-        0 0 0 1px rgba(145, 70, 255, 0.08),
-        0 24px 64px rgba(0, 0, 0, 0.6);
-    width: 360px;
+  background: var(--mantine-color-dark-8);
+  border: 1px solid rgba(145, 70, 255, 0.2);
+  box-shadow:
+    0 0 0 1px rgba(145, 70, 255, 0.08),
+    0 24px 64px rgba(0, 0, 0, 0.6);
+  width: 360px;
 }
 
 .button {
-    background: #9146ff;
-    box-shadow: 0 4px 20px rgba(145, 70, 255, 0.4);
-    transition:
-        transform 0.15s ease,
-        box-shadow 0.15s ease;
+  background: #9146ff;
+  box-shadow: 0 4px 20px rgba(145, 70, 255, 0.4);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(145, 70, 255, 0.55);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(145, 70, 255, 0.55);
 }

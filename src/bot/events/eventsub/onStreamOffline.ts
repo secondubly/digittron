@@ -2,16 +2,16 @@ import { log } from '@core/utils/logger'
 import type { BotContext, EventDeps } from '../types'
 
 export default ({ bot, firstMessageTracker }: EventDeps) => ({
-    type: 'eventsub',
-    name: 'onStreamOffline',
-    register({ eventSub, broadcasterId }: BotContext) {
-        eventSub.onStreamOffline(broadcasterId, (event) => {
-            log.bot.debug(
-                `Stream offline, stopping services for ${event.broadcasterId}`,
-            )
+  type: 'eventsub',
+  name: 'onStreamOffline',
+  register({ eventSub, broadcasterId }: BotContext) {
+    eventSub.onStreamOffline(broadcasterId, (event) => {
+      log.bot.debug(
+        `Stream offline, stopping services for ${event.broadcasterId}`,
+      )
 
-            firstMessageTracker.setOffline()
-            bot.stopAdPoller()
-        })
-    },
+      firstMessageTracker.setOffline()
+      bot.stopAdPoller()
+    })
+  },
 })

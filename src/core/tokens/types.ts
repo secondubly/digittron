@@ -2,26 +2,26 @@ export type TokenProvider = 'twitch' | 'spotify'
 
 // matches what you get from Spotify, along with extra Twitch fields
 export interface ThirdPartyTokenRecord {
-    accessToken: string
-    refreshToken?: string
-    expiresIn: number
-    obtainedAt: number
-    scope: string
-    userId: string
-    provider: TokenProvider
+  accessToken: string
+  refreshToken?: string
+  expiresIn: number
+  obtainedAt: number
+  scope: string
+  userId: string
+  provider: TokenProvider
 }
 
 // used for logging into dashboard
 export interface OauthTokenRecord {
-    twitchId: string
-    username: string
-    avatar: string
-    accessToken: string
-    refreshToken: string
-    expiresIn: number
-    obtainedAt: number
-    scope: string
-    provider: 'twitch'
+  twitchId: string
+  username: string
+  avatar: string
+  accessToken: string
+  refreshToken: string
+  expiresIn: number
+  obtainedAt: number
+  scope: string
+  provider: 'twitch'
 }
 /**
  * Token Keys:

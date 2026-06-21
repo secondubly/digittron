@@ -7,31 +7,31 @@ import type { Bot } from '../bot'
 import type { FirstMessageTracker } from '@bot_services/FirstMessageTracker'
 
 export interface EventDeps {
-    registry: CommandRegistry
-    bot: Bot
-    apiClient: ApiClient
-    firstMessageTracker: FirstMessageTracker
-    say: Bot['say']
+  registry: CommandRegistry
+  bot: Bot
+  apiClient: ApiClient
+  firstMessageTracker: FirstMessageTracker
+  say: Bot['say']
 }
 
 export interface BotContext {
-    chatClient: ChatClient
-    eventSub: EventSubWsListener | EventSubHttpListener
-    broadcasterId: string
-    botUserId: string
-    firstMessageTracker: FirstMessageTracker
+  chatClient: ChatClient
+  eventSub: EventSubWsListener | EventSubHttpListener
+  broadcasterId: string
+  botUserId: string
+  firstMessageTracker: FirstMessageTracker
 }
 
 export interface ChatEvent {
-    type: 'chat'
-    name: string
-    register: (ctx: BotContext) => void
+  type: 'chat'
+  name: string
+  register: (ctx: BotContext) => void
 }
 
 export interface EventSubEvent {
-    type: 'eventsub'
-    name: string
-    register: (ctx: BotContext) => void
+  type: 'eventsub'
+  name: string
+  register: (ctx: BotContext) => void
 }
 
 export type BotEvent = ChatEvent | EventSubEvent

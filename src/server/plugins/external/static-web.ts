@@ -5,10 +5,10 @@ import type { FastifyRegisterOptions } from 'fastify'
 
 const dirPath = path.join(import.meta.dirname, '../../../../', 'build', 'web')
 const staticOpts: FastifyRegisterOptions<FastifyStaticOptions> = {
-    root: dirPath,
-    prefix: '/',
+  root: dirPath,
+  prefix: '/',
 }
 
 export default fp(async (fastify) => {
-    fastify.register(fastifyStatic, staticOpts)
+  fastify.register(fastifyStatic, staticOpts)
 })

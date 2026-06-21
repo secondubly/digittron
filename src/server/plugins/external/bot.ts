@@ -3,24 +3,24 @@ import { Bot } from '../../../bot/bot'
 import { config } from '@core/config/env'
 
 export default fp(
-    async (server) => {
-        // tokenStore already exists on app — registered by tokenStore plugin
-        const bot = new Bot(config.TWITCH_CHANNELS, server.tokenStore)
+  async (server) => {
+    // tokenStore already exists on app — registered by tokenStore plugin
+    const bot = new Bot(config.TWITCH_CHANNELS, server.tokenStore)
 
-        if (server) server.decorate('bot', bot)
-        // REVIEW: do we need this?
-        server.decorate('registry', bot.commandRegistry)
+    if (server) server.decorate('bot', bot)
+    // REVIEW: do we need this?
+    server.decorate('registry', bot.commandRegistry)
 
-        server.addHook('onReady', async () => {
-            bot.start().catch((err) => {
-                server.log.error({ err }, 'Bot failed to start')
-            })
-        })
+    server.addHook('onReady', async () => {
+      bot.start().catch((err) => {
+        server.log.error({ err }, 'Bot failed to start')
+      })
+    })
 
-        server.addHook('onClose', async () => bot.stop())
-    },
-    {
-        name: 'bot',
-        dependencies: ['tokenStore'],
-    },
+    server.addHook('onClose', async () => bot.stop())
+  },
+  {
+    name: 'bot',
+    dependencies: ['tokenStore'],
+  },
 )

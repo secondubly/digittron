@@ -5,19 +5,19 @@ import type { EntityManager } from '@mikro-orm/sqlite'
 import mikroOrmConfig from '@root/mikro-orm.config'
 
 export default fp(
-    async (server: FastifyInstance) => {
-        const orm = await MikroORM.init(mikroOrmConfig)
+  async (server: FastifyInstance) => {
+    const orm = await MikroORM.init(mikroOrmConfig)
 
-        server.decorate('orm', orm)
-        server.decorate('db', orm.em)
+    server.decorate('orm', orm)
+    server.decorate('db', orm.em)
 
-        server.addHook('onRequest', async (req) => {
-            req.em = orm.em.fork() as EntityManager
-        })
+    server.addHook('onRequest', async (req) => {
+      req.em = orm.em.fork() as EntityManager
+    })
 
-        server.addHook('onClose', async () => {
-            await orm.close()
-        })
-    },
-    { name: 'db' },
+    server.addHook('onClose', async () => {
+      await orm.close()
+    })
+  },
+  { name: 'db' },
 )

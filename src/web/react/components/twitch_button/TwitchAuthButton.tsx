@@ -1,34 +1,36 @@
 // components/TwitchAuthButton.tsx
-import { Button, Text, Badge, Stack,
-         Group, Paper, Divider, 
-         Skeleton}    from '@mantine/core';
-import { IconBrandTwitch } from '@tabler/icons-react';
-import classes from './TwitchAuthButton.module.css';
-import {useScopes} from '../../hooks/useScopes'
+import {
+  Button,
+  Text,
+  Badge,
+  Stack,
+  Group,
+  Paper,
+  Divider,
+  Skeleton,
+} from '@mantine/core'
+import { IconBrandTwitch } from '@tabler/icons-react'
+import classes from './TwitchAuthButton.module.css'
+import { useScopes } from '../../hooks/useScopes'
 
 interface TwitchAuthButtonProps {
-    redirect: () => void
+  redirect: () => void
 }
 
-export function TwitchAuthButton({
-    redirect
-}: TwitchAuthButtonProps) {
-  const { scopes, loading } = useScopes();
-  const scopeList = scopes?.twitch['bot'] ?? [];
+export function TwitchAuthButton({ redirect }: TwitchAuthButtonProps) {
+  const { scopes, loading } = useScopes()
+  const scopeList = scopes?.twitch['bot'] ?? []
 
   return (
-    <Paper
-      p="xl"
-      radius="lg"
-      className={classes.card}
-    >
+    <Paper p="xl" radius="lg" className={classes.card}>
       <Stack align="center" gap="lg">
-
         {/* Header */}
         <Stack align="center" gap={6}>
           <Group gap={8}>
             <IconBrandTwitch size={26} color="var(--mantine-color-violet-5)" />
-            <Text fw={800} size="xl">Twitch</Text>
+            <Text fw={800} size="xl">
+              Twitch
+            </Text>
           </Group>
           <Text size="xs" c="dimmed" tt="uppercase" ff="monospace">
             Connect your account
@@ -40,7 +42,7 @@ export function TwitchAuthButton({
             ? Array.from({ length: 4 }).map((_, i) => (
                 <Skeleton key={i} height={20} width={100} radius="sm" />
               ))
-            : scopeList.map(scope => (
+            : scopeList.map((scope) => (
                 <Badge
                   key={scope}
                   variant="light"
@@ -50,8 +52,7 @@ export function TwitchAuthButton({
                 >
                   {scope}
                 </Badge>
-              ))
-          }
+              ))}
         </Group>
 
         <Divider w="100%" color="dark.5" />
@@ -67,7 +68,7 @@ export function TwitchAuthButton({
           className={classes.button}
           onClick={redirect}
         >
-        Connect Bot Account
+          Connect Bot Account
         </Button>
 
         {/* Footer */}
@@ -77,8 +78,7 @@ export function TwitchAuthButton({
             Terms of Service
           </Text>
         </Text>
-
       </Stack>
     </Paper>
-  );
+  )
 }

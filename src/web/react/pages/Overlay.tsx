@@ -38,28 +38,31 @@
 //   );
 // }
 
-import { useCallback }    from 'react';
-import { useSSE }         from '../hooks/useSSE';
-import { useCustomAudio } from '../hooks/useCustomAudio';
+import { useCallback } from 'react'
+import { useSSE } from '../hooks/useSSE'
+import { useCustomAudio } from '../hooks/useCustomAudio'
 
 interface FirstMessageEvent {
-  chatterId:   string;
-  chatterName: string;
-  message:     string;
-  timestamp:   string;
+  chatterId: string
+  chatterName: string
+  message: string
+  timestamp: string
 }
 
 export function OverlayPage() {
-  const { playForChatter } = useCustomAudio('/audio/first-message.mp3');
+  const { playForChatter } = useCustomAudio('/audio/first-message.mp3')
 
   useSSE({
     handlers: {
-      firstMessage: useCallback(async (event: FirstMessageEvent) => {
-        await playForChatter(event.chatterId);
-      }, [playForChatter]),
+      firstMessage: useCallback(
+        async (event: FirstMessageEvent) => {
+          await playForChatter(event.chatterId)
+        },
+        [playForChatter],
+      ),
     },
-  });
+  })
 
   // no UI — invisible overlay
-  return null;
+  return null
 }
