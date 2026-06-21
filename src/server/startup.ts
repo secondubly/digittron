@@ -27,7 +27,6 @@ function getLoggerOptions() {
 
 export async function init({ withBot = true }: ServerBuildOptions = {}) {
   const server = Fastify({
-    withBot,
     logger: getLoggerOptions(),
     // these are recommended values based on best practices
     connectionTimeout: 120_000,
@@ -44,8 +43,7 @@ export async function init({ withBot = true }: ServerBuildOptions = {}) {
 
   closeWithGrace(
     {
-      delay:
-        (process.env.FASTIFY_CLOSE_GRACE_DELAY as unknown as number) ?? 500,
+      delay: (process.env.FASTIFY_CLOSE_GRACE_DELAY as unknown as number) ?? 500,
     },
     async ({ err }) => {
       if (err != null) {
