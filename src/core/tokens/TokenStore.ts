@@ -20,12 +20,12 @@ const IV_LENGTH = 12
 
 type ProviderEntity =
   | Pick<
-      User,
-      | 'access_token_encrypted'
-      | 'refresh_token_encrypted'
-      | 'expires_in'
-      | 'twitch_id'
-    >
+    User,
+    | 'access_token_encrypted'
+    | 'refresh_token_encrypted'
+    | 'expires_in'
+    | 'twitch_id'
+  >
   | Omit<OauthToken, 'updatedAt' | 'token_type' | 'updated_at'>
 
 export class TokenStore {
@@ -150,6 +150,7 @@ export class TokenStore {
     const Entity = this.getEntity(provider)
     const userIdField = this.getUserIdField(provider)
 
+    // TODO: figure out why this is failing on fresh auth
     const existing = await this.em.findOne(Entity, {
       [userIdField]: userId,
     })
