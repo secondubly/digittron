@@ -4,7 +4,6 @@ import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 import type { Command, CommandContext, CommandDeps } from '../types.js'
 import type { ApiClient } from '@twurple/api'
 import { log } from '@core/utils/logger.js'
-import { config } from '@core/config/env.js'
 
 type SayFn = (channel: string, message: string) => Promise<void>
 
@@ -24,9 +23,7 @@ export class CommandRegistry {
 
     const imports = files
       .filter((f) =>
-        config.NODE_ENV === 'development'
-          ? f.endsWith('.ts')
-          : f.endsWith('.js'),
+        process.env.NODE_ENV === 'development' ? f.endsWith('.ts') : f.endsWith('.js'),
       )
       .map((f) => path.join(dir, f))
 
@@ -35,8 +32,7 @@ export class CommandRegistry {
         const mod = await import(filePath)
         const exported = mod.default
 
-        const command: Command =
-          typeof exported === 'function' ? exported(deps) : exported
+        const command: Command = typeof exported === 'function' ? exported(deps) : exported
 
         if (!command?.name || !command?.execute) {
           log.bot.warn(`Skipping load of ${filePath} – not a valid command`)
@@ -57,17 +53,11 @@ export class CommandRegistry {
     return this
   }
 
-  async dispatch(
-    msg: EventSubChannelChatMessageEvent,
-    client: ApiClient,
-  ): Promise<void> {
+  async dispatch(msg: EventSubChannelChatMessageEvent, client: ApiClient): Promise<void> {
     const text = msg.messageText.trim()
     if (!text.startsWith(this.prefix)) return
 
-    const [trigger, ...args] = text
-      .slice(this.prefix.length)
-      .trim()
-      .split(/\s+/)
+    const [trigger, ...args] = text.slice(this.prefix.length).trim().split(/\s+/)
     const command = this.commands.get(trigger.toLowerCase())
 
     if (!command) return
@@ -102,8 +92,7 @@ export class CommandRegistry {
   private isMod(msg: EventSubChannelChatMessageEvent): boolean {
     // broadcaster is considered a mod in almost all cases
     return (
-      msg.chatterId === msg.broadcasterId ||
-      Object.keys(msg.badges).some((b) => b === 'moderator')
+      msg.chatterId === msg.broadcasterId || Object.keys(msg.badges).some((b) => b === 'moderator')
     )
   }
 
