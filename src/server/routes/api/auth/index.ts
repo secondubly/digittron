@@ -69,8 +69,6 @@ const plugin: FastifyPluginAsync = async (fastify) => {
   )
 
   fastify.get('/me', async function (req, reply) {
-    console.log('request user:', req.user)
-    console.log('user authenticated:', req.isAuthenticated())
     if (!req.user || !req.isAuthenticated()) {
       return reply.code(401).send({ user: null })
     }
