@@ -117,7 +117,7 @@ export default fp(
                         done: VerifyCallback,
                     ) => {
                         try {
-                            fastify.tokenStore.set(
+                            await fastify.tokenStore.set(
                                 `spotify:${config.TWITCH_BROADCASTER_ID}`,
                                 {
                                     accessToken: accessToken,
