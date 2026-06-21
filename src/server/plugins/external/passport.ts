@@ -1,9 +1,6 @@
 import fp from 'fastify-plugin'
 import fastifyPassport from '@fastify/passport'
-import {
-  Strategy as TwitchStrategy,
-  type TwitchProfile,
-} from 'passport-twitch-new'
+import { Strategy as TwitchStrategy, type TwitchProfile } from 'passport-twitch-new'
 import {
   Strategy as SpotifyStrategy,
   type Profile as SpotifyProfile,
@@ -81,7 +78,11 @@ export default fp(
                 twitch_id: profile.id,
               })) as User
               // object that is passed to registerUserSerializer
-              done(null, user)
+              done(null, {
+                twitch_id: user.twitch_id,
+                avatar: user.avatar,
+                username: user.username,
+              })
             } else {
               done(null)
             }
@@ -111,18 +112,15 @@ export default fp(
             done: VerifyCallback,
           ) => {
             try {
-              await fastify.tokenStore.set(
-                `spotify:${config.TWITCH_BROADCASTER_ID}`,
-                {
-                  accessToken: accessToken,
-                  refreshToken: refreshToken,
-                  expiresIn: expires_in, // 1 hour in seconds
-                  obtainedAt: Date.now(),
-                  scope: SPOTIFY_SCOPE_STRING,
-                  userId: profile.id,
-                  provider: 'spotify',
-                } as ThirdPartyTokenRecord,
-              )
+              await fastify.tokenStore.set(`spotify:${config.TWITCH_BROADCASTER_ID}`, {
+                accessToken: accessToken,
+                refreshToken: refreshToken,
+                expiresIn: expires_in, // 1 hour in seconds
+                obtainedAt: Date.now(),
+                scope: SPOTIFY_SCOPE_STRING,
+                userId: profile.id,
+                provider: 'spotify',
+              } as ThirdPartyTokenRecord)
               done(null)
             } catch (err) {
               done(err as Error, profile)
@@ -134,11 +132,7 @@ export default fp(
   { name: 'passport', dependencies: ['session', 'db'] },
 )
 
-async function upsertUser(
-  req: FastifyRequest,
-  tokenStore: TokenStore,
-  data: TwitchProfile,
-) {
+async function upsertUser(req: FastifyRequest, tokenStore: TokenStore, data: TwitchProfile) {
   req.log.debug(`Called in lifecycle: ${req.url}`)
   if (!data._access_token || !data._refresh_token) {
     throw Error('Missing values in token data')
