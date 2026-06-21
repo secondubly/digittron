@@ -21,9 +21,7 @@ const plugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       }),
     },
     async (_request, reply) => {
-      const token = await fastify.tokenStore.get(
-        `spotify:${config.TWITCH_BROADCASTER_ID}`,
-      )
+      const token = await fastify.tokenStore.get(`spotify:${config.TWITCH_BROADCASTER_ID}`)
 
       reply.setCookie('spotify_refresh_token', token.refresh_token, {
         httpOnly: true, // not accessible via document.cookie
