@@ -81,11 +81,8 @@ export class SpotifyFetcher {
       return this.fetch<T>(url, options, attempt + 1)
     }
 
-    // ── Max retries reached or non-401 error ──────────────────────────────────
     if (attempt >= this.maxRetries) {
-      log.api.error(
-        `Spotify fetch failed after ${this.maxRetries} retries: ${url}`,
-      )
+      log.api.error(`Spotify fetch failed after ${this.maxRetries} retries: ${url}`)
     }
 
     return {
@@ -97,15 +94,11 @@ export class SpotifyFetcher {
   }
 
   async getCurrentlyPlaying<T>(): Promise<SpotifyResponse<T>> {
-    return this.fetch<T>(
-      'https://api.spotify.com/v1/me/player/currently-playing',
-    )
+    return this.fetch<T>('https://api.spotify.com/v1/me/player/currently-playing')
   }
 
   async getRecentlyPlayed<T>(limit = 10): Promise<SpotifyResponse<T>> {
-    return this.fetch<T>(
-      `https://api.spotify.com/v1/me/player/recently-played?limit=${limit}`,
-    )
+    return this.fetch<T>(`https://api.spotify.com/v1/me/player/recently-played?limit=${limit}`)
   }
 
   async getPlaybackState<T>(): Promise<SpotifyResponse<T>> {

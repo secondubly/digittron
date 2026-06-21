@@ -37,7 +37,7 @@ export async function init({ withBot = true }: ServerBuildOptions = {}) {
     },
   }).withTypeProvider<TypeBoxTypeProvider>()
 
-  // used to deteermine whether to load bot plugin or not
+  // used to determine whether to load bot plugin or not
   server.decorate('withBot', withBot)
   server.register(fp(bootstrap))
 

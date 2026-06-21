@@ -25,13 +25,10 @@ export class EventRegistry {
           const mod = await import(fullPath)
           const exported = mod.default
 
-          const event: BotEvent =
-            typeof exported === 'function' ? exported(deps) : exported
+          const event: BotEvent = typeof exported === 'function' ? exported(deps) : exported
 
           if (typeof event?.register !== 'function') {
-            console.warn(
-              `${fullPath} — register function is not valid, skipping`,
-            )
+            console.warn(`${fullPath} — register function is not valid, skipping`)
             return
           }
 
@@ -47,8 +44,6 @@ export class EventRegistry {
 
     await walk(dir)
   }
-
-  // ── Register all loaded events ────────────────────────────────────────────
 
   registerAll(ctx: BotContext): void {
     this.events.forEach((event) => {

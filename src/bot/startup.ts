@@ -10,25 +10,20 @@ import mikroOrmConfig from '../mikro-orm.config'
 export async function startBot(): Promise<Bot> {
   log.bot.info('Starting bot in standalone mode...')
 
-  // ── 1. Database ───────────────────────────────────────────────────────────
   const orm = await MikroORM.init<SqliteDriver>(mikroOrmConfig)
   const em = orm.em.fork() as SqlEntityManager<SqliteDriver>
   log.bot.info('Database connected')
 
-  // ── 2. Redis ──────────────────────────────────────────────────────────────
   const redis: RedisClientType = createClient({ url: config.REDIS_URL })
   redis.on('error', (err) => log.bot.error({ err }, 'Redis error'))
   await redis.connect()
   log.bot.info('Redis connected')
 
-  // ── 3. Token store ────────────────────────────────────────────────────────
   const tokenStore = new TokenStore(redis, em)
   log.bot.info('TokenStore initialized')
 
-  // ── 4. Bot ────────────────────────────────────────────────────────────────
   const bot = new Bot(config.TWITCH_CHANNELS, tokenStore)
 
-  // ── 5. Graceful shutdown ──────────────────────────────────────────────────
   const shutdown = async (signal: string) => {
     log.bot.info(`Received ${signal} — shutting down...`)
 
@@ -64,7 +59,6 @@ export async function startBot(): Promise<Bot> {
     await shutdown('unhandledRejection')
   })
 
-  // ── 6. Start ──────────────────────────────────────────────────────────────
   await bot.start()
   log.bot.info('🤖  Bot running in standalone mode')
 

@@ -4,7 +4,7 @@ import { config } from '@core/config/env'
 
 export const autoConfig = (_fastify: FastifyInstance) => {
   return {
-    // any IP can make at most 4 requests per minute
+    // any IP can make at most RATE_LIMIT_MAX requests per minute
     max: config.RATE_LIMIT_MAX,
     timeWindow: '1 minute',
     ban: 3,

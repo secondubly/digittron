@@ -52,10 +52,7 @@ export function formatArtistNames(names: string[]): string {
 export function cleanArtistName(name: string): string {
   return name
     .trim()
-    .replace(
-      /\s*[\(\[](feat|ft|featuring|with|vs\.?|x)\.?\s+[^\)\]]+[\)\]]/gi,
-      '',
-    )
+    .replace(/\s*[\(\[](feat|ft|featuring|with|vs\.?|x)\.?\s+[^\)\]]+[\)\]]/gi, '')
     .replace(/[,;&]+$/, '')
     .trim()
 }
@@ -75,9 +72,7 @@ export function cleanTrackName(name: string): string {
 export function getAlbumArt(track: Track): string | null {
   if (!track.album.images.length) return null
 
-  return (
-    [...track.album.images].sort((a, b) => b.width - a.width).at(0)?.url ?? null
-  )
+  return [...track.album.images].sort((a, b) => b.width - a.width).at(0)?.url ?? null
 }
 
 export function formatTrackForChat(track: Track): string {
@@ -86,7 +81,6 @@ export function formatTrackForChat(track: Track): string {
   return `${trackName} by ${formatted}`
 }
 
-// now bring it all together
 export function parseCurrentlyPlaying(data: CurrentlyPlaying) {
   const { item, is_playing } = data
   const artist = parseArtist(item)
