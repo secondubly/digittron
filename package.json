@@ -23,7 +23,7 @@
     "mikro-orm": "mikro-orm",
     "seed": "mikro-orm-esm seeder:run",
     "test": "node --import tsx --test \"./tests/**/*.test.ts\"",
-    "start": "node build/index.js",
+    "start": "node build/main.js",
     "web": "vite"
   },
   "keywords": [],
