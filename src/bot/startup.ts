@@ -5,7 +5,7 @@ import type { SqlEntityManager, SqliteDriver } from '@mikro-orm/sqlite'
 import { createClient, type RedisClientType } from 'redis'
 import { Bot } from '../bot/bot'
 import { config } from '@core/config/env'
-import mikroOrmConfig from '@root/mikro-orm.config'
+import mikroOrmConfig from '@root/src/mikro-orm.config'
 
 export async function startBot(): Promise<Bot> {
   log.bot.info('Starting bot in standalone mode...')
