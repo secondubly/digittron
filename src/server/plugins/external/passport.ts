@@ -78,6 +78,7 @@ export default fp(
                 twitch_id: profile.id,
               })) as User
               // object that is passed to registerUserSerializer
+              console.log('user id', user.twitch_id)
               done(null, {
                 twitch_id: user.twitch_id,
                 avatar: user.avatar,
