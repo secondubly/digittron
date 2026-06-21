@@ -21,6 +21,7 @@ commitlint.config.js
 extensions.json
 launch.json
 settings.json
+extensions.json
 
 # env files
 .env*
