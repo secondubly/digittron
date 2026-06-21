@@ -1,21 +1,51 @@
-import { useState, useCallback, useRef } from 'react'
+import { useCallback, useRef, useEffect } from 'react'
 import { useAudio } from './useAudio'
+import { useAudioAlerts } from './useAudioAlerts'
 
-export interface CustomAudioEntry {
-    chatterId: string
-    chatterName: string
-    audioUrl: string
-    volume?: number
-}
+const API = import.meta.env.VITE_API_URL ?? 'http://localhost:4000'
 
 export function useCustomAudio(defaultUrl: string, defaultVolume = 0.5) {
-    const [entries, setEntries] = useState<Map<string, CustomAudioEntry>>(
-        new Map(),
-    )
+    const { alerts, loading, uploadAlert, updateAlert, deleteAlert } =
+        useAudioAlerts()
 
-    // cache Audio instances so we don't recreate them on every play
     const audioCache = useRef<Map<string, HTMLAudioElement>>(new Map())
     const defaultAudio = useAudio(defaultUrl, { volume: defaultVolume })
+
+    useEffect(() => {
+        if (loading) return
+
+        alerts.forEach((alert) => {
+            if (!alert.enabled) return
+
+            // skip if already cached
+            if (audioCache.current.has(alert.chatterId)) return
+
+            const audio = new Audio(`${API}${alert.audioUrl}`)
+            audio.volume = alert.volume
+            audio.preload = 'auto'
+
+            // preload
+            audio.load()
+
+            audioCache.current.set(alert.chatterId, audio)
+            console.log(
+                `🎵  Preloaded audio for ${alert.chatterName} (${alert.chatterId})`,
+            )
+        })
+
+        // clean up cache entries that were removed from DB
+        for (const [chatterId] of audioCache.current) {
+            const stillExists = alerts.some((a) => a.chatterId === chatterId)
+            if (!stillExists) {
+                const audio = audioCache.current.get(chatterId)
+                if (audio) {
+                    audio.pause()
+                    audio.src = ''
+                }
+                audioCache.current.delete(chatterId)
+            }
+        }
+    }, [alerts, loading])
 
     const getAudioInstance = useCallback(
         (url: string, volume: number): HTMLAudioElement => {
@@ -23,6 +53,7 @@ export function useCustomAudio(defaultUrl: string, defaultVolume = 0.5) {
                 const audio = new Audio(url)
                 audio.volume = volume
                 audio.preload = 'auto'
+                audio.load()
                 audioCache.current.set(url, audio)
             }
             return audioCache.current.get(url)!
@@ -30,96 +61,89 @@ export function useCustomAudio(defaultUrl: string, defaultVolume = 0.5) {
         [],
     )
 
-    // ── Play audio for a specific chatter ─────────────────────────────────────
-
     const playForChatter = useCallback(
         async (chatterId: string) => {
-            const entry = entries.get(chatterId)
+            const alert = alerts.find(
+                (a) => a.chatterId === chatterId && a.enabled,
+            )
 
-            if (!entry) {
-                // do nothing
+            if (!alert) {
+                await defaultAudio.play()
                 return
             }
 
             try {
-                const audio = getAudioInstance(
-                    entry.audioUrl,
-                    entry.volume ?? defaultVolume,
-                )
+                const cached = audioCache.current.get(chatterId)
+                const audio =
+                    cached ??
+                    getAudioInstance(`${API}${alert.audioUrl}`, alert.volume)
+
                 audio.currentTime = 0
                 await audio.play()
             } catch (err) {
                 console.warn(`Audio play failed for ${chatterId}:`, err)
-                await defaultAudio.play() // fall back to default on error
+                await defaultAudio.play()
             }
         },
-        [entries, defaultAudio, defaultVolume, getAudioInstance],
+        [alerts, defaultAudio, getAudioInstance],
     )
-
-    // ── Add entry ─────────────────────────────────────────────────────────────
 
     const addEntry = useCallback(
-        (entry: CustomAudioEntry) => {
-            setEntries((prev) => new Map(prev).set(entry.chatterId, entry))
+        async (
+            file: File,
+            chatterId: string,
+            chatterName: string,
+            volume: number = 0.5,
+        ) => {
+            const alert = await uploadAlert(
+                file,
+                chatterId,
+                chatterName,
+                volume,
+            )
 
-            // preload the audio
-            getAudioInstance(entry.audioUrl, entry.volume ?? defaultVolume)
+            // immediately cache the new audio
+            const audio = new Audio(`${API}${alert.audioUrl}`)
+            audio.volume = volume
+            audio.preload = 'auto'
+            audio.load()
+            audioCache.current.set(chatterId, audio)
+
+            return alert
         },
-        [defaultVolume, getAudioInstance],
+        [uploadAlert],
     )
 
-    // ── Remove entry ──────────────────────────────────────────────────────────
+    const removeEntry = useCallback(
+        async (id: number, chatterId: string) => {
+            await deleteAlert(id)
 
-    const removeEntry = useCallback((chatterId: string) => {
-        setEntries((prev) => {
-            const entry = prev.get(chatterId)
-
-            // clean up cached Audio instance
-            if (entry) {
-                const audio = audioCache.current.get(entry.audioUrl)
-                if (audio) {
-                    audio.pause()
-                    audio.src = ''
-                }
-                audioCache.current.delete(entry.audioUrl)
+            const audio = audioCache.current.get(chatterId)
+            if (audio) {
+                audio.pause()
+                audio.src = ''
             }
-
-            const next = new Map(prev)
-            next.delete(chatterId)
-            return next
-        })
-    }, [])
-
-    // ── Update volume for a specific chatter ──────────────────────────────────
+            audioCache.current.delete(chatterId)
+        },
+        [deleteAlert],
+    )
 
     const updateVolume = useCallback(
-        (chatterId: string, volume: number) => {
-            setEntries((prev) => {
-                const entry = prev.get(chatterId)
-                if (!entry) return prev
-                return new Map(prev).set(chatterId, { ...entry, volume })
-            })
+        async (id: number, chatterId: string, volume: number) => {
+            await updateAlert(id, { volume })
 
-            // update cached audio instance volume immediately
-            const entry = entries.get(chatterId)
-            if (entry) {
-                const audio = audioCache.current.get(entry.audioUrl)
-                if (audio) audio.volume = volume
-            }
+            const audio = audioCache.current.get(chatterId)
+            if (audio) audio.volume = volume
         },
-        [entries],
+        [updateAlert],
     )
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    const hasCustomAudio = useCallback(
-        (chatterId: string) => {
-            return entries.has(chatterId)
+    const toggleEnabled = useCallback(
+        async (id: number, enabled: boolean) => {
+            await updateAlert(id, { enabled })
         },
-        [entries],
+        [updateAlert],
     )
-
-    // ── Cleanup all cached audio ──────────────────────────────────────────────
 
     const clearCache = useCallback(() => {
         audioCache.current.forEach((audio) => {
@@ -127,16 +151,22 @@ export function useCustomAudio(defaultUrl: string, defaultVolume = 0.5) {
             audio.src = ''
         })
         audioCache.current.clear()
-        setEntries(new Map())
     }, [])
 
+    useEffect(() => {
+        return () => clearCache()
+    }, [clearCache])
+
     return {
-        entries,
+        alerts,
+        loading,
         playForChatter,
         addEntry,
         removeEntry,
         updateVolume,
-        hasCustomAudio,
+        toggleEnabled,
+        hasCustomAudio: (chatterId: string) =>
+            alerts.some((a) => a.chatterId === chatterId && a.enabled),
         clearCache,
     }
 }
