@@ -66,15 +66,11 @@ export class Bot extends EventEmitter {
         apiClient: this.apiClient,
         adapter: new NgrokAdapter({
           ngrokConfig: {
-            authtoken:
-              envConfig.NGROK_AUTH_TOKEN ??
-              'thisShouldBeARandomlyGeneratedFixedString',
+            authtoken: envConfig.NGROK_AUTH_TOKEN ?? 'thisShouldBeARandomlyGeneratedFixedString',
           },
         }),
         logger: { minLevel: 'debug' },
-        secret:
-          process.env.EVENTSUB_SECRET ??
-          'thisShouldBeARandomlyGeneratedFixedString',
+        secret: process.env.EVENTSUB_SECRET ?? 'thisShouldBeARandomlyGeneratedFixedString',
       })
     } else {
       this.eventSub = new EventSubWsListener({
@@ -129,18 +125,14 @@ export class Bot extends EventEmitter {
 
   private async poll() {
     try {
-      const schedule = await this.apiClient?.channels.getAdSchedule(
-        envConfig.TWITCH_BROADCASTER_ID,
-      )
+      const schedule = await this.apiClient?.channels.getAdSchedule(envConfig.TWITCH_BROADCASTER_ID)
 
       if (!schedule || schedule.nextAdDate) {
         log.bot.info('No upcoming ad scheduled')
         return
       }
 
-      log.bot.info(
-        `Next ad at: ${schedule.nextAdDate} | duration: ${schedule.duration}s`,
-      )
+      log.bot.info(`Next ad at: ${schedule.nextAdDate} | duration: ${schedule.duration}s`)
       this.scheduleWarning(schedule.nextAdDate!, schedule.duration)
     } catch (err) {
       log.bot.error(`Poll error: ${err}`)
@@ -150,8 +142,7 @@ export class Bot extends EventEmitter {
   async scheduleWarning(nextAdAt: Date, durationSeconds: number) {
     if (this.scheduledTimer) clearTimeout(this.scheduledTimer)
 
-    const delayMs =
-      new Date(nextAdAt).getTime() - Date.now() - envConfig.LEAD_TIME_MS
+    const delayMs = new Date(nextAdAt).getTime() - Date.now() - envConfig.LEAD_TIME_MS
 
     if (delayMs <= 0) {
       log.bot.info('Ad is imminent or passed, skipping warning.')
@@ -188,24 +179,17 @@ export class Bot extends EventEmitter {
 
   private async onAdWarning(nextAdAt: Date, durationSeconds: number) {
     // we need to use valueOf so TS doesn't complain about arithmetic
-    const secsUntil = Math.round(
-      (new Date(nextAdAt).valueOf() - Date.now()) / 1000,
-    )
+    const secsUntil = Math.round((new Date(nextAdAt).valueOf() - Date.now()) / 1000)
     const message = `📢 Ad break in ~${secsUntil}s (${durationSeconds}s long). Stretch your legs! PogChamp`
 
     this.apiClient?.chat
-      .sendChatMessageAsApp(
-        this.botId,
-        envConfig.TWITCH_BROADCASTER_ID,
-        message,
-      )
+      .sendChatMessageAsApp(this.botId, envConfig.TWITCH_BROADCASTER_ID, message)
       .then(() => log.bot.info(`${message}`))
       .catch((err) => log.bot.error('Chat send failed:', err))
   }
 
   public async start(): Promise<void> {
-    const broadcasterKey =
-      `twitch:${envConfig.TWITCH_BROADCASTER_ID}` as TokenKey
+    const broadcasterKey = `twitch:${envConfig.TWITCH_BROADCASTER_ID}` as TokenKey
     const botKey = `twitch:${envConfig.TWITCH_BOT_ID}` as TokenKey
 
     await this.ensureToken(broadcasterKey, 'Broadcaster')
@@ -225,9 +209,7 @@ export class Bot extends EventEmitter {
       )) as OauthTokenRecord | null
 
       if (!spotifyToken || !spotifyToken.refreshToken) {
-        log.bot.warn(
-          'Spotify token missing or malformed — Spotify commands unavailable',
-        )
+        log.bot.warn('Spotify token missing or malformed — Spotify commands unavailable')
       } else {
         this.spotifyFetcher = new SpotifyFetcher({
           tokenStore: this.tokenStore,
@@ -244,20 +226,14 @@ export class Bot extends EventEmitter {
       say: this.say.bind(this),
       getCommands: () => this.commandRegistry.list(),
     }
-    await this.commandRegistry.loadCommands(
-      path.join(import.meta.dirname, 'commands'),
-      deps,
-    )
+    await this.commandRegistry.loadCommands(path.join(import.meta.dirname, 'commands'), deps)
 
-    await this.eventRegistry.loadEvents(
-      path.join(import.meta.dirname, 'events'),
-      {
-        registry: this.commandRegistry,
-        bot: this,
-        apiClient: this.apiClient,
-        say: this.say.bind(this),
-      },
-    )
+    await this.eventRegistry.loadEvents(path.join(import.meta.dirname, 'events'), {
+      registry: this.commandRegistry,
+      bot: this,
+      apiClient: this.apiClient,
+      say: this.say.bind(this),
+    })
 
     await this.apiClient?.eventSub.deleteAllSubscriptions()
     await this.chatClient?.connect()
@@ -290,10 +266,17 @@ export class Bot extends EventEmitter {
       return
     }
 
-    log.bot.warn(`${label} token missing — waiting for authentication...`)
-    log.bot.warn(
-      `========== Visit http://localhost:4000/login to authenticate. ==========`,
-    )
+    if (label.toLocaleLowerCase() === 'broadcaster') {
+      log.bot.warn(`${label} token missing — waiting for authentication...`)
+      log.bot.warn(
+        `========== Visit http://localhost:4000/api/auth/twitch/login to authenticate. ==========`,
+      )
+    } else {
+      log.bot.warn(`${label} token missing — waiting for authentication...`)
+      log.bot.warn(
+        `========== Visit http://localhost:4000/api/auth/twitch/bot-login to authenticate. ==========`,
+      )
+    }
 
     await this.authWaiter.waitFor(tokenKey) // blocks here until notify() fires
 
