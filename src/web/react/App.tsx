@@ -7,7 +7,6 @@ import classes from './styles/AppShell.module.css';
 import { IconMoon, IconSunHigh } from "@tabler/icons-react";
 
 export default function MyApp() {
-    // const [audioUrl, setAudioURL] = useState<string | null>(null)
     const { setColorScheme } = useMantineColorScheme({
         keepTransitions: true
     });
