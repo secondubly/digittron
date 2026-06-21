@@ -12,11 +12,13 @@ const plugin: FastifyPluginAsync = async (fastify) => {
   fastify.get(
     '/twitch/login',
     {
+      // @ts-expect-error ignore constructor complaint, false positive
       preValidation: fastifyPassport.authenticate('twitch', {
         scope: TWITCH_BROADCASTER_SCOPE_STRING,
+        forceVerify: true
       }),
     },
-    async () => {},
+    async () => { },
   )
 
   fastify.get(
@@ -28,7 +30,7 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         scope: TWITCH_BOT_SCOPE_STRING,
       }),
     },
-    async () => {},
+    async () => { },
   )
 
   fastify.get(
@@ -64,7 +66,7 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         }
       }
       // redirect after successful auth
-      return reply.redirect(`${config.CLIENT_URL}/`)
+      return reply.redirect(`/`)
     },
   )
 
