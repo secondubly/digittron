@@ -55,6 +55,5 @@ export const spotifyFetcher = async (path: string) => {
 
     if (!res.ok) throw new Error(`Spotify error: ${res.status}`)
     if (res.status === 204) return null // e.g. no active device
-    console.log('response status: ', res.status)
     return res.json()
 }
