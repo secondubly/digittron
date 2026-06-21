@@ -24,6 +24,7 @@ const EnvSchema = Type.Object({
     RATE_LIMIT_MAX: Type.Number({ default: 4 }),
     ENCRYPTION_KEY: Type.String({ minLength: 1 }),
     SESSION_SECRET: Type.String({ minLength: 1 }),
+    COOKIE_SECRET: Type.String({ minLength: 1 }),
     SPOTIFY_CLIENT_ID: Type.Optional(Type.String()),
     SPOTIFY_CLIENT_SECRET: Type.Optional(Type.String()),
     STEAM_ID: Type.Optional(Type.String()),
