@@ -46,6 +46,32 @@ const plugin: FastifyPluginAsync = async (fastify) => {
     )
 
     fastify.get('/me', async function (req, reply) {
+        /**
+         if spotify info is present, we should set the refresh token proactively
+         this is used for everyone, whether they're logged in or not
+        */
+        // if (config.SPOTIFY_CLIENT_ID && config.SPOTIFY_CLIENT_SECRET) {
+        //     const spotifyToken: ThirdPartyTokenRecord | null =
+        //         await fastify.tokenStore.get(
+        //             `spotify:${config.TWITCH_BROADCASTER_ID}`,
+        //         )
+
+        //     if (spotifyToken && spotifyToken.refreshToken) {
+        //         reply.setCookie(
+        //             'spotify_refresh_token',
+        //             spotifyToken.refreshToken,
+        //             {
+        //                 httpOnly: true, // not accessible via document.cookie
+        //                 secure: process.env.NODE_ENV === 'production', // HTTPS only in prod
+        //                 sameSite: 'lax', // CSRF protection
+        //                 path: '/',
+        //                 maxAge: 60 * 60 * 24 * 60, // 60 days
+        //                 signed: true, // HMAC-signed with COOKIE_SECRET
+        //             },
+        //         )
+        //     }
+        // }
+
         if (!req.user || !req.isAuthenticated()) {
             return reply.code(401).send({ user: null })
         }
@@ -62,6 +88,7 @@ const plugin: FastifyPluginAsync = async (fastify) => {
     })
 
     fastify.delete('/logout', async (req, reply) => {
+        reply.clearCookie('spotify_refresh_token', { path: '/' })
         await req.logOut()
         return reply.send({ ok: true })
     })
