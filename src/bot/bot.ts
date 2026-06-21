@@ -8,7 +8,7 @@ import { CommandRegistry } from './services/CommandRegistry'
 import path from 'path'
 import { EventRegistry } from './services/EventRegistry'
 import { log } from '@core/utils/logger'
-import { config as envConfig } from '@core/config/env'
+import { config, config as envConfig } from '@core/config/env'
 import { TokenStore } from '@core/tokens/TokenStore'
 import { createAuthProvider } from '@core/tokens/TokenAdapter'
 import { AuthWaiter } from '@core/tokens/AuthWait'
@@ -269,12 +269,12 @@ export class Bot extends EventEmitter {
     if (label.toLocaleLowerCase() === 'broadcaster') {
       log.bot.warn(`${label} token missing — waiting for authentication...`)
       log.bot.warn(
-        `========== Visit http://localhost:4000/api/auth/twitch/login to authenticate. ==========`,
+        `========== Visit http://${config.CLIENT_URL}/api/auth/twitch/login to authenticate. ==========`,
       )
     } else {
       log.bot.warn(`${label} token missing — waiting for authentication...`)
       log.bot.warn(
-        `========== Visit http://localhost:4000/api/auth/twitch/bot-login to authenticate. ==========`,
+        `========== Visit http://${config.CLIENT_URL}/twitch-login to authenticate. ==========`,
       )
     }
 
