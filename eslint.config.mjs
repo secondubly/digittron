@@ -1,8 +1,10 @@
 // @ts-check
 
 import tseslint from 'typescript-eslint'
+import {defineConfig } from 'eslint/config'
+import prettierConfig from 'eslint-config-prettier'
 
-export default tseslint.config(
+export default defineConfig(
     tseslint.configs.recommended,
     {
         ignores: ['**/build/**'],
@@ -20,4 +22,5 @@ export default tseslint.config(
             ],
         },
     },
+    prettierConfig
 )

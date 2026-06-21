@@ -2,5 +2,23 @@
     "tabWidth": 2,
     "useTabs": false,
     "semi": false,
-    "singleQuote": true
+    "printWidth": 100,
+    "singleQuote": true,
+    "overrides": [
+        {
+            "files": "*.tsx",
+            "options": {
+                "semi": true,
+                "trailingComma": "all",
+                "singleQuote": true,
+                "jsxSingleQuote": false,
+                "printWidth": 100,
+                "tabWidth": 2,
+                "bracketSpacing": true,
+                "bracketSameLine": false,
+                "arrowParens": "always",
+                "endOfLine": "lf"
+            }
+        }
+    ]
 }
