@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 
-DB_PATH="/usr/src/app/db"
+DB_PATH="/usr/src/app/core/db"
 
 if [ ! -d "$DB_PATH" ]; then
   echo "Database folder not found, creating folder..."
