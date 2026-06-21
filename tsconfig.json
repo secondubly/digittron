@@ -23,10 +23,7 @@
     "moduleResolution": "bundler",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "typeRoots": [
-      "node_modules/@types",
-      "src/server/types"
-    ],
+    "typeRoots": ["node_modules/@types", "src/server/types"],
 
     // Other Outputs
     "sourceMap": false,
@@ -49,7 +46,7 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "allowJs": true,
+    "allowJs": true
   },
   "include": ["./src/**/*.ts", "src/core/config/scopes.ts", "vite-env.d.ts"],
   "ts-node": {
