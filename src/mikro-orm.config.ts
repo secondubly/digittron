@@ -1,7 +1,6 @@
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
 import { Migrator } from '@mikro-orm/migrations'
 import { defineConfig } from '@mikro-orm/sqlite'
-// import { config } from './config.js'
 
 export default defineConfig({
   dbName: 'src/core/db/sqlite.db',
