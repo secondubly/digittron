@@ -1,55 +1,9 @@
-import useSWR from 'swr'
 import classes from './SpotifyQueue.module.css'
-import { type QueueResponse, type SimplifiedTrack } from '../../types/spotify'
+import { type SimplifiedTrack } from '../../types/spotify'
 import { ActionIcon, Box, Flex, Group, Image, ScrollArea, Stack, Text, Title, Divider, Paper } from '@mantine/core'
 import { IconMusicPlus } from '@tabler/icons-react'
 import { MarqueeText } from '../MarqueeText/MarqueeText'
-
-const getToken = async () => {
-  try {
-      const twitchId = '89181064'
-      const res = await fetch(`/api/spotify/token/${twitchId}`)
-
-      const { accessToken } = await res.json()
-      return accessToken
-  } catch (error) {
-      console.error('Failed to retrieve token', error)
-  }
-}
-
-const spotifyFetcher = async (url: string) => {
-  try {
-    const token = await getToken()
-    const res = await fetch(url, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    })
-
-    if (!res.ok) {
-      if (res.status === 401) {
-        const newToken = await getToken()
-
-        const retryResponse = await fetch(url, {
-          headers: {
-              Authorization: `Bearer ${newToken}`,
-          },
-        })
-
-        if (!retryResponse.ok) {
-          throw new Error(retryResponse.statusText)
-        }
-
-        return retryResponse.json()
-      }
-      throw new Error(res.statusText)
-    }
-
-    return res.json()
-  } catch (err) {
-    throw err
-  }
-}
+import { usePlayback } from '../../hooks/useSpotify'
 
 
 const formatTime = (ms: number) => {
@@ -57,17 +11,12 @@ const formatTime = (ms: number) => {
 }
 
 const SpotifyQueue = () => {
-  // SWR constructor: (url endpoint (aka key), fetch HTTP request to call on the endpoint, {optional parameters})
-  const { data, error, isLoading } = useSWR<QueueResponse>('https://api.spotify.com/v1/me/player/queue', spotifyFetcher,
-    {
-      refreshInterval: 5000,
-      revalidateOnFocus: false,
-    }
-  );
+  const { playback: data, isLoading, error } = usePlayback()
 
   if (isLoading) return <div>Loading player queue...</div>;
   if (error) return <div>Failed to load queue. Ensure Spotify is active.</div>;
-  if (!data || (data.currently_playing === null && !data.queue.length)) return <div>No active device or music playing.</div>;
+
+  if (!data || data.device.is_private_session || (data.currently_playing === null && !data.queue.length)) return <div>No active device or music playing.</div>;
 
   return (
           <Box>

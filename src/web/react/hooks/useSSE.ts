@@ -36,7 +36,7 @@ export function useSSE({
     const connect = useCallback(() => {
         if (!enabled) return
 
-        const es = new EventSource(`${API}/api/events`, {
+        const es = new EventSource(`${API}/api/audio/events`, {
             withCredentials: true,
         })
         esRef.current = es

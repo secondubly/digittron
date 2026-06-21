@@ -1,5 +1,6 @@
 .now-playing-container img {
     width: 50%;
+    max-width: 600px;
     box-shadow: var(--paper-shadow);
     flex-grow: 1; /* maybe shrink this a bit */
 }
