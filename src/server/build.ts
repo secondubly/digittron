@@ -1,29 +1,28 @@
 import path from 'node:path'
 import fastifyAutoload from '@fastify/autoload'
-import type {
-  FastifyError,
-  FastifyInstance,
-  FastifyPluginOptions,
-} from 'fastify'
+import type { FastifyError, FastifyInstance, FastifyPluginOptions } from 'fastify'
 
-export default async function bootstrap(
-  fastify: FastifyInstance,
-  opts: FastifyPluginOptions,
-) {
+export default async function bootstrap(fastify: FastifyInstance, opts: FastifyPluginOptions) {
   delete opts.skipOverride
   /**
    * load external plugins first because the server may need them immediately
    */
-  await fastify.register(fastifyAutoload, {
-    dir: path.join(import.meta.dirname, 'plugins/external'),
-    options: { ...opts },
-    matchFilter: (pathToFile) => {
-      if (pathToFile.endsWith('bot.ts') && !fastify.withBot) {
-        return false
-      }
-      return true
-    },
-  })
+  await fastify
+    .register(fastifyAutoload, {
+      dir: path.join(import.meta.dirname, 'plugins/external'),
+      options: { ...opts },
+      encapsulate: false,
+      matchFilter: (pathToFile) => {
+        if (pathToFile.endsWith('bot.ts') && !fastify.withBot) {
+          return false
+        }
+        return true
+      },
+    })
+    .after((err) => {
+      if (err) throw err
+      fastify.log.debug('All autoloaded plugins are loaded and ready!')
+    })
 
   fastify.register(fastifyAutoload, {
     dir: path.join(import.meta.dirname, 'routes'),
@@ -65,9 +64,7 @@ export default async function bootstrap(
     },
     (request, reply) => {
       const knownPathPrefixes = ['/api/spotify/token', '/api/twitch/token']
-      const matchesPartialPath = knownPathPrefixes.some((p) =>
-        request.url.startsWith(p),
-      )
+      const matchesPartialPath = knownPathPrefixes.some((p) => request.url.startsWith(p))
 
       if (matchesPartialPath && request.method === 'GET') {
         return reply.code(400).send({
@@ -95,4 +92,6 @@ export default async function bootstrap(
       })
     },
   )
+
+  console.log('bootstrap end')
 }
