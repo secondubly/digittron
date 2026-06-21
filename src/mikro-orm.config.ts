@@ -6,7 +6,7 @@ import { defineConfig } from '@mikro-orm/sqlite'
 export default defineConfig({
   dbName: 'src/core/db/sqlite.db',
   // folder-based discovery setup, using common filename suffix
-  entities: ['build/lib/db/models/*.entity.js'],
+  entities: ['build/core/db/models/*.entity.js'],
   entitiesTs: ['src/core/db/models/*.entity.ts'],
   // we will use the ts-morph reflection, an alternative to the default reflect-metadata provider
   // check the documentation for their differences: https://mikro-orm.io/docs/metadata-providers
