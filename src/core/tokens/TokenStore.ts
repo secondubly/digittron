@@ -6,7 +6,7 @@ import type {
     ThirdPartyTokenRecord,
     OauthTokenRecord,
 } from './types'
-import type { SqlEntityManager } from '@mikro-orm/sqlite'
+import type { EntityClass, SqlEntityManager } from '@mikro-orm/sqlite'
 import { log } from '../utils/logger'
 import { User } from '../db/models/user.entity'
 import { OauthToken } from '../db/models/OauthToken.entity'
@@ -121,7 +121,7 @@ export class TokenStore {
         return { provider, userId }
     }
 
-    private getEntity(provider: TokenProvider) {
+    private getEntity(provider: TokenProvider): EntityClass<OauthToken | User> {
         return provider === 'twitch' ? User : OauthToken
     }
 
@@ -150,7 +150,7 @@ export class TokenStore {
         const Entity = this.getEntity(provider)
         const userIdField = this.getUserIdField(provider)
 
-        const existing = await this.em.findOne(Entity as any, {
+        const existing = await this.em.findOne(Entity, {
             [userIdField]: userId,
         })
 
@@ -187,7 +187,7 @@ export class TokenStore {
         const Entity = this.getEntity(provider)
         const userIdField = this.getUserIdField(provider)
 
-        const row = await this.em.findOne(Entity as any, {
+        const row = await this.em.findOne(Entity, {
             [userIdField]: userId,
         })
 
