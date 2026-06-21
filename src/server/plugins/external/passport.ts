@@ -104,8 +104,7 @@ export default fp(
                     {
                         clientID: config.SPOTIFY_CLIENT_ID,
                         clientSecret: config.SPOTIFY_CLIENT_SECRET,
-                        callbackURL:
-                            'http://127.0.0.1:4000/api/spotify/callback',
+                        callbackURL: `${config.CLIENT_URL}/api/spotify/callback`,
                         // @ts-expect-error(ignore call error, false positive)
                         scope: SPOTIFY_SCOPES,
                     },

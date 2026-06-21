@@ -17,7 +17,7 @@ const plugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
         '/callback',
         {
             preValidation: fastifyPassport.authenticate('spotify', {
-                failureRedirect: '/spotify_login?error=spotify_failed',
+                failureRedirect: `${config.CLIENT_URL}/spotify_login?error=spotify_failed`,
             }),
         },
         async (_request, reply) => {

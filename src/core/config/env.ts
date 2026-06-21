@@ -30,6 +30,7 @@ const EnvSchema = Type.Object({
     STEAM_ID: Type.Optional(Type.String()),
     NGROK_AUTH_TOKEN: Type.Optional(Type.String({ minLength: 1 })),
     EVENT_SUB_SECRET: Type.Optional(Type.String({ minLength: 1 })),
+    CLIENT_URL: Type.Optional(Type.String()),
     NODE_ENV: Type.Union(
         [Type.Literal('development'), Type.Literal('production')],
         { default: 'development' },
@@ -51,4 +52,17 @@ if (!Value.Check(EnvSchema, withDefaults)) {
     process.exit(2)
 }
 
-export const config = Value.Decode(EnvSchema, withDefaults) as Env
+let CLIENT_URL: string
+if (process.env.CLIENT_URL) {
+    CLIENT_URL = process.env.CLIENT_URL
+} else {
+    CLIENT_URL =
+        withDefaults.NODE_ENV === 'development'
+            ? `http://localhost:${withDefaults.WEB_PORT}`
+            : `http://localhost:${withDefaults.API_PORT}`
+}
+
+export const config = {
+    ...(Value.Decode(EnvSchema, withDefaults) as Env),
+    CLIENT_URL: CLIENT_URL,
+}

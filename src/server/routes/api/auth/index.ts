@@ -4,6 +4,8 @@ import {
     TWITCH_BOT_SCOPE_STRING,
     TWITCH_BROADCASTER_SCOPE_STRING,
 } from '@core/config/scopes'
+import { config } from '@core/config/env'
+import type { ThirdPartyTokenRecord } from '@core/tokens/types'
 
 const plugin: FastifyPluginAsync = async (fastify) => {
     fastify.get('/', async function (_req, reply) {
@@ -36,42 +38,41 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         '/twitch/callback',
         {
             preValidation: fastifyPassport.authenticate('twitch', {
-                failureRedirect: `/?error=twitch_failed`,
+                failureRedirect: `${config.CLIENT_URL}/?error=twitch_failed`,
             }),
         },
         async (_request, reply) => {
+            /**
+                if spotify info is present, we should set the refresh token proactively
+                this is used for everyone, whether they're logged in or not
+            */
+            if (config.SPOTIFY_CLIENT_ID && config.SPOTIFY_CLIENT_SECRET) {
+                const spotifyToken: ThirdPartyTokenRecord | null =
+                    await fastify.tokenStore.get(
+                        `spotify:${config.TWITCH_BROADCASTER_ID}`,
+                    )
+
+                if (spotifyToken && spotifyToken.refreshToken) {
+                    reply.setCookie(
+                        'spotify_refresh_token',
+                        spotifyToken.refreshToken,
+                        {
+                            httpOnly: true, // not accessible via document.cookie
+                            secure: process.env.NODE_ENV === 'production', // HTTPS only in prod
+                            sameSite: 'lax', // CSRF protection
+                            path: '/',
+                            maxAge: 60 * 60 * 24 * 60, // 60 days
+                            signed: true, // HMAC-signed with COOKIE_SECRET
+                        },
+                    )
+                }
+            }
             // redirect after successful
-            return reply.redirect(`/`)
+            return reply.redirect(`${config.CLIENT_URL}/`)
         },
     )
 
     fastify.get('/me', async function (req, reply) {
-        /**
-         if spotify info is present, we should set the refresh token proactively
-         this is used for everyone, whether they're logged in or not
-        */
-        // if (config.SPOTIFY_CLIENT_ID && config.SPOTIFY_CLIENT_SECRET) {
-        //     const spotifyToken: ThirdPartyTokenRecord | null =
-        //         await fastify.tokenStore.get(
-        //             `spotify:${config.TWITCH_BROADCASTER_ID}`,
-        //         )
-
-        //     if (spotifyToken && spotifyToken.refreshToken) {
-        //         reply.setCookie(
-        //             'spotify_refresh_token',
-        //             spotifyToken.refreshToken,
-        //             {
-        //                 httpOnly: true, // not accessible via document.cookie
-        //                 secure: process.env.NODE_ENV === 'production', // HTTPS only in prod
-        //                 sameSite: 'lax', // CSRF protection
-        //                 path: '/',
-        //                 maxAge: 60 * 60 * 24 * 60, // 60 days
-        //                 signed: true, // HMAC-signed with COOKIE_SECRET
-        //             },
-        //         )
-        //     }
-        // }
-
         if (!req.user || !req.isAuthenticated()) {
             return reply.code(401).send({ user: null })
         }
