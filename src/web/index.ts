@@ -1,15 +1,9 @@
 import fastify, { type FastifyBaseLogger, type FastifyInstance } from 'fastify'
-import fastifyStatic from '@fastify/static'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { log } from '../core/utils/logger'
 
 export const init = (port: number) => {
   console.log(`Initializing web on port ${port}`)
 
-  const __filename = fileURLToPath(import.meta.url)
-  const __dirname = path.dirname(__filename)
-  const reactPath = path.join(__dirname, '..', 'web')
   let server: FastifyInstance
   if (process.env.NODE_ENV === 'development') {
     server = fastify({
@@ -18,11 +12,6 @@ export const init = (port: number) => {
   } else {
     server = fastify()
   }
-
-  server.register(fastifyStatic, {
-    root: reactPath,
-    prefix: '/',
-  })
 
   server.get('/', async (_request, reply) => {
     return reply.sendFile('index.html')

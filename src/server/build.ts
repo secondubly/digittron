@@ -82,14 +82,16 @@ export default async function bootstrap(fastify: FastifyInstance, opts: FastifyP
             params: request.params,
           },
         },
-        'Resource not found',
+        'Resource not found, redirecting to index.html',
       )
 
-      return reply.code(404).send({
-        statusCode: 404,
-        error: 'Not Found',
-        message: `Route ${request.method}:${request.url} not found`,
-      })
+      // return reply.code(404).send({
+      //   statusCode: 404,
+      //   error: 'Not Found',
+      //   message: `Route ${request.method}:${request.url} not found`,
+      // })
+
+      reply.sendFile('index.html')
     },
   )
 
