@@ -98,12 +98,10 @@ export function getToken(server: FastifyInstance) {
             }
         }
 
-        return reply
-            .code(200)
-            .send({
-                access_token: token.accessToken,
-                expires_in: token.expiresIn,
-            })
+        return reply.code(200).send({
+            access_token: token.accessToken,
+            expires_in: token.expiresIn,
+        })
     }
 }
 
@@ -112,6 +110,7 @@ export function refreshToken(server: FastifyInstance) {
         const refreshToken = request.unsignCookie(
             request.cookies.spotify_refresh_token ?? '',
         )
+
         if (!refreshToken.valid || !refreshToken.value) {
             return reply
                 .status(401)
