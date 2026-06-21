@@ -10,7 +10,10 @@ export class AuthWaiter extends EventEmitter {
     return new Promise((resolve, reject) => {
       const onAuth = (key: string) => {
         if (key !== tokenKey) return
-        clearTimeout(timer)
+        // REVIEW: verify this
+        if (timer) {
+          clearTimeout(timer)
+        }
         this.off('authenticated', onAuth)
         resolve()
       }
