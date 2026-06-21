@@ -1,9 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify'
 import fastifyPassport from '@fastify/passport'
-import {
-  TWITCH_BOT_SCOPE_STRING,
-  TWITCH_BROADCASTER_SCOPE_STRING,
-} from '@core/config/scopes'
+import { TWITCH_BOT_SCOPE_STRING, TWITCH_BROADCASTER_SCOPE_STRING } from '@core/config/scopes'
 import { config } from '@core/config/env'
 import type { ThirdPartyTokenRecord } from '@core/tokens/types'
 
@@ -41,16 +38,19 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         failureRedirect: `${config.CLIENT_URL}/?error=twitch_failed`,
       }),
     },
-    async (_request, reply) => {
+    async (req, reply) => {
       /**
                 if spotify info is present, we should set the refresh token proactively
                 this is used for everyone, whether they're logged in or not
             */
+      if (!req.user) {
+        return reply.status(401).send({ error: 'Authentication failed' })
+      }
+
       if (config.SPOTIFY_CLIENT_ID && config.SPOTIFY_CLIENT_SECRET) {
-        const spotifyToken: ThirdPartyTokenRecord | null =
-          await fastify.tokenStore.get(
-            `spotify:${config.TWITCH_BROADCASTER_ID}`,
-          )
+        const spotifyToken: ThirdPartyTokenRecord | null = await fastify.tokenStore.get(
+          `spotify:${config.TWITCH_BROADCASTER_ID}`,
+        )
 
         if (spotifyToken && spotifyToken.refreshToken) {
           reply.setCookie('spotify_refresh_token', spotifyToken.refreshToken, {
@@ -63,12 +63,14 @@ const plugin: FastifyPluginAsync = async (fastify) => {
           })
         }
       }
-      // redirect after successful
+      // redirect after successful auth
       return reply.redirect(`${config.CLIENT_URL}/`)
     },
   )
 
   fastify.get('/me', async function (req, reply) {
+    console.log('request user:', req.user)
+    console.log('user authenticated:', req.isAuthenticated())
     if (!req.user || !req.isAuthenticated()) {
       return reply.code(401).send({ user: null })
     }
