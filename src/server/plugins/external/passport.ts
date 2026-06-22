@@ -68,17 +68,18 @@ export default fp(
             profile._expires_in = 14_400 // 4 hours in seconds
 
             // handle db updates here instead of the route
-            await upsertUser(request, fastify.tokenStore, profile)
+            await upsertUser(fastify.tokenStore, profile)
 
-            // notify bot that a token has been set (so we can continue startup)
             fastify.authWaiter.notify(`twitch:${profile.id}`)
+
             // only create login sessions for a non-bot account
             if (profile.id === config.TWITCH_BROADCASTER_ID) {
+              // REVIEW: should we ping db directly or use token store?
               const user = (await request.em.findOne(User, {
                 twitch_id: profile.id,
               })) as User
+
               // object that is passed to registerUserSerializer
-              console.log('user id', user.twitch_id)
               done(null, {
                 twitch_id: user.twitch_id,
                 avatar: user.avatar,
@@ -133,10 +134,9 @@ export default fp(
   { name: 'passport', dependencies: ['session', 'db'] },
 )
 
-async function upsertUser(req: FastifyRequest, tokenStore: TokenStore, data: TwitchProfile) {
-  req.log.debug(`Called in lifecycle: ${req.url}`)
+async function upsertUser(tokenStore: TokenStore, data: TwitchProfile) {
   if (!data._access_token || !data._refresh_token) {
-    throw Error('Missing values in token data')
+    throw Error('Missing access token and/or refresh token in token data')
   }
 
   await tokenStore.set(`twitch:${data.id}`, {
