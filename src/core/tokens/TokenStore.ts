@@ -19,13 +19,7 @@ const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 12
 
 type ProviderEntity =
-  | Pick<
-    User,
-    | 'access_token_encrypted'
-    | 'refresh_token_encrypted'
-    | 'expires_in'
-    | 'twitch_id'
-  >
+  | Pick<User, 'access_token_encrypted' | 'refresh_token_encrypted' | 'expires_in' | 'twitch_id'>
   | Omit<OauthToken, 'updatedAt' | 'token_type' | 'updated_at'>
 
 export class TokenStore {
@@ -50,7 +44,8 @@ export class TokenStore {
 
   async set(key: TokenKey, data: TokenRecord | MMRHistory): Promise<void> {
     if (this.isTokenRecord(data)) {
-      Promise.all([this.setDb(key, data), this.setCache(key, data)])
+      // we need to await this in order to be sure the data is written successfully
+      await Promise.all([this.setDb(key, data), this.setCache(key, data)])
     } else {
       // only used for deadlock tokens
       this.setCache(key, data)
@@ -84,11 +79,7 @@ export class TokenStore {
 
   private encryptToken(token: string) {
     const iv = crypto.randomBytes(IV_LENGTH)
-    const cipher = crypto.createCipheriv(
-      ALGORITHM,
-      Buffer.from(config.ENCRYPTION_KEY, 'hex'),
-      iv,
-    )
+    const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(config.ENCRYPTION_KEY, 'hex'), iv)
     let encrypted = cipher.update(token, 'utf8', 'hex')
     encrypted += cipher.final('hex')
     const authTag = cipher.getAuthTag()
@@ -195,10 +186,7 @@ export class TokenStore {
   private async setCache(key: TokenKey, token: TokenRecord): Promise<void>
   private async setCache(key: TokenKey, rank: MMRHistory): Promise<void>
 
-  private async setCache(
-    key: TokenKey,
-    data: TokenRecord | MMRHistory,
-  ): Promise<void> {
+  private async setCache(key: TokenKey, data: TokenRecord | MMRHistory): Promise<void> {
     if (this.isTokenRecord(data)) {
       const ttl = this.getTtl(data)
 
@@ -232,11 +220,7 @@ export class TokenStore {
     }
   }
 
-  private toRecord(
-    row: ProviderEntity,
-    provider: TokenProvider,
-    userId: string,
-  ): TokenRecord {
+  private toRecord(row: ProviderEntity, provider: TokenProvider, userId: string): TokenRecord {
     // twitch bot and spotify tokens are considered oauth tokens
     if (provider === 'spotify') {
       const castRow = row as OauthToken
