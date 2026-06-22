@@ -15,10 +15,10 @@ const plugin: FastifyPluginAsync = async (fastify) => {
       // @ts-expect-error ignore constructor complaint, false positive
       preValidation: fastifyPassport.authenticate('twitch', {
         scope: TWITCH_BROADCASTER_SCOPE_STRING,
-        forceVerify: true
+        forceVerify: true,
       }),
     },
-    async () => { },
+    async () => {},
   )
 
   fastify.get(
@@ -30,7 +30,7 @@ const plugin: FastifyPluginAsync = async (fastify) => {
         scope: TWITCH_BOT_SCOPE_STRING,
       }),
     },
-    async () => { },
+    async () => {},
   )
 
   fastify.get(
@@ -42,9 +42,9 @@ const plugin: FastifyPluginAsync = async (fastify) => {
     },
     async (req, reply) => {
       /**
-                if spotify info is present, we should set the refresh token proactively
-                this is used for everyone, whether they're logged in or not
-            */
+        if spotify info is present, we should set the refresh token proactively
+        this is used for everyone, whether they're logged in or not
+      */
       if (!req.user) {
         return reply.status(401).send({ error: 'Authentication failed' })
       }
