@@ -36,14 +36,19 @@ export class Bot extends EventEmitter {
   constructor(
     channels: string[],
     private readonly tokenStore: TokenStore,
+    authWaiter?: AuthWaiter,
   ) {
     super()
     this.channels = channels
     this.botId = envConfig.TWITCH_BOT_ID
     this.eventRegistry = new EventRegistry()
-    this.authWaiter = new AuthWaiter()
     this.firstMessageTracker = new FirstMessageTracker()
     this.commandRegistry = new CommandRegistry('!', this.say.bind(this))
+    if (authWaiter) {
+      this.authWaiter = authWaiter
+    } else {
+      this.authWaiter = new AuthWaiter()
+    }
   }
 
   private initializeClients(authProvider: RefreshingAuthProvider) {
@@ -191,10 +196,14 @@ export class Bot extends EventEmitter {
   public async start(): Promise<void> {
     const broadcasterKey = `twitch:${envConfig.TWITCH_BROADCASTER_ID}` as TokenKey
     const botKey = `twitch:${envConfig.TWITCH_BOT_ID}` as TokenKey
-    const spotifyKey = `spotfiy:${envConfig.TWITCH_BROADCASTER_ID}` as TokenKey
+    const spotifyKey = `spotify:${envConfig.TWITCH_BROADCASTER_ID}` as TokenKey
 
     await this.ensureToken(broadcasterKey, 'Broadcaster')
     await this.ensureToken(botKey, 'Bot')
+    // await Promise.all([
+    //   this.ensureToken(broadcasterKey, 'Broadcaster'),
+    //   this.ensureToken(botKey, 'Bot'),
+    // ])
 
     const authProvider = await createAuthProvider(
       envConfig.TWITCH_CLIENT_ID,
@@ -267,22 +276,27 @@ export class Bot extends EventEmitter {
       return
     }
 
-    if (label.toLocaleLowerCase() === 'broadcaster') {
-      log.bot.warn(`${label} token missing — waiting for authentication...`)
-      log.bot.warn(
-        `========== Visit http://${config.CLIENT_URL}/api/auth/twitch/login to authenticate. ==========`,
-      )
-    } else if (label.toLocaleLowerCase() === 'bot') {
-      log.bot.warn(`${label} token missing — waiting for authentication...`)
-      log.bot.warn(
-        `========== Visit http://${config.CLIENT_URL}/twitch-login to authenticate. ==========`,
-      )
-    } else {
-      // must be spotify token
-      log.bot.warn(`${label} token missing — waiting for authentication...`)
-      log.bot.warn(
-        `========== Visit http://${config.CLIENT_URL}/spotify_login to authenticate. ==========`,
-      )
+    log.bot.warn(`${label} token missing — waiting for authentication...`)
+    switch (label.toLocaleLowerCase()) {
+      case 'broadcaster':
+        // TODO: make a redirect url for this route
+        log.bot.warn(
+          `========== Visit ${config.CLIENT_URL}/api/auth/twitch/login to authenticate. ==========`,
+        )
+        break
+      case 'bot':
+        log.bot.warn(
+          `========== Visit ${config.CLIENT_URL}/twitch_login to authenticate. ==========`,
+        )
+        break
+      case 'spotify':
+        log.bot.warn(
+          `========== Visit ${config.CLIENT_URL}/spotify_login to authenticate. ==========`,
+        )
+        break
+      default:
+        log.bot.error('Invalid token key provided, please check your environment variables.')
+        process.exit(1)
     }
 
     await this.authWaiter.waitFor(tokenKey) // blocks here until notify() fires

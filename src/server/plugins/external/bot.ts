@@ -5,7 +5,7 @@ import { config } from '@core/config/env'
 export default fp(
   async (server) => {
     // tokenStore already exists on app — registered by tokenStore plugin
-    const bot = new Bot(config.TWITCH_CHANNELS, server.tokenStore)
+    const bot = new Bot(config.TWITCH_CHANNELS, server.tokenStore, server.authWaiter)
 
     if (server) server.decorate('bot', bot)
     // REVIEW: do we need this?
@@ -21,6 +21,6 @@ export default fp(
   },
   {
     name: 'bot',
-    dependencies: ['tokenStore'],
+    dependencies: ['authWaiter', 'tokenStore'],
   },
 )
