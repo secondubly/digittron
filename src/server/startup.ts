@@ -8,7 +8,7 @@ interface ServerBuildOptions {
   withBot?: boolean
 }
 function getLoggerOptions() {
-  if (process.stdout.isTTY || process.env.NODE_ENV === 'development') {
+  if (process.stdout.isTTY && process.env.NODE_ENV === 'development') {
     return {
       level: 'trace',
       transport: {
