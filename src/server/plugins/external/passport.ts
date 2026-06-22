@@ -25,6 +25,10 @@ export default fp(
 
     // what gets stored in the session
     fastifyPassport.registerUserSerializer(async (user: User) => {
+      if (!user) {
+        return
+      }
+
       return user.twitch_id
     })
 
@@ -72,7 +76,7 @@ export default fp(
 
             fastify.authWaiter.notify(`twitch:${profile.id}`)
 
-            // only create login sessions for a non-bot account
+            // only create login sessions for broadcaster account
             if (profile.id === config.TWITCH_BROADCASTER_ID) {
               const user: User | null = await request.em.findOne(User, {
                 twitch_id: profile.id,
@@ -105,7 +109,7 @@ export default fp(
           {
             clientID: config.SPOTIFY_CLIENT_ID,
             clientSecret: config.SPOTIFY_CLIENT_SECRET,
-            callbackURL: `${config.CLIENT_URL}/api/spotify/callback`,
+            callbackURL: `http://127.0.0.1:4000/api/spotify/callback`,
             // @ts-expect-error(ignore call error, false positive)
             scope: SPOTIFY_SCOPES,
           },
@@ -126,6 +130,10 @@ export default fp(
                 userId: profile.id,
                 provider: 'spotify',
               } as ThirdPartyTokenRecord)
+
+              // notify bot that spotify token has been set
+              fastify.authWaiter.notify(`spotify:${config.TWITCH_BROADCASTER_ID}`)
+
               done(null)
             } catch (err) {
               done(err as Error, profile)
