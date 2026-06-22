@@ -74,10 +74,13 @@ export default fp(
 
             // only create login sessions for a non-bot account
             if (profile.id === config.TWITCH_BROADCASTER_ID) {
-              // REVIEW: should we ping db directly or use token store?
-              const user = (await request.em.findOne(User, {
+              const user: User | null = await request.em.findOne(User, {
                 twitch_id: profile.id,
-              })) as User
+              })
+
+              if (!user) {
+                throw Error('User not found during callback.')
+              }
 
               // object that is passed to registerUserSerializer
               done(null, {
