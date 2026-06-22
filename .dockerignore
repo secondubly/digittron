@@ -2,6 +2,7 @@
 .git
 .gitignore
 .github/
+.gitmodules
 
 # Ignore Node.js specific files and directories
 node_modules/
@@ -32,6 +33,7 @@ temp/
 
 # eslint files
 eslint.config.mjs
+commitlint.config.js
 
 # Extras 
 **/*.md
