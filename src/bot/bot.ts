@@ -191,9 +191,10 @@ export class Bot extends EventEmitter {
   public async start(): Promise<void> {
     const broadcasterKey = `twitch:${envConfig.TWITCH_BROADCASTER_ID}` as TokenKey
     const botKey = `twitch:${envConfig.TWITCH_BOT_ID}` as TokenKey
+    const spotifyKey = `spotfiy:${envConfig.TWITCH_BROADCASTER_ID}` as TokenKey
 
     await this.ensureToken(broadcasterKey, 'Broadcaster')
-    await this.ensureToken(botKey, 'Bot account')
+    await this.ensureToken(botKey, 'Bot')
 
     const authProvider = await createAuthProvider(
       envConfig.TWITCH_CLIENT_ID,
@@ -204,9 +205,9 @@ export class Bot extends EventEmitter {
     this.initializeClients(authProvider)
 
     if (envConfig.SPOTIFY_CLIENT_ID && envConfig.SPOTIFY_CLIENT_SECRET) {
-      const spotifyToken = (await this.tokenStore.get(
-        `spotify:${envConfig.TWITCH_BROADCASTER_ID}`,
-      )) as OauthTokenRecord | null
+      await this.ensureToken(spotifyKey, 'Spotify')
+
+      const spotifyToken = (await this.tokenStore.get(spotifyKey)) as OauthTokenRecord | null
 
       if (!spotifyToken || !spotifyToken.refreshToken) {
         log.bot.warn('Spotify token missing or malformed — Spotify commands unavailable')
@@ -271,10 +272,16 @@ export class Bot extends EventEmitter {
       log.bot.warn(
         `========== Visit http://${config.CLIENT_URL}/api/auth/twitch/login to authenticate. ==========`,
       )
-    } else {
+    } else if (label.toLocaleLowerCase() === 'bot') {
       log.bot.warn(`${label} token missing — waiting for authentication...`)
       log.bot.warn(
         `========== Visit http://${config.CLIENT_URL}/twitch-login to authenticate. ==========`,
+      )
+    } else {
+      // must be spotify token
+      log.bot.warn(`${label} token missing — waiting for authentication...`)
+      log.bot.warn(
+        `========== Visit http://${config.CLIENT_URL}/spotify_login to authenticate. ==========`,
       )
     }
 
