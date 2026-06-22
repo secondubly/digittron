@@ -39,7 +39,7 @@ export async function init({ withBot = true }: ServerBuildOptions = {}) {
 
   // used to determine whether to load bot plugin or not
   server.decorate('withBot', withBot)
-  server.register(fp(bootstrap))
+  await server.register(fp(bootstrap)) // this must complete before we can access orm
 
   closeWithGrace(
     {
