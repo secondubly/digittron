@@ -8,24 +8,24 @@ export class AuthWaiter extends EventEmitter {
    */
   waitFor(tokenKey: string, timeoutMs?: number): Promise<void> {
     return new Promise((resolve, reject) => {
+      let timer: NodeJS.Timeout | null = null
       const onAuth = (key: string) => {
         if (key !== tokenKey) return
-        // REVIEW: verify this
-        if (timer) {
-          clearTimeout(timer)
-        }
+
+        if (timer) clearTimeout(timer)
+
+        // .off() is alias for removeListener
         this.off('authenticated', onAuth)
         resolve()
       }
 
       this.on('authenticated', onAuth)
-
-      const timer = timeoutMs
-        ? setTimeout(() => {
-            this.off('authenticated', onAuth)
-            reject(new Error(`Timed out waiting for auth: ${tokenKey}`))
-          }, timeoutMs)
-        : null
+      if (timeoutMs) {
+        timer = setTimeout(() => {
+          this.off('authenticated', onAuth)
+          reject(new Error(`Timed out waiting for auth: ${tokenKey}`))
+        }, timeoutMs)
+      }
     })
   }
 
