@@ -23,7 +23,7 @@ export class CommandRegistry {
 
     const imports = files
       .filter((f) =>
-        process.env.NODE_ENV === 'development' ? f.endsWith('.ts') : f.endsWith('.js'),
+        process.env.NODE_ENV === 'production' ? f.endsWith('.js') : f.endsWith('.ts'),
       )
       .map((f) => path.join(dir, f))
 

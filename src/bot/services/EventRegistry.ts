@@ -14,13 +14,20 @@ export class EventRegistry {
         entries.map(async (entry) => {
           const fullPath = path.join(folder, entry.name)
 
+          // if we're in a directory, pass it to walk
           if (entry.isDirectory()) {
             await walk(fullPath)
             return
           }
-
-          // TODO: add a check for js files and NODE_ENV = prod
-          if (!entry.name.endsWith('.ts') || entry.name === 'types.ts') return
+          if (process.env.NODE_ENV === 'production') {
+            // in production, we only care about .js files, ignore declaration files or types
+            if (entry.name.endsWith('.ts') || entry.name.startsWith('types')) {
+              return
+            }
+          } else if (!entry.name.endsWith('.ts') || entry.name === 'types.ts') {
+            // in development skip any files that don't end in .ts or the types.ts file
+            return
+          }
 
           const mod = await import(fullPath)
           const exported = mod.default

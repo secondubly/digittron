@@ -5,7 +5,7 @@ export const init = (port: number) => {
   console.log(`Initializing web on port ${port}`)
 
   let server: FastifyInstance
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === 'production') {
     server = fastify({
       loggerInstance: log.web as FastifyBaseLogger,
     })
@@ -21,8 +21,9 @@ export const init = (port: number) => {
     return 'pong\n'
   })
 
-  if (process.env.NODE_ENV === 'development') {
-    return server.listen({ port }, (err, address) => {
+  if (process.env.NODE_ENV === 'production') {
+    // if running via docker, listen on all interfaces to enable connection from outside the container
+    return server.listen({ port, host: '0.0.0.0' }, (err, address) => {
       if (err) {
         console.error(err)
         process.exit(1)
@@ -30,8 +31,7 @@ export const init = (port: number) => {
       console.log(`Web server listening at ${address}`)
     })
   } else {
-    // if running via docker, listen on all interfaces to enable connection from outside the container
-    return server.listen({ port, host: '0.0.0.0' }, (err, address) => {
+    return server.listen({ port }, (err, address) => {
       if (err) {
         console.error(err)
         process.exit(1)

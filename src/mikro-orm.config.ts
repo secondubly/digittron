@@ -1,9 +1,15 @@
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection'
 import { Migrator } from '@mikro-orm/migrations'
 import { defineConfig } from '@mikro-orm/sqlite'
+import path from 'path'
 
-const dbPath =
-  process.env.NODE_ENV === 'development' ? 'src/core/db/sqlite.db' : '/app/data/sqlite.db'
+let dbPath: string
+
+if (process.env.NODE_ENV === 'production') {
+  dbPath = '/app/data/sqlite.db'
+} else {
+  dbPath = path.join(process.cwd(), '../', 'db', 'sqlite.db')
+}
 
 export default defineConfig({
   dbName: dbPath,
@@ -15,12 +21,14 @@ export default defineConfig({
   // check the documentation for their differences: https://mikro-orm.io/docs/metadata-providers
   metadataProvider: TsMorphMetadataProvider,
   // enable debug to log sql queries and discovery information
-  debug: process.env.NODE_ENV === 'development' ? true : false,
+  debug: process.env.NODE_ENV === 'production' ? false : true,
   extensions: [Migrator],
   migrations: {
     tableName: 'digittron_migrations',
-    path: './src/core/db/migrations',
+    path: './build/core/db/migrations',
     pathTs: './src/core/db/migrations',
-    glob: '*.{js,ts}',
+  },
+  discovery: {
+    warnWhenNoEntities: true,
   },
 })

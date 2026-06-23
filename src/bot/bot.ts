@@ -61,7 +61,12 @@ export class Bot extends EventEmitter {
       authProvider,
     })
 
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'production') {
+      this.eventSub = new EventSubWsListener({
+        apiClient: this.apiClient,
+        logger: { minLevel: 'info' },
+      })
+    } else {
       if (!envConfig.NGROK_AUTH_TOKEN || !envConfig.EVENT_SUB_SECRET) {
         log.bot.warn(
           'Missing NGROK_AUTH and/or EVENT_SUB_SECRET keys, the bot might be running in an insecure state.',
@@ -76,11 +81,6 @@ export class Bot extends EventEmitter {
         }),
         logger: { minLevel: 'debug' },
         secret: process.env.EVENTSUB_SECRET ?? 'thisShouldBeARandomlyGeneratedFixedString',
-      })
-    } else {
-      this.eventSub = new EventSubWsListener({
-        apiClient: this.apiClient,
-        logger: { minLevel: 'info' },
       })
     }
   }
@@ -200,10 +200,6 @@ export class Bot extends EventEmitter {
 
     await this.ensureToken(broadcasterKey, 'Broadcaster')
     await this.ensureToken(botKey, 'Bot')
-    // await Promise.all([
-    //   this.ensureToken(broadcasterKey, 'Broadcaster'),
-    //   this.ensureToken(botKey, 'Bot'),
-    // ])
 
     const authProvider = await createAuthProvider(
       envConfig.TWITCH_CLIENT_ID,

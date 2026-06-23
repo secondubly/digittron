@@ -32,7 +32,7 @@ const EnvSchema = Type.Object({
   EVENT_SUB_SECRET: Type.Optional(Type.String({ minLength: 1 })),
   CLIENT_URL: Type.Optional(Type.String()),
   NODE_ENV: Type.Union([Type.Literal('development'), Type.Literal('production')], {
-    default: 'development',
+    default: 'production',
   }),
 })
 

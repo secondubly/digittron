@@ -17,7 +17,7 @@ export default fp(
         ttl: SESSION_TTL_S,
       }),
       cookie: {
-        secure: config.NODE_ENV === 'production',
+        secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
         sameSite: 'lax',
         maxAge: SESSION_TTL_MS, // 7 days in milliseconds
