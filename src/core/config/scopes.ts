@@ -21,10 +21,15 @@ export const TWITCH_BROADCASTER_SCOPES = [
 ] as const
 
 export const TWITCH_BOT_SCOPES = [
+  'chat:edit',
+  'chat:read',
+  'moderator:manage:blocked_terms',
   'moderator:manage:announcements',
   'moderator:manage:banned_users',
+  'moderator:manage:chat_settings',
   'moderator:manage:chat_messages',
   'moderator:manage:shoutouts',
+  'moderator:manage:unban_requests',
   'moderator:manage:warnings',
   'moderator:read:chat_settings',
   'moderator:read:chatters',
@@ -34,8 +39,6 @@ export const TWITCH_BOT_SCOPES = [
   'user:bot',
   'user:read:chat',
   'user:write:chat',
-  'chat:read',
-  'chat:edit',
 ] as const
 
 export const SPOTIFY_SCOPES = [
@@ -56,8 +59,7 @@ export type SpotifyScope = (typeof SPOTIFY_SCOPES)[number]
 
 // Used for Oauth URLs
 
-export const TWITCH_BROADCASTER_SCOPE_STRING =
-  TWITCH_BROADCASTER_SCOPES.join(' ')
+export const TWITCH_BROADCASTER_SCOPE_STRING = TWITCH_BROADCASTER_SCOPES.join(' ')
 export const TWITCH_BOT_SCOPE_STRING = TWITCH_BOT_SCOPES.join(' ')
 export const SPOTIFY_SCOPE_STRING = SPOTIFY_SCOPES.join(' ')
 
