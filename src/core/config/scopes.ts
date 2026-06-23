@@ -14,6 +14,7 @@ export const TWITCH_BROADCASTER_SCOPES = [
   'channel:read:predictions',
   'channel:read:redemptions',
   'channel:read:subscriptions',
+  'channel:read:ads',
   'channel:read:vips',
   'clips:edit',
   'moderation:read',
