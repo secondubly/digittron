@@ -1,5 +1,4 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
-import { config } from '@core/config/env'
 
 const plugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
   fastify.get(
@@ -14,7 +13,7 @@ const plugin: FastifyPluginAsync = async (fastify: FastifyInstance) => {
       return {
         status: 'ok',
         uptime: process.uptime(),
-        env: config.NODE_ENV,
+        env: process.env.NODE_ENV,
         timestamp: Date.now(),
         bot: fastify.bot?.isRunning() ?? false,
       }
