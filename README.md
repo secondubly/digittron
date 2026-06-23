@@ -5,34 +5,24 @@ Twitch bot for secondubly and his community, built in NodeJS with a React fronte
 ```
 digittron
 ├── build # build files
-├── data # database file and schema
-├── initdb.sh # init (and seeding) script for database
-└── src
-    ├── api # API server
-    ├── bot # twitch bot
-    │   └── commands # twitch bot commands
-    ├── lib # shared core functionality
-    │   ├── bot # commonly used types
-    │   ├── db # database models
-    │   └── utils # utility functions
-    └── web # frontend 
+├── db # database location
+├── src 
+│   ├── bot # twitch bot
+│   ├── core # shared functions/classes/types
+│   ├── server # API
+│   └── web # frontend
+└── tests # unit tests
 ```
 
 ## Development
 
 ### Setup
 
-1. Copy `.env.example` to `.env` and fill in your credentials.
-    * For bot access token, use the following url: 
-        ```
-        https://id.twitch.tv/oauth2/authorize?client_id=CLIENT_ID&redirect_uri=http://localhost:3000&response_type=code&scope=channel:edit:commercial+channel:moderate+chat:read+chat:edit+clips:edit+moderator:manage:announcements+moderator:manage:banned_users+moderator:manage:blocked_terms+moderator:manage:chat_messages+moderator:manage:shoutouts+moderator:manage:unban_requests+moderator:manage:warnings+moderator:read:chat_settings+moderator:read:chatters+moderator:read:followers+moderator:read:moderators+moderator:read:vips+user:bot+user:read:chat+user:write:chat&force_verify=true
-        ```
-    * For broadcaster access token, use the following url:
-        ```
-        https://id.twitch.tv/oauth2/authorize?client_id=CLIENT_ID&redirect_uri=http://localhost:3000&response_type=code&scope=bits:read+channel:bot+channel:read:ads+channel:manage:broadcast+channel:manage:polls+channel:manage:predictions+channel:manage:raids+channel:manage:redemptions+channel:manage:schedule+channel:manage:videos+channel:read:editors+channel:read:hype_train+channel:read:polls+channel:read:predictions+channel:read:redemptions+channel:read:subscriptions+channel:read:vips+clips:edit+moderation:read+user:read:subscriptions&force_verify=true
-        ```
+1. Copy `.env.example` to `.env` and fill in credentials and fields as needed.
     * In development mode, you will need an ngrok auth token - you can get one by signing up here: http://ngrok.com. This is used to enable the “Bot” badge for the bot, allowing extra functionality.
-    * The `EVENTSUB_SECRET` is just a randomly generated string.
+2. On first launch the bot will ask you to navigate to a webpage to give itself permissions from both the broadcaster, and the account the bot will be running as. Once those are done, the bot will run as normal.
+    * If you wish to use spotify related commands, you **must** fill out the SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET fields in your env file. How to get those is outside the scope of this project, but you can read more about it [here](https://developer.spotify.com/documentation/web-api/concepts/apps).
+
 
 
 
@@ -50,36 +40,48 @@ pnpm run dev
 
 ```
 # Build and run with docker - will create a persistent redis service as well
+# Download the supplied docker-compose.yml file
 # Add optional “-d” flag to run in detached mode
 docker compose up
 ```
 
 ### Environment Variables
 
-* `CLIENT_ID`: Twitch application Client ID
-* `CLIENT_SECRET`: Twitch application Client Secret
-* `BOT_ID`: Twitch ID of bot account
-* `TWITCH_ID`: Twitch broadcaster/owner account ID
-* `CHANNELS`: List of twitch channels to connect to (separated by commas)
+* `TWITCH_CLIENT_ID`: Twitch application Client ID
+* `TWITCH_CLIENT_SECRET`: Twitch application Client Secret
+* `TWITCH_BOT_ID`: Twitch ID of bot account
+* `TWITCH_BROADCASTER_ID`: Twitch ID of broadcaster account
+* `TWITCH_CHANNELS`=comma separated list of channels to connect to
+* `REDIS_URL`: URL to connect to your redis instance (in development mode, default is localhost)
+* `ENCRYPTION_KEY`= Used to encrypt access tokens and refresh tokens
+* `SESSION_SECRET`: Used to encrypt login sessions for the dashboard
+* `COOKIE_SECRET`: Used to encrypt cookies for sensitive information
+* `API_PORT`: Port that backend server runs on (defaults to 4000)
+* `WEB_PORT`: Port that frontend runs on (in development mode only, defaults to 5000)
+* `NODE_ENV`=development # defaults to production if not provided
 * `SPOTIFY_CLIENT_ID`: Spotify application Client ID (Optional)
 * `SPOTIFY_CLIENT_SECRET`: Spotify application client secret (Optional)
-* `REDIS_URL`: URL to connect to your redis instance (in development mode, default is localhost)
-* `NODE_ENV`: Whether to run bot in production or development mode
+* `STEAM_ID`: Used to grab Deadlock information (Optional)
+* `RATE_LIMIT_MAX`: Used to prevent server overload
 * `NGROK_AUTH_TOKEN`: Only needed in development mode, ngrok auth token is used to create a EventSub adapter
 * `EVENTSUB_SECRET`: Only needed in development mode, eventsub secret is used to validate connections to EventSub adapter
+* `CLIENT_URL`: URL that the built client runs on (defaults to http://localhost:4000)
 
 
 ## Bot Commands
 
 * `!anniversary` - Prints stream anniversary message
 * `!backseat` - backseating message announcement
+* `!blind` - message about first playthroughs (and backseating)
 * `!commands` - list all available commands
 * `!d20` - roll a d20
-* `!details` lists a summary of the currently playing game
-* `!discord` - list the discord url
+* `!details` a summary of the current game
+* `!discord` - the discord url
 * `!game` - shows the game (or change the stream game if you're a moderator)
 * `!permit` - allow specified user to post links without being timed out
+* `!playlist` - link to the stream playlist
 * `!raidmsg` - shows the outgoing raid message
+* `!rank` - Shows the broadcaster's deadlock rank
 * `!roulette` - I count six shots (okay maybe just one)
 * `!subgoal` - subgoals for the anniversary stream
 * `!test` - test command for mods/broadcaster
