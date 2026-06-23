@@ -8,10 +8,10 @@ import { log } from '@core/utils/logger'
 export default fp(
   async (server: FastifyInstance) => {
     const orm = await MikroORM.init(mikroOrmConfig)
-
     log.app.info('Checking for database migrations...')
     await orm.migrator.up()
 
+    log.app.info('Database migrations complete')
     server.decorate('orm', orm)
     server.decorate('db', orm.em)
 
