@@ -3,10 +3,12 @@ import fp from 'fastify-plugin'
 import closeWithGrace from 'close-with-grace'
 import bootstrap from './build'
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox'
+import { config } from '@core/config/env'
 
 interface ServerBuildOptions {
   withBot?: boolean
 }
+
 function getLoggerOptions() {
   if (process.stdout.isTTY && process.env.NODE_ENV === 'development') {
     return {
@@ -22,7 +24,7 @@ function getLoggerOptions() {
     }
   }
 
-  return { level: process.env.LOG_LEVEL ?? 'silent' }
+  return { level: process.env.LOG_LEVEL ?? 'info' }
 }
 
 export async function init({ withBot = true }: ServerBuildOptions = {}) {
@@ -39,7 +41,13 @@ export async function init({ withBot = true }: ServerBuildOptions = {}) {
 
   // used to determine whether to load bot plugin or not
   server.decorate('withBot', withBot)
-  await server.register(fp(bootstrap)) // this must complete before we can access orm
+  await server.register(
+    fp(
+      await bootstrap({
+        redisUrl: config.REDIS_URL,
+      }),
+    ),
+  ) // this must complete before we can access orm
 
   closeWithGrace(
     {
