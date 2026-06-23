@@ -19,7 +19,10 @@ export default ({ registry, apiClient, bot, say }: EventDeps): EventSubEvent => 
       // REVIEW: should we time out users who post links in commands?
       registry.dispatch(event, apiClient)
 
-      if (firstMessageTracker.isFirstMessage(chatterId)) {
+      const isBotOrBroadcaster = chatterId === config.TWITCH_BOT_ID || chatterId === config.TWITCH_BROADCASTER_ID
+
+      // we don't care about bot or broadcaster messages in chat
+      if (!isBotOrBroadcaster && firstMessageTracker.isFirstMessage(chatterId)) {
         log.bot.info(`👋  First message from ${chatterDisplayName} this stream`)
 
         if (audioAlertUsers.has(chatterId)) {
