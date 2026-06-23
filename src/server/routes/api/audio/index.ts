@@ -12,15 +12,23 @@ const plugin: FastifyPluginAsync = async (fastify) => {
       sse: true,
     },
     async (request, reply) => {
-      reply.raw.writeHead(200, {
-        'Access-Control-Allow-Credentials': 'true', // TODO: remove before release
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        // TODO:L remove before release
-        'Access-Control-Allow-Origin': request.headers.origin ?? 'http://localhost:5000',
-        Connection: 'keep-alive',
-        'X-Accel-Buffering': 'no', // disable nginx buffering
-      })
+      if (process.env.NODE_ENV === 'production') {
+        reply.raw.writeHead(200, {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          Connection: 'keep-alive',
+          'X-Accel-Buffering': 'no', // disable nginx buffering
+        })
+      } else {
+        reply.raw.writeHead(200, {
+          'Access-Control-Allow-Credentials': 'true',
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Access-Control-Allow-Origin': request.headers.origin ?? 'http://localhost:5000',
+          Connection: 'keep-alive',
+          'X-Accel-Buffering': 'no', // disable nginx buffering
+        })
+      }
 
       reply.raw.write('event: connected\ndata: {"status":"ok"}\n\n')
 
