@@ -31,4 +31,5 @@ export default defineConfig({
   discovery: {
     warnWhenNoEntities: true,
   },
+  ensureDatabase: true
 })
