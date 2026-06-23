@@ -35,7 +35,7 @@ export class TokenStore {
 
   async connect(): Promise<void> {
     await this.redis.connect()
-    console.log('TokenStore connected to Redis')
+    log.app.info('TokenStore connected to Redis')
   }
 
   async disconnect(): Promise<void> {
