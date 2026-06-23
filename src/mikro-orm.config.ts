@@ -8,7 +8,7 @@ let dbPath: string
 if (process.env.NODE_ENV === 'production') {
   dbPath = '/app/data/sqlite.db'
 } else {
-  dbPath = path.join(process.cwd(), '../', 'db', 'sqlite.db')
+  dbPath = path.join(process.cwd(), 'db', 'sqlite.db')
 }
 
 export default defineConfig({
