@@ -141,7 +141,6 @@ export class TokenStore {
     const Entity = this.getEntity(provider)
     const userIdField = this.getUserIdField(provider)
 
-    // TODO: figure out why this is failing on fresh auth
     const existing = await this.em.findOne(Entity, {
       [userIdField]: userId,
     })
