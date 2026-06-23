@@ -17,6 +17,9 @@ if (process.env.NODE_ENV === 'development') {
 } else {
   logger = pino({
     level: 'info',
+    formatters: {
+      level: (label: string) => ({ level: label }),
+    },
   })
 }
 
