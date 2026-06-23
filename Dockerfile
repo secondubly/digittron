@@ -1,33 +1,32 @@
 FROM node:krypton-slim AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-ENV CI=true
-RUN apt update
-RUN apt-get install -y sqlite3 && rm -rf /var/cache/apk/*
-RUN corepack enable
 WORKDIR /usr/src/app
 
-FROM base AS dependencies
-COPY package.json /usr/src/app/
-COPY pnpm-lock.yaml /usr/src/app/
+# Install pnpm globally
+RUN npm install -g pnpm
+
+
+FROM base AS prod-dependencies
+COPY pnpm-lock.yaml package.json ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
 FROM base AS build
 COPY . .
-# create database file if needed
-RUN ./initdb.sh
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm run build
 
-FROM base AS production
-COPY --from=dependencies /usr/src/app/node_modules /usr/src/app/node_modules
-COPY --from=build /usr/src/app/build /usr/src/app/build
-# copy database
-COPY --from=build /usr/src/app/core/db /usr/src/app/core/db 
-COPY --from=build /usr/src/app/package.json /usr/src/app/package.json
-COPY --from=build /usr/src/app/tsconfig.json /usr/src/app/tsconfig.json
+FROM node:krypton-slim AS production
+WORKDIR /usr/src/app
+ENV NODE_ENV=production
 
-VOLUME ["/usr/src/app/db"]
+RUN npm install -g pnpm
+
+COPY --from=prod-dependencies /usr/src/app/node_modules /usr/src/app/node_modules
+COPY --from=build /usr/src/app/build ./build
+COPY --from=build /usr/src/app/tsconfig.json ./tsconfig.json
+COPY package.json ./
+
+RUN mkdir -p /app/data && chown -R node:node /app/data /app
+
 EXPOSE 4000 5000
 
 CMD ["pnpm", "start"]
