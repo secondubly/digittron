@@ -23,9 +23,9 @@
     "lint": "eslint . --ext .ts",
     "make:dirs": "pnpm exec mkdir -p build/server/public/assets build/server/uploads/audio",
     "mikro-orm": "mikro-orm",
-    "seed": "mikro-orm-esm seeder:run",
     "test": "node --import tsx --test \"./tests/**/*.test.ts\"",
-    "start": "node --env-file=.env build/main.js",
+    "start": "node build/main.js",
+    "start:env": "node --env-file=.env build/main.js",
     "web": "vite"
   },
   "keywords": [],
