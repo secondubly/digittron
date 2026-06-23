@@ -1,9 +1,14 @@
+import { config } from '@core/config/env.js'
 import { init as buildServer } from './server/startup.js'
 import { init as webInit } from './web/index.js'
 import { log } from '@core/utils/logger.js'
 
 // server controls bot as well
 const main = async () => {
+  if (!process.env.NODE_ENV) {
+    process.env.NODE_ENV = config.NODE_ENV
+  }
+
   const server = await buildServer()
   try {
     if (process.stdout.isTTY && process.env.NODE_ENV !== 'production') {
