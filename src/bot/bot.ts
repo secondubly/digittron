@@ -132,13 +132,13 @@ export class Bot extends EventEmitter {
     try {
       const schedule = await this.apiClient?.channels.getAdSchedule(envConfig.TWITCH_BROADCASTER_ID)
 
-      if (!schedule || schedule.nextAdDate) {
+      if (!schedule || !schedule.nextAdDate) {
         log.bot.info('No upcoming ad scheduled')
         return
       }
 
       log.bot.info(`Next ad at: ${schedule.nextAdDate} | duration: ${schedule.duration}s`)
-      this.scheduleWarning(schedule.nextAdDate!, schedule.duration)
+      this.scheduleWarning(schedule.nextAdDate, schedule.duration)
     } catch (err) {
       log.bot.error(`Poll error: ${err}`)
     }
