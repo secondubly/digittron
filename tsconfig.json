@@ -27,7 +27,7 @@
 
     // Other Outputs
     "sourceMap": false,
-    "declaration": false,
+    "declaration": true,
 
     // Stricter Typechecking Options
     "exactOptionalPropertyTypes": true,
