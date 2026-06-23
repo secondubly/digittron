@@ -1,14 +1,14 @@
 services:
   digittron:
-    container_name: digittron
-    image: ghcr.io/secondubly/digittron:latest
+    container_name: bot
+    image: secondubly/digittron
     build:
       context: .
       dockerfile: Dockerfile
     depends_on:
       redis:
-        condition: service_started
-    restart: unless-stopped
+        condition: service_healthy
+    restart: no
     ports:
       - "${WEB_PORT:-5000}:5000"
       - "${API_PORT:-4000}:4000"
@@ -38,15 +38,19 @@ services:
       - EVENTSUB_SECRET=${EVENTSUB_SECRET}
       - CLIENT_URL=${CLIENT_URL}
     volumes:
-      - ./db/:/usr/src/app/db
-    env_file:
-      - ./.env
+      - ./db/sqlite.db:/app/data/sqlite.db
   redis:
     container_name: redis
     image: redis:8.2.1
     restart: unless-stopped
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
 volumes:
   redis_data:
