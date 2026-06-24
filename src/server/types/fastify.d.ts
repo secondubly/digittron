@@ -8,6 +8,12 @@ import type { Bot } from 'src/bot/bot'
 import type { CommandRegistry } from '@lib/bot/CommandRegistry'
 import type { User } from '@core/db/models/user.entity'
 
+interface AuthUser {
+  twitch_id: string
+  username: string
+  avatar: string
+}
+
 declare module 'fastify' {
   interface FastifyInstance {
     orm: MikroORM<SqliteDriver>
@@ -25,13 +31,13 @@ declare module 'fastify' {
 
   interface FastifyRequest {
     em: EntityManager
-    session?: {
-      user?: {
-        username?: string | null
-        image?: string | null
-      }
-      expires: string
-    }
+    user: AuthUser
+  }
+
+  interface PassportUser {
+    id: string
+    username: string
+    avatar: string
   }
 
   type PassportUser = Pick<User, 'twitch_id' | 'username' | 'avatar'>
@@ -39,9 +45,9 @@ declare module 'fastify' {
 
 declare module '@fastify/session' {
   // placeholder
-  interface FastifySessionObject {
-    userId?: string
-    userName?: string
-    profileImg?: string
+  interface SessionData {
+    passport: {
+      user: string // user's id
+    }
   }
 }
