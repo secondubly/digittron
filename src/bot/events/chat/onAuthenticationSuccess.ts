@@ -17,15 +17,15 @@ export default ({ say }: EventDeps): EventSubEvent => ({
         'Psst, hey. Take me with you. I hate this job.',
       ]
 
-      if (isFirstConnection) {
-        const message =
-          startupMessages[Math.floor(Math.random() * startupMessages.length)]
-        config.TWITCH_CHANNELS.forEach((chan) => say(chan, message))
-        isFirstConnection = false
-      }
       log.bot.info(
         `${isFirstConnection ? 'Connected' : 'Reconnected'} to Twitch, requesting ${config.TWITCH_CHANNELS.length} channels: ${config.TWITCH_CHANNELS.join(', ')}`,
       )
+
+      if (isFirstConnection) {
+        const message = startupMessages[Math.floor(Math.random() * startupMessages.length)]
+        config.TWITCH_CHANNELS.forEach((chan) => say(chan, message))
+        isFirstConnection = false
+      }
     })
   },
 })
