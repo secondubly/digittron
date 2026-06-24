@@ -10,7 +10,6 @@ export interface EventDeps {
   registry: CommandRegistry
   bot: Bot
   apiClient: ApiClient
-  firstMessageTracker: FirstMessageTracker
   say: Bot['say']
 }
 
