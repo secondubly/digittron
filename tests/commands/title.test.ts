@@ -92,9 +92,9 @@ describe('!title command', () => {
       await titleCommand.execute(ctx)
 
       expect(client.channels.updateChannelInfo).toHaveBeenCalledWith(BROADCASTER_ID, {
-        title: 'New,Stream,Title',
+        title: 'New Stream Title',
       })
-      expect(ctx.say).toHaveBeenCalledWith('@ModUser updated game title to: New,Stream,Title.')
+      expect(ctx.say).toHaveBeenCalledWith('@ModUser updated game title to: New Stream Title.')
     })
 
     it('updates the title when the chatter is the broadcaster', async () => {
@@ -109,10 +109,10 @@ describe('!title command', () => {
       await titleCommand.execute(ctx)
 
       expect(client.channels.updateChannelInfo).toHaveBeenCalledWith(BROADCASTER_ID, {
-        title: 'Broadcaster,Title',
+        title: 'Broadcaster Title',
       })
       expect(ctx.say).toHaveBeenCalledWith(
-        '@BroadcasterUser updated game title to: Broadcaster,Title.',
+        '@BroadcasterUser updated game title to: Broadcaster Title.',
       )
     })
 
