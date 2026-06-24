@@ -25,7 +25,6 @@
     "mikro-orm": "mikro-orm",
     "test": "node --import tsx --test \"./tests/**/*.test.ts\"",
     "start": "node build/main.js",
-    "start:env": "node --env-file=.env build/main.js",
     "web": "vite"
   },
   "keywords": [],
