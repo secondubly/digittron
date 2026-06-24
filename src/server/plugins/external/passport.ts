@@ -25,29 +25,23 @@ export default fp(
 
     // what gets stored in the session
     fastifyPassport.registerUserSerializer(async (user: User) => {
-      if (!user) {
-        return
-      }
-
+      if (!user?.twitch_id) throw new Error('Cannot serialize user: missing twitch_id')
       return user.twitch_id
     })
 
     // what gets loaded from the session on each request
-    fastifyPassport.registerUserDeserializer(async (id: number, req) => {
+    fastifyPassport.registerUserDeserializer(async (payload: { user: string }, req) => {
+      const id = typeof payload === 'object' ? payload.user : payload
       const user = await req.em.findOne(
         User,
-        {
-          twitch_id: id.toString(),
-        },
+        { twitch_id: id },
         {
           fields: ['twitch_id', 'username', 'avatar'],
         },
       )
-      if (!user) {
-        return
-      } else {
-        return user
-      }
+      if (!user) throw new Error(`No user found for twitch_id: ${id}`)
+
+      return user
     })
 
     fastifyPassport.use(
@@ -85,13 +79,8 @@ export default fp(
               if (!user) {
                 throw Error('User not found during callback.')
               }
-
               // object that is passed to registerUserSerializer
-              done(null, {
-                twitch_id: user.twitch_id,
-                avatar: user.avatar,
-                username: user.username,
-              })
+              done(null, user)
             } else {
               done(null)
             }
