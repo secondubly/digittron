@@ -23,7 +23,8 @@
     "lint": "eslint . --ext .ts",
     "make:dirs": "pnpm exec mkdir -p build/server/public/assets build/server/uploads/audio",
     "mikro-orm": "mikro-orm",
-    "test": "node --import tsx --test \"./tests/**/*.test.ts\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "start": "node build/main.js",
     "web": "vite"
   },
