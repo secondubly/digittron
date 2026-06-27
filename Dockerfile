@@ -2,16 +2,18 @@ FROM node:krypton-slim AS base
 WORKDIR /usr/src/app
 
 # Install pnpm globally
-RUN npm install -g pnpm
+RUN npm install -g pnpm@11
 
 
 FROM base AS prod-dependencies
-COPY pnpm-lock.yaml package.json ./
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
 
 FROM base AS build
-COPY . .
+# Copy config files first so pnpm install has allowBuilds available
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+COPY . .
 RUN pnpm run build
 
 FROM node:krypton-slim AS production
@@ -29,4 +31,4 @@ RUN mkdir -p /app/data && chown -R node:node /app/data /app
 
 EXPOSE 4000 5000
 
-CMD ["pnpm", "start"]
+CMD ["node", "build/main.js"]
