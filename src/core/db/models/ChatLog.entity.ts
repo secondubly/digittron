@@ -6,11 +6,11 @@ export class ChatLog {
   id!: number
 
   @Property()
-  user_id!: string
+  userId!: string
 
   @Property()
   message!: string
 
   @Property({ onCreate: () => new Date() })
-  created_at: Date = new Date()
+  createdAt: Date = new Date()
 }

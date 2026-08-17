@@ -1,11 +1,7 @@
-import {
-  Entity,
-  PrimaryKey,
-  Property,
-  ManyToOne,
-} from '@mikro-orm/decorators/legacy'
+import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/decorators/legacy'
 import type { Rel } from '@mikro-orm/core'
-import { BaseEntity, User } from './user.entity'
+import { User } from './User.entity'
+import { BaseEntity } from './BaseEntity'
 
 @Entity()
 export class AudioAlert extends BaseEntity {

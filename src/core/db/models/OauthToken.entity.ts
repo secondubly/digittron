@@ -1,10 +1,5 @@
-import {
-  Entity,
-  ManyToOne,
-  PrimaryKey,
-  Property,
-} from '@mikro-orm/decorators/legacy'
-import { BaseEntity, User } from './user.entity'
+import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy'
+import { BaseEntity, User } from './User.entity'
 
 @Entity()
 export class OauthToken extends BaseEntity {
