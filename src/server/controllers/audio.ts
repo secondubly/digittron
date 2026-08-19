@@ -1,4 +1,4 @@
-import { AudioAlert } from '@core/db/models/audio_alert.entity'
+import { AudioAlert } from '@core/db/models/AudioAlert.entity'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import path from 'node:path'
 import { createWriteStream } from 'fs'
