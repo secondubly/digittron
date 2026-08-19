@@ -31,5 +31,5 @@ const main = async () => {
 }
 
 main().catch((err) => {
-  log.app.error(`Failed to start app: `, err)
+  log.app.error(`Failed to start app: ${err.message}`)
 })
