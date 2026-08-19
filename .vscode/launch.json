@@ -45,7 +45,7 @@
             "env": {
                 "NODE_ENV": "development"
             },
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env.development"
         },
         {
             "type": "node",
