@@ -1,4 +1,4 @@
-import { AudioAlert } from '@core/db/models/audio_alert.entity'
+import { AudioAlert } from '@core/db/models/AudioAlert.entity'
 import { log } from '@core/utils/logger'
 import type { FastifyPluginAsync } from 'fastify'
 import { deleteFile, getFile, updateFile, uploadFile } from '@server/controllers/audio'
