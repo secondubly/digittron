@@ -30,7 +30,8 @@ export class Bot extends EventEmitter {
   readonly firstMessageTracker: FirstMessageTracker
   private botId: string
   private scheduledTimer: NodeJS.Timeout | null = null
-  private pollInterval: NodeJS.Timeout | null = null
+  private pollTimer: NodeJS.Timeout | null = null
+  private pollExpected: number | null = null
   private running = false
 
   constructor(
@@ -86,22 +87,44 @@ export class Bot extends EventEmitter {
   }
 
   public startAdPoller() {
-    if (this.pollInterval) {
+    if (this.pollTimer) {
       log.bot.warn('Ad polling already started, skipping start call.')
       return
     }
 
     log.bot.info('Starting ad poller')
     this.poll()
-    this.pollInterval = setInterval(() => this.poll, envConfig.POLL_INTERVAL_MS)
+
+    this.pollExpected = Date.now() + envConfig.POLL_INTERVAL_MS
+    this.pollTimer = setTimeout(() => this.pollTick(), envConfig.POLL_INTERVAL_MS)
   }
 
   public stopAdPoller() {
-    if (this.pollInterval) clearInterval(this.pollInterval)
+    if (this.pollTimer) clearInterval(this.pollTimer)
     if (this.scheduledTimer) clearInterval(this.scheduledTimer)
 
-    this.pollInterval = null
+    this.pollTimer = null
     this.scheduledTimer = null
+  }
+
+  /**
+   * Calculate polling drift (if there is any) and fire the ad warning
+   */
+  private async pollTick() {
+    // if no poller has been set, we don't need to do anything
+    if (this.pollExpected === null) return
+
+    // how far off we actually fired vs. the ideal anchor
+    const drift = Date.now() - this.pollExpected
+
+    await this.poll()
+
+    // update when the next poll should fire
+    this.pollExpected += envConfig.POLL_INTERVAL_MS
+    // ideally drift should never be negative (aka the warning fired early) but if it ever is, set the next delay to 0 (fire immediately)
+    const nextDelay = Math.max(0, envConfig.POLL_INTERVAL_MS - drift)
+
+    this.pollTimer = setTimeout(() => this.pollTick(), nextDelay)
   }
 
   // if the bot restarts mid-stream, we don't want to miss any ads, so start polling again

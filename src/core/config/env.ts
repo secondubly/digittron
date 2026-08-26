@@ -6,7 +6,7 @@ const SpaceSeparatedChannels = Type.Transform(Type.String({ minLength: 1 }))
   .Decode((values) => {
     const channels = values.split(' ').map((c) => c.trim())
 
-    return channels // string[]
+    return channels
   })
   .Encode((channels) => channels.join(','))
 
@@ -18,8 +18,8 @@ const EnvSchema = Type.Object({
   TWITCH_BROADCASTER_ID: Type.String({ minLength: 1 }),
   TWITCH_BOT_ID: Type.String({ minLength: 1 }),
   TWITCH_CHANNELS: SpaceSeparatedChannels,
-  LEAD_TIME_MS: Type.Number({ default: 60_000 }),
-  POLL_INTERVAL_MS: Type.Number({ default: 300_000 }),
+  LEAD_TIME_MS: Type.Number({ default: 60_000 }), // default of 1 min
+  POLL_INTERVAL_MS: Type.Number({ default: 600_000 }), // default of 10 mins
   REDIS_URL: Type.String({ default: 'redis:6379' }),
   RATE_LIMIT_MAX: Type.Number({ default: 4 }),
   ENCRYPTION_KEY: Type.String({ minLength: 1 }),
