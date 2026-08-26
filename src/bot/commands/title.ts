@@ -4,6 +4,7 @@ const title: Command = {
   name: 'title',
   aliases: [],
   description: 'Show stream title (for viwers) or change stream title (for moderators and up)',
+  enabled: true,
   async execute({ msg, args, client, say }: CommandContext) {
     const { broadcasterId, chatterId, chatterDisplayName } = msg
     const channelInfo = await client.channels.getChannelInfoById(broadcasterId)

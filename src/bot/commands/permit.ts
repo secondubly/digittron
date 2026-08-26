@@ -18,6 +18,7 @@ export function isPermitted(userId: string): boolean {
 export default (): Command => ({
   name: 'permit',
   aliases: ['allow'],
+  enabled: true,
   description: 'Allow a user to post a link',
   modOnly: true,
   async execute({ client, args, say }: CommandContext) {
@@ -34,9 +35,7 @@ export default (): Command => ({
     }
 
     permitList.set(targetUser.id, Date.now() + PERMIT_DURATION_MS)
-    say(
-      `@${targetUser.displayName}, you may post one link in the next 60 seconds.`,
-    )
+    say(`@${targetUser.displayName}, you may post one link in the next 60 seconds.`)
 
     log.bot.info(`Permit granted to ${targetUser.displayName}`)
   },

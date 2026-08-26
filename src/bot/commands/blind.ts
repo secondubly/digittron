@@ -3,7 +3,7 @@ import type { Command } from '../types.js'
 const blind: Command = {
   name: 'blind',
   aliases: [],
-  // enabled: true,
+  enabled: true,
   description: 'Explanation of blind playthroughs',
   execute: async function ({ say }) {
     say(

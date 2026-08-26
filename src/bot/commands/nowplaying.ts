@@ -9,6 +9,7 @@ import { currentlyPlayingSchema } from '@server/schemas/spotify'
 export default ({ spotifyFetcher }: CommandDeps): Command => ({
   name: 'nowplaying',
   aliases: ['np', 'playing'],
+  enabled: true,
   description: 'Shows artist and title of currently playing song',
   async execute({ msg, say }: CommandContext) {
     const { chatterDisplayName } = msg

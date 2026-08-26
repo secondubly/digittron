@@ -3,7 +3,7 @@ import type { Command, CommandContext } from '../types.js'
 const raidmsg: Command = {
   name: 'raidmsg',
   aliases: [],
-
+  enabled: true,
   description: 'the channel’s raid message',
   async execute({ say }: CommandContext) {
     say(

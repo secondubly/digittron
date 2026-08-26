@@ -60,7 +60,7 @@ export class CommandRegistry {
     const [trigger, ...args] = text.slice(this.prefix.length).trim().split(/\s+/)
     const command = this.commands.get(trigger.toLowerCase())
 
-    if (!command) return
+    if (!command || !command.enabled) return
 
     // mod-only check
     if (command.modOnly && !this.isMod(msg)) {

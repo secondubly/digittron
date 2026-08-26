@@ -5,21 +5,19 @@ import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 const isMod = (msg: EventSubChannelChatMessageEvent): boolean => {
   // broadcaster is considered a mod in almost all cases
   return (
-    msg.chatterId === msg.broadcasterId ||
-    Object.keys(msg.badges).some((b) => b === 'moderator')
+    msg.chatterId === msg.broadcasterId || Object.keys(msg.badges).some((b) => b === 'moderator')
   )
 }
 
 const game: Command = {
   name: 'game',
   aliases: [],
-  description:
-    'Show currently streaming game (for viewers) OR change the current game.',
+  enabled: true,
+  description: 'Show currently streaming game (for viewers) OR change the current game.',
   async execute({ client, msg, args, say }: CommandContext) {
     const { broadcasterId, chatterDisplayName } = msg
     if (args.length === 0) {
-      const channelInfo =
-        await client.channels.getChannelInfoById(broadcasterId)
+      const channelInfo = await client.channels.getChannelInfoById(broadcasterId)
       if (!channelInfo) {
         log.bot.error('Could not retrieve channel info for !details command')
         return

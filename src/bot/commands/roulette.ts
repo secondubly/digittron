@@ -6,6 +6,7 @@ const SHOT_TIMEOUT_DURATION_SECONDS = 60
 export default (): Command => ({
   name: 'roulette',
   aliases: [],
+  enabled: true,
   description: 'Play russian roulette! Good luck!',
   async execute({ msg, client, say }: CommandContext) {
     const { broadcasterId, chatterId, chatterDisplayName } = msg
@@ -38,7 +39,5 @@ export const isTrustedUser = (event: EventSubChannelChatMessageEvent) => {
 
   if (chatterId === broadcasterId) return true
 
-  return Object.keys(event.badges).some(
-    (b) => b === 'moderator' || b === 'subscriber',
-  )
+  return Object.keys(event.badges).some((b) => b === 'moderator' || b === 'subscriber')
 }

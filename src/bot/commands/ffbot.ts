@@ -4,6 +4,7 @@ const ffbot: Command = {
   name: 'ffbot',
   aliases: ['ffbot'],
   description: 'Explains what FFBot is.',
+  enabled: false,
   execute: async function ({ say }): Promise<void> {
     const message =
       'FFBot is an idle game, inspired on Final Fantasy, with over 133 characters! To join in, type !join. ' +

@@ -3,6 +3,7 @@ import type { Command, CommandContext } from '../types.js'
 const d20: Command = {
   name: 'd20',
   aliases: [],
+  enabled: true,
   description: 'Roll a d20',
   execute: async function ({ msg, say }: CommandContext): Promise<void> {
     const displayName = msg.chatterDisplayName

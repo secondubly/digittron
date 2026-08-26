@@ -6,7 +6,7 @@ import type { TokenRecord } from '@core/tokens/types'
 export default ({ tokenStore }: CommandDeps): Command => ({
   name: 'details',
   aliases: [],
-  // enabled: true,
+  enabled: true,
   description: 'Description of currently streaming game',
   async execute({ client, msg, say }) {
     /**
@@ -16,9 +16,7 @@ export default ({ tokenStore }: CommandDeps): Command => ({
      *
      */
     const INVALID_GAME_IDS = ['509658', '1469308723']
-    const channelInfo = await client.channels.getChannelInfoById(
-      msg.broadcasterId,
-    )
+    const channelInfo = await client.channels.getChannelInfoById(msg.broadcasterId)
     if (!channelInfo) {
       // log an error
       log.bot.error('Could not retrieve channel info for !details command')
@@ -36,9 +34,7 @@ export default ({ tokenStore }: CommandDeps): Command => ({
       return
     }
 
-    const { accessToken } = (await tokenStore.get(
-      `twitch:${config.TWITCH_BOT_ID}`,
-    )) as TokenRecord
+    const { accessToken } = (await tokenStore.get(`twitch:${config.TWITCH_BOT_ID}`)) as TokenRecord
 
     if (!accessToken) {
       log.bot.warn(`Could not retrieve access token for ${this.name} request`)
@@ -73,8 +69,7 @@ export default ({ tokenStore }: CommandDeps): Command => ({
     } else if (gameData.summary) {
       message = gameData.summary
     } else {
-      message =
-        'Could not get a good enough summary for this game, ask the streamer!'
+      message = 'Could not get a good enough summary for this game, ask the streamer!'
     }
 
     let messages: string[] = []

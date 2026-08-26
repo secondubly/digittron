@@ -1,4 +1,4 @@
-import type { CommandContext, CommandDeps } from '../types'
+import type { Command, CommandContext, CommandDeps } from '../types'
 import type { TokenStore } from '@core/tokens/TokenStore'
 import { log } from '@core/utils/logger'
 import { config } from '@core/config/env'
@@ -28,9 +28,10 @@ const DEADLOCK_RANKS = new Map<number, string>([
   [11, 'Eternus'],
 ])
 
-const rank = ({ tokenStore }: CommandDeps) => ({
+const rank = ({ tokenStore }: CommandDeps): Command => ({
   name: 'rank',
   aliases: [],
+  enabled: false,
   description: 'Show Daedlock rank',
   async execute({ msg, say }: CommandContext) {
     if (!config.STEAM_ID) {
@@ -69,9 +70,7 @@ async function getDeadlockRank(
   if (!response.ok) {
     if (response.status === 500) {
       // use cached value
-      rank = (await tokenStore.get(
-        `deadlock:${steamId}`,
-      )) as unknown as MMRHistory
+      rank = (await tokenStore.get(`deadlock:${steamId}`)) as unknown as MMRHistory
       if (!rank) return null
     } else {
       // any other error just return null

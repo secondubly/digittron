@@ -23,6 +23,7 @@ export interface CommandContext {
 export interface Command {
   name: string
   aliases?: string[]
+  enabled: boolean
   description: string
   cooldownMs?: number // per-user cooldown
   modOnly?: boolean
