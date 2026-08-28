@@ -71,9 +71,11 @@ const commands = ({ getCommands }: CommandDeps) => ({
           break
       }
     } else {
-      const commands = getCommands()
-
-      const commandNames = commands.map((c) => `!${c.name}`).join(', ')
+      // only show enabled commands
+      const commandNames = commands
+        .filter((c) => c.enabled)
+        .map((c) => `!${c.name}`)
+        .join(', ')
       say(`@${chatterDisplayName} available commands: ${commandNames}`)
     }
   },
