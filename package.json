@@ -10,7 +10,7 @@
     "build:web": "vite build",
     "clean": "rm -rf build",
     "dev": "tsx watch --env-file=.env.development src/main.ts",
-    "dev:bot": "tsx watch --env-file=.env src/bot/main.ts",
+    "dev:bot": "tsx watch --env-file=.env.development src/bot/main.ts",
     "dev:server": "tsx watch --env-file=.env src/server/main.ts",
     "dev:web": "concurrently -c magenta,#7700cf -n API,WEB \"pnpm:dev:server\" \"vite\"",
     "format": "prettier --write .",

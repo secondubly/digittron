@@ -32,7 +32,7 @@
             "runtimeArgs": ["run", "dev:bot"],
             "runtimeExecutable": "pnpm",
             "outputCapture": "std", // enables pino logging to appear in console
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env.development"
         },
         {
             "type": "node",
