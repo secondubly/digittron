@@ -6,7 +6,7 @@ import type { RedisClientType } from 'redis'
 import type { AuthWaiter } from '@core/AuthWait'
 import type { Bot } from 'src/bot/bot'
 import type { CommandRegistry } from '@lib/bot/CommandRegistry'
-import type { User } from '@core/db/models/user.entity'
+import type { User } from '@core/db/models/User.entity'
 
 interface AuthUser {
   twitch_id: string
