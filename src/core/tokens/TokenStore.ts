@@ -8,7 +8,7 @@ import type {
 } from './types'
 import type { EntityClass, SqlEntityManager } from '@mikro-orm/sqlite'
 import { log } from '../utils/logger'
-import { User } from '../db/models/user.entity'
+import { User } from '../db/models/User.entity'
 import { OauthToken } from '../db/models/OauthToken.entity'
 import crypto from 'crypto'
 import { config } from '../config/env'

@@ -7,7 +7,7 @@ import {
   type VerifyCallback,
 } from 'passport-spotify'
 import { config } from '@core/config/env'
-import { User } from '@core/db/models/user.entity'
+import { User } from '@core/db/models/User.entity'
 import type { FastifyRequest } from 'fastify'
 import type { TokenStore } from '@core/tokens/TokenStore'
 import type { ThirdPartyTokenRecord } from '@core/tokens/types'

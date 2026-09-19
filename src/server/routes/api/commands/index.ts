@@ -1,4 +1,4 @@
-import { createCustomCommand } from '@root/src/server/controllers/commands'
+import { createCustomCommand } from '@server/controllers/commands'
 import type { FastifyPluginAsync } from 'fastify'
 
 const plugin: FastifyPluginAsync = async (fastify) => {

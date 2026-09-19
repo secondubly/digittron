@@ -7,7 +7,7 @@ import type { audioId, audioOptions, filename } from '../schemas/audio_alerts'
 import { pipeline } from 'node:stream'
 import type { MultipartValue } from '@fastify/multipart'
 import { promisify } from 'node:util'
-import { User } from '@core/db/models/user.entity'
+import { User } from '@core/db/models/User.entity'
 
 const UPLOAD_DIR = path.join(import.meta.dirname, '../', 'uploads', 'audio')
 

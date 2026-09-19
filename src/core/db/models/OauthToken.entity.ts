@@ -1,5 +1,5 @@
 import { Entity, ManyToOne, PrimaryKey, Property } from '@mikro-orm/decorators/legacy'
-import { User } from './user.entity'
+import { User } from './User.entity'
 import { BaseEntity } from './BaseEntity'
 
 @Entity()

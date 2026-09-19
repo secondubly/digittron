@@ -1,6 +1,6 @@
 import type { EventSubChannelChatMessageEvent } from '@twurple/eventsub-base'
 import type { CommandContext, CommandDeps } from '../types'
-import type { commandBody } from '@root/src/server/schemas/commands'
+import type { commandBody } from '@server/schemas/commands'
 import { config } from '@core/config/env'
 
 interface CommandFlags {
