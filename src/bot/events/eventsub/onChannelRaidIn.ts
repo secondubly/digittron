@@ -1,6 +1,5 @@
 import { log } from '@core/utils/logger'
 import type { EventDeps, EventSubEvent } from '../types'
-import { error } from 'node:console'
 
 export default ({ apiClient, say }: EventDeps): EventSubEvent => ({
   type: 'eventsub',
