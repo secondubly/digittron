@@ -8,14 +8,8 @@ export default ({ apiClient, say }: EventDeps): EventSubEvent => ({
     const listener = eventSub.onChannelRaidTo(broadcasterId, async (event) => {
       // get game info for raidingUser
       const raiderId = event.raidingBroadcasterId
-      const channelInfo = await apiClient.channels.getChannelInfoById(raiderId)
 
-      if (!channelInfo) {
-        log.bot.warn('Could not retrieve info for raiding broadcaster')
-        return
-      }
-
-      const raidMsg = `Everyone say hi to ${event.raidingBroadcasterDisplayName}! They were playing ${channelInfo.gameName ?? 'absolutely nothing!'}!`
+      const raidMsg = `Welcome raiders! Thank you so much for the raid ${event.raidingBroadcasterDisplayName}! Don't forget to give them a follow over at https://twitch.tv/${event.raidedBroadcasterName}!'}!`
       await say(event.raidedBroadcasterName, raidMsg)
 
       // shoutout raider
