@@ -10,19 +10,22 @@ const main = async () => {
   }
 
   const server = await buildServer()
+
   try {
-    if (process.stdout.isTTY && process.env.NODE_ENV !== 'production') {
-      server.log.info('Server running in development mode')
+    if (process.env.NODE_ENV === 'production') {
+      server.log.info('Server running in production mode')
       server.listen({
-        port: (process.env.API_PORT as unknown as number) ?? 4001,
-      })
-      // start web server if we're in dev mode
-      webInit((process.env.WEB_PORT as unknown as number) ?? 50001)
-    } else {
-      server.listen({
-        port: (process.env.API_PORT as unknown as number) ?? 4001,
+        port: parseInt(process.env.API_PORT ?? '4001'),
         host: '0.0.0.0',
       })
+
+    } else {
+      server.listen({
+        port: parseInt(process.env.API_PORT ?? '4001'),
+      })
+      // start web server if we're in dev mode
+      webInit(parseInt(process.env.WEB_PORT ?? '5001'))
+      server.log.info('Server running in development mode')
     }
   } catch (err) {
     server.log.error(err)
