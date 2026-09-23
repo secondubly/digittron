@@ -73,6 +73,7 @@ export class Bot extends EventEmitter {
           'Missing NGROK_AUTH and/or EVENT_SUB_SECRET keys, the bot might be running in an insecure state.',
         )
       }
+
       this.eventSub = new EventSubHttpListener({
         apiClient: this.apiClient,
         adapter: new NgrokAdapter({
