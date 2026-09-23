@@ -23,20 +23,20 @@ export const init = (port: number) => {
 
   if (process.env.NODE_ENV === 'production') {
     // if running via docker, listen on all interfaces to enable connection from outside the container
-    return server.listen({ port, host: '0.0.0.0' }, (err, address) => {
+    return server.listen({ port, host: '0.0.0.0' }, (err, _address) => {
       if (err) {
         console.error(err)
         process.exit(1)
       }
-      console.log(`Web server listening at ${address}`)
+      // console.log(`Web server listening at ${address}`)
     })
   } else {
-    return server.listen({ port }, (err, address) => {
+    return server.listen({ port }, (err, _address) => {
       if (err) {
         console.error(err)
         process.exit(1)
       }
-      console.log(`Web server listening at ${address}`)
+      // console.log(`Web server listening at ${address}`)
     })
   }
 }
