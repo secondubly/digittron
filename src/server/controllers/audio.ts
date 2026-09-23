@@ -43,7 +43,7 @@ export async function uploadFile(req: FastifyRequest, reply: FastifyReply) {
   // delete old file if replacing
   if (existing) {
     const oldPath = path.join(process.cwd(), existing.audioUrl)
-    await fs.unlink(oldPath).catch(() => {})
+    await fs.unlink(oldPath).catch(() => { })
     await req.em.remove(existing).flush()
   }
 
@@ -89,7 +89,7 @@ export function updateFile() {
       const { id } = req.params
 
       const alert = await req.em.findOne(AudioAlert, {
-        id: Number(id),
+        id: parseInt(id),
         owner: { twitch_id: req.user!.twitch_id },
       })
 
@@ -114,7 +114,7 @@ export function deleteFile() {
     if (!req.isAuthenticated()) return reply.code(401).send()
 
     const alert = await req.em.findOne(AudioAlert, {
-      id: Number(req.params.id),
+      id: parseInt(req.params.id),
       owner: { twitch_id: req.user!.twitch_id },
     })
 
@@ -122,7 +122,7 @@ export function deleteFile() {
 
     // delete file from disk
     const filePath = path.join(process.cwd(), alert.audioUrl)
-    await fs.unlink(filePath).catch(() => {})
+    await fs.unlink(filePath).catch(() => { })
 
     await req.em.remove(alert).flush()
     return reply.code(204).send()
