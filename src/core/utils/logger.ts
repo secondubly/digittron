@@ -1,6 +1,4 @@
-import pino, { type Logger } from 'pino'
-
-let logger: Logger
+import pino from 'pino'
 
 const formatting_opts = {
   colorize: true,
@@ -9,27 +7,16 @@ const formatting_opts = {
   ignore: 'pid,hostname,service',
 }
 
-logger = pino()
-if (process.env.NODE_ENV === 'development') {
-  logger = pino({
-    transport: {
-      target: 'pino-pretty',
-      options: formatting_opts,
-    },
-    level: 'debug',
-  })
-} else {
-  logger = pino({
-    level: 'info',
-    formatters: {
-      level: (label: string) => ({ level: label }),
-    },
-    transport: {
-      target: 'pino-pretty',
-      options: formatting_opts,
-    },
-  })
-}
+const logger = pino({
+  level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+  formatters: {
+    level: (label: string) => ({ level: label }),
+  },
+  transport: {
+    target: 'pino-pretty',
+    options: formatting_opts,
+  },
+})
 
 export const log = {
   bot: logger.child({ service: 'BOT' }),
