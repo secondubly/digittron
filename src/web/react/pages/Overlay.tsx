@@ -64,5 +64,7 @@ export function OverlayPage() {
   })
 
   // no UI — invisible overlay
-  return null
+  return (
+    <title>secondubly - Overlay</title>
+  )
 }
