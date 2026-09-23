@@ -10,21 +10,20 @@ interface ServerBuildOptions {
 }
 
 function getLoggerOptions() {
-  if (process.stdout.isTTY && process.env.NODE_ENV === 'development') {
-    return {
-      level: 'trace',
-      transport: {
-        target: 'pino-pretty',
-        options: {
-          colorize: true,
-          translateTime: 'HH:mm:ss Z',
-          ignore: 'pid,hostname',
-        },
+  return {
+    level: process.env.NODE_ENV === 'production' ? 'info' : 'trace',
+    transport: {
+      target: 'pino-pretty',
+      formatters: {
+        level: (label: string) => ({ level: label }),
       },
-    }
+      options: {
+        colorize: true,
+        translateTime: 'SYS:yyyy-mm-dd HH:MM:ss.l', // Translate time to system's local time
+        ignore: 'pid,hostname,service',
+      },
+    },
   }
-
-  return { level: process.env.LOG_LEVEL ?? 'info' }
 }
 
 export async function init({ withBot = true }: ServerBuildOptions = {}) {
