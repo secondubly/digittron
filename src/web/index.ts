@@ -28,7 +28,8 @@ export const init = (port: number) => {
         console.error(err)
         process.exit(1)
       }
-      // console.log(`Web server listening at ${address}`)
+
+      server.log.info('Server running in production mode')
     })
   } else {
     return server.listen({ port }, (err, _address) => {
@@ -36,7 +37,8 @@ export const init = (port: number) => {
         console.error(err)
         process.exit(1)
       }
-      // console.log(`Web server listening at ${address}`)
+
+      server.log.info('Server running in development mode')
     })
   }
 }
