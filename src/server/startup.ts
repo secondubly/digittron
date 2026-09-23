@@ -40,6 +40,7 @@ export async function init({ withBot = true }: ServerBuildOptions = {}) {
 
   // used to determine whether to load bot plugin or not
   server.decorate('withBot', withBot)
+
   await server.register(
     fp(
       await bootstrap({
@@ -53,7 +54,7 @@ export async function init({ withBot = true }: ServerBuildOptions = {}) {
       delay: (process.env.FASTIFY_CLOSE_GRACE_DELAY as unknown as number) ?? 500,
     },
     async ({ err }) => {
-      if (err != null) {
+      if (err) {
         server.log.error(err)
       }
 
@@ -63,23 +64,6 @@ export async function init({ withBot = true }: ServerBuildOptions = {}) {
   )
 
   await server.ready()
-
-  try {
-    if (process.stdout.isTTY) {
-      server.log.info('Server running in development mode')
-      server.listen({
-        port: (process.env.API_PORT as unknown as number) ?? 4001,
-      })
-    } else {
-      server.listen({
-        port: (process.env.API_PORT as unknown as number) ?? 4001,
-        host: '0.0.0.0',
-      })
-    }
-  } catch (err) {
-    server.log.error(err)
-    process.exit(1)
-  }
 
   return server
 }
