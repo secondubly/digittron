@@ -17,8 +17,6 @@ interface UseSSEOptions {
   enabled?: boolean
 }
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:4000'
-
 export function useSSE({
   handlers,
   reconnectDelay = 3_000,
@@ -36,7 +34,7 @@ export function useSSE({
   const connect = useCallback(() => {
     if (!enabled) return
 
-    const es = new EventSource(`${API}/api/audio/events`, {
+    const es = new EventSource(`/api/audio/events`, {
       withCredentials: true,
     })
     esRef.current = es

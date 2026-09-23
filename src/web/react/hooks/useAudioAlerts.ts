@@ -11,15 +11,13 @@ export interface AudioAlertRecord {
   enabled: boolean
 }
 
-const API = import.meta.env.VITE_API_URL ?? 'http://localhost:4000'
-
 export function useAudioAlerts() {
   const [alerts, setAlerts] = useState<AudioAlertRecord[]>([])
   const [loading, setLoading] = useState(true)
 
   const fetchAlerts = useCallback(async () => {
     setLoading(true)
-    const res = await fetch(`${API}/api/audio/alerts`, {
+    const res = await fetch(`/api/audio/alerts`, {
       credentials: 'include',
     })
     const data = await res.json()
@@ -44,7 +42,7 @@ export function useAudioAlerts() {
       formData.append('chatterName', chatterName)
       formData.append('volume', String(volume))
 
-      const res = await fetch(`${API}/api/audio/alerts`, {
+      const res = await fetch(`/api/audio/alerts`, {
         method: 'POST',
         credentials: 'include',
         body: formData,
@@ -63,7 +61,7 @@ export function useAudioAlerts() {
 
   const updateAlert = useCallback(
     async (id: number, updates: { volume?: number; enabled?: boolean }) => {
-      await fetch(`${API}/api/audio/alerts/${id}`, {
+      await fetch(`/api/audio/alerts/${id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -78,7 +76,7 @@ export function useAudioAlerts() {
   )
 
   const deleteAlert = useCallback(async (id: number) => {
-    await fetch(`${API}/api/audio/alerts/${id}`, {
+    await fetch(`/api/audio/alerts/${id}`, {
       method: 'DELETE',
       credentials: 'include',
     })

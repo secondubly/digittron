@@ -20,13 +20,11 @@ interface AuthContextType {
   isAuthenticated: boolean
 }
 
-const API = 'http://localhost:4000'
-
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
-  login: () => {},
-  logout: async () => {},
+  login: () => { },
+  logout: async () => { },
   isAuthenticated: false,
 })
 
@@ -45,7 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = () => {
-    window.location.href = `${API}/api/auth/twitch/login`
+    window.location.href = `/api/auth/twitch/login`
   }
 
   const logout = async () => {
