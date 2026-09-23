@@ -20,6 +20,14 @@ if (process.env.NODE_ENV === 'development') {
     formatters: {
       level: (label: string) => ({ level: label }),
     },
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'SYS:yyyy-mm-dd HH:MM:ss.l', // Translate time to system's local time
+        ignore: 'pid,hostname',
+      },
+    },
   })
 }
 
