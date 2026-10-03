@@ -1,0 +1,25 @@
+{
+  "name": "digittron",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/bun": "latest",
+    "@types/figlet": "^1.7.0",
+    "eslint": "^10.12.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.6",
+    "prettier": "^3.9.9",
+    "typescript-eslint": "^8.71.0"
+  },
+  "peerDependencies": {
+    "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "@twurple/api": "^8.2.0",
+    "@twurple/auth": "^8.2.0",
+    "@twurple/easy-bot": "^8.2.0",
+    "figlet": "^1.12.0"
+  }
+}
