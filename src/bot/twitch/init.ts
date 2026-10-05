@@ -1,6 +1,9 @@
 import { RefreshingAuthProvider, type AccessToken, type RefreshingAuthProviderConfig } from "@twurple/auth";
 import { Bot, BotCommand, createBotCommand } from "@twurple/easy-bot";
+import { buildCommands } from "./commands";
+import { ApiClient } from "@twurple/api";
 
+// these will be used as app implied scopes
 export const TWITCH_BROADCASTER_SCOPES = [
   'bits:read',
   'channel:bot',
@@ -22,7 +25,7 @@ export const TWITCH_BROADCASTER_SCOPES = [
   'clips:edit',
   'moderation:read',
   'user:read:subscriptions',
-] as const
+]
 
 export const init = async() => {
     if (!Bun.env.TWITCH_CLIENT_ID || !Bun.env.TWITCH_CLIENT_SECRET || !Bun.env.TWITCH_CHANNELS) {
@@ -41,7 +44,8 @@ export const init = async() => {
 
             const authProvider = new RefreshingAuthProvider({
                 clientId: Bun.env.TWITCH_CLIENT_ID,
-                clientSecret: Bun.env.TWITCH_CLIENT_SECRET
+                clientSecret: Bun.env.TWITCH_CLIENT_SECRET,
+                TWITCH_BROADCASTER_SCOPES
             } as RefreshingAuthProviderConfig)
 
             // on token refresh, update the appropriate file
@@ -52,10 +56,23 @@ export const init = async() => {
             })
             
             await authProvider.addUserForToken(tokenData, ['chat'])
+            const api = new ApiClient({ authProvider })
 
             const channels = (Bun.env.TWITCH_CHANNELS as string).split(',') as string[]
+            console.log('channels', channels)
 
-            const bot = new Bot({ authProvider, channels })
+            const bot = new Bot({ authProvider, channels, commands: buildCommands({ api }) })
+            
+            try {
+                await bot.api.requestScopesForUser(userId, TWITCH_BROADCASTER_SCOPES)
+            } catch (error) {
+                console.error('Could not request app scopes', error)
+            }
+
+            bot.chat.onJoin((channel, _user) => {
+            const normalizedChannel = channel.toLowerCase().replace(/^#/, '')
+                console.info(`Joined #${normalizedChannel}`)
+            })
 
             return bot
     } catch (err) {
