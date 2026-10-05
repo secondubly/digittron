@@ -33,48 +33,59 @@ export const init = async() => {
     }
 
     const userId = Bun.env.TWITCH_USER_ID || "113565139" // twitch bot id, not broadcaster
-    const tokenFile = `./tokens.${userId}.json`
+    const ownerId = Bun.env.OWNER_ID || "89181064"
+    const tokenPath = (id: string) => `./tokens.${id}.json`
+
+    async function loadToken(id: string) {
+        const file = tokenPath(id)
+        try {
+            return await Bun.file(file).json()
+        } catch {
+            throw new Error(`Could not read token file: ${file}`)
+        }
+    }
+
+    const [botToken, ownerToken] = await Promise.all([
+        loadToken(userId),
+        loadToken(ownerId)
+    ])
 
     try {
-        const tokenData = await Bun.file(tokenFile)
-            .json()
-            .catch(() => {
-                throw new Error(`Could not read token file: ${tokenFile}`)
+
+        const authProvider = new RefreshingAuthProvider({
+            clientId: Bun.env.TWITCH_CLIENT_ID,
+            clientSecret: Bun.env.TWITCH_CLIENT_SECRET,
+            TWITCH_BROADCASTER_SCOPES
+        } as RefreshingAuthProviderConfig)
+
+        // on token refresh, update the appropriate file
+        authProvider.onRefresh(async (userId: string, newTokenData: AccessToken) => {
+            await Bun.write(`./tokens.${userId}.json`, JSON.stringify(newTokenData, null, 2)).catch(err => {
+                console.error('Failed to save token', err.message)
             })
+        })
+        
+        await authProvider.addUserForToken(botToken, ['chat'])
+        await authProvider.addUserForToken(ownerToken)
+        const api = new ApiClient({ authProvider })
 
-            const authProvider = new RefreshingAuthProvider({
-                clientId: Bun.env.TWITCH_CLIENT_ID,
-                clientSecret: Bun.env.TWITCH_CLIENT_SECRET,
-                TWITCH_BROADCASTER_SCOPES
-            } as RefreshingAuthProviderConfig)
+        const channels = (Bun.env.TWITCH_CHANNELS as string).split(',') as string[]
+        console.log('channels', channels)
 
-            // on token refresh, update the appropriate file
-            authProvider.onRefresh(async (userId: string, newTokenData: AccessToken) => {
-                await Bun.write(`./tokens.${userId}.json`, JSON.stringify(newTokenData, null, 2)).catch(err => {
-                    console.error('Failed to save token', err.message)
-                })
-            })
-            
-            await authProvider.addUserForToken(tokenData, ['chat'])
-            const api = new ApiClient({ authProvider })
+        const bot = new Bot({ authProvider, channels, commands: buildCommands({ api }) })
 
-            const channels = (Bun.env.TWITCH_CHANNELS as string).split(',') as string[]
-            console.log('channels', channels)
+        try {
+            await bot.api.requestScopesForUser(ownerId, TWITCH_BROADCASTER_SCOPES)
+        } catch (error) {
+            console.error('Could not request app scopes', error)
+        }
 
-            const bot = new Bot({ authProvider, channels, commands: buildCommands({ api }) })
-            
-            try {
-                await bot.api.requestScopesForUser(userId, TWITCH_BROADCASTER_SCOPES)
-            } catch (error) {
-                console.error('Could not request app scopes', error)
-            }
+        bot.chat.onJoin((channel, _user) => {
+        const normalizedChannel = channel.toLowerCase().replace(/^#/, '')
+            console.info(`Joined #${normalizedChannel}`)
+        })
 
-            bot.chat.onJoin((channel, _user) => {
-            const normalizedChannel = channel.toLowerCase().replace(/^#/, '')
-                console.info(`Joined #${normalizedChannel}`)
-            })
-
-            return bot
+        return bot
     } catch (err) {
         console.error('Build error', err)
     }   
