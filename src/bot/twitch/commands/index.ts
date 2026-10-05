@@ -18,7 +18,5 @@ export function buildCommands(deps: Deps): BotCommand[] {
         commandList.push(backseat, blind, discord, test, title(deps))
     }
 
-
-    console.log('command list', commandList)
     return commandList
 }
