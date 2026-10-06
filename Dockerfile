@@ -1,8 +1,6 @@
 FROM oven/bun:1 AS base
 WORKDIR /usr/src/app
 
-LABEL org.opencontainers.image.source="https://github.com/secondubly/digittron"
-
 FROM base AS install
 RUN mkdir -p /temp/dev /temp/prod
 
