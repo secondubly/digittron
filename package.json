@@ -4,11 +4,13 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "build": "bun run build.ts",
+    "bot": "bun run --hot src/bot/twitch/index.ts",
     "dev": "concurrently -n bot,overlay -c purple,orange \"bun run bot\" \"bun run web\"",
-    "bot": "bun run src/bot/twitch/index.ts",
     "format": "prettier --write .",
-    "server": "bun src/web/index.ts",
+    "server": "bun --hot src/web/index.ts",
     "web": "vite",
+    "web:build": "vite build",
     "start": "bun run src/index.ts"
   },
   "devDependencies": {
