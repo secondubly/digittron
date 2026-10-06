@@ -1,5 +1,7 @@
 import { RefreshingAuthProvider, type AccessToken, type RefreshingAuthProviderConfig } from "@twurple/auth";
-import { Bot, BotCommand, createBotCommand } from "@twurple/easy-bot";
+import { Bot } from "@twurple/easy-bot";
+import { EventSubWsListener } from "@twurple/eventsub-ws"
+import { trackFirstMessages } from "./services/tracker";
 import { buildCommands } from "./commands";
 import { ApiClient } from "@twurple/api";
 
@@ -73,6 +75,16 @@ export const init = async() => {
         console.log('channels', channels)
 
         const bot = new Bot({ authProvider, channels, commands: buildCommands({ api }) })
+
+        const listener = new EventSubWsListener({ apiClient: api })
+
+        await trackFirstMessages({
+            bot,
+            api,
+            listener,
+            broadcasterId: ownerId,
+            ignoreUserIds: [userId, ownerId], // ignore bot and streamer IDs
+        })
 
         try {
             await bot.api.requestScopesForUser(ownerId, TWITCH_BROADCASTER_SCOPES)
