@@ -41,7 +41,7 @@ export const init = async () => {
 
   const userId = Bun.env.TWITCH_BOT_ID || '113565139' // twitch bot id, not broadcaster
   const ownerId = Bun.env.TWITCH_OWNER_ID || '89181064'
-  const tokenPath = (id: string) => `./tokens.${id}.json`
+  const tokenPath = (id: string) => `./data/tokens.${id}.json`
 
   async function loadToken(id: string) {
     const file = tokenPath(id)
@@ -89,17 +89,13 @@ export const init = async () => {
     })
 
     try {
+      // REVIEW: do we really need this?
       await bot.api.requestScopesForUser(ownerId, TWITCH_BROADCASTER_SCOPES)
     } catch (error) {
       console.error('Could not request app scopes', error)
     }
 
     // event handlers
-    bot.chat.onJoin((channel, _user) => {
-      const normalizedChannel = channel.toLowerCase().replace(/^#/, '')
-      console.info(`Joined #${normalizedChannel}`)
-    })
-
     let isFirstConnection = true
     bot.chat.onAuthenticationSuccess(() => {
       console.log('ready to yap 😃')
