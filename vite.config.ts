@@ -8,9 +8,9 @@ export default defineConfig({
   publicDir: 'public',
   build: {
     outDir: 'dist/web',
-    emptyOutDir: true
+    emptyOutDir: true,
   },
   server: {
     port: 3000,
-  }
+  },
 })
