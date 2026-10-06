@@ -9,6 +9,6 @@ export default command('testalert', 'broadcaster', async (_params, ctx) => {
       name: ctx.msg.userInfo.displayName,
       sound: '89181064.mp3', // must exist in your sounds/ folder
     },
-    Bun.env.ALERT_PORT ?? '3000',
+    Bun.env.WEB_PORT ?? '3000',
   )
 })

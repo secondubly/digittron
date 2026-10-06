@@ -39,8 +39,8 @@ export const init = async () => {
     throw new Error('Missing required environment variables.')
   }
 
-  const userId = Bun.env.TWITCH_USER_ID || '113565139' // twitch bot id, not broadcaster
-  const ownerId = Bun.env.OWNER_ID || '89181064'
+  const userId = Bun.env.TWITCH_BOT_ID || '113565139' // twitch bot id, not broadcaster
+  const ownerId = Bun.env.TWITCH_OWNER_ID || '89181064'
   const tokenPath = (id: string) => `./tokens.${id}.json`
 
   async function loadToken(id: string) {
