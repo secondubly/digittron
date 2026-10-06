@@ -2,7 +2,7 @@ import { Database } from "bun:sqlite"
 import type { ApiClient } from "@twurple/api"
 import type { Bot } from "@twurple/easy-bot"
 import type { EventSubWsListener } from "@twurple/eventsub-ws"
-import { sendAlert } from "../../../server/build"
+import { sendAlert } from "../../../web/alerts"
 
 type Options = {
     bot: Bot
@@ -57,7 +57,7 @@ export async function trackFirstMessages({
                 type: "first-message",
                 name: userId,
                 sound: `${userId}.mp3`
-            })
+            }, Bun.env.ALERT_PORT ?? '3000')
         }
 
         // changes === 1 only if this (stream, user) pair wasn't already recorded
