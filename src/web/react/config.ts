@@ -13,15 +13,15 @@
  */
 const params = new URLSearchParams(location.search)
 
-export const channel = (params.get("channel") ?? "").toLowerCase()
-export const ttl = Number(params.get("ttl") ?? 30) * 1000
-export const max = Number(params.get("max") ?? 12)
-export const size = Number(params.get("size") ?? 22)
-export const hide = new Set((params.get("hide") ?? "").toLowerCase().split(",").filter(Boolean))
-export const debug = params.has("debug")
+export const channel = (params.get('channel') ?? '').toLowerCase()
+export const ttl = Number(params.get('ttl') ?? 30) * 1000
+export const max = Number(params.get('max') ?? 12)
+export const size = Number(params.get('size') ?? 22)
+export const hide = new Set((params.get('hide') ?? '').toLowerCase().split(',').filter(Boolean))
+export const debug = params.has('debug')
 
-export const emoteProviders = new Set((params.get("emotes") ?? "7tv,bttv").toLowerCase().split(","))
+export const emoteProviders = new Set((params.get('emotes') ?? '7tv,bttv').toLowerCase().split(','))
 
-export const alertsUrl = params.get("alerts") ?? "ws://localhost:3001"
-export const alertsHttp = alertsUrl.replace(/^ws/, "http") // sounds are served by the same server
-export const volume = Math.min(1, Math.max(0, Number(params.get("volume") ?? 0.6)))
+export const alertsUrl = params.get('alerts') ?? 'ws://localhost:3000'
+export const alertsHttp = alertsUrl.replace(/^ws/, 'http') // sounds are served by the same server
+export const volume = Math.min(1, Math.max(0, Number(params.get('volume') ?? 0.6)))
