@@ -2,6 +2,7 @@ import { Database } from "bun:sqlite"
 import type { ApiClient } from "@twurple/api"
 import type { Bot } from "@twurple/easy-bot"
 import type { EventSubWsListener } from "@twurple/eventsub-ws"
+import { sendAlert } from "../../../server/build"
 
 type Options = {
     bot: Bot
@@ -31,6 +32,7 @@ export async function trackFirstMessages({
 
     const ignored = new Set(ignoreUserIds)
     const seen = new Set<string>() // cache so most messages never touch the database
+    const hasAudio = new Set<string>('537326154')
     let streamId: string | null = null
 
     const setStream = (id: string | null) => {
@@ -46,8 +48,17 @@ export async function trackFirstMessages({
 
     bot.onMessage(async ({ userId, userName }) => {
         const sid = streamId
+        // TODO: add serybot, and nightbot to the ignore list
         if (!sid || ignored.has(userId) || seen.has(userId)) return
         seen.add(userId)
+
+        if (hasAudio.has(userId)) {
+            sendAlert({
+                type: "first-message",
+                name: userId,
+                sound: `${userId}.mp3`
+            })
+        }
 
         // changes === 1 only if this (stream, user) pair wasn't already recorded
         const result = insert.run(sid, userId, userName, Date.now())
