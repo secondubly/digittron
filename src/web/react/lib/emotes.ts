@@ -1,5 +1,5 @@
 import { emoteProviders } from '../config'
-import type { Part } from '../types'
+import type { BTTVEmote, BTTVUserResponse, Part, SevenTVEmote, SevenTVEmoteSetResponse, SevenTVUserResponse } from '../types'
 
 // Twitch emote ranges are in Unicode code points, so split with Array.from
 export function buildParts(text: string, emotesTag: string): Part[] {
@@ -49,11 +49,12 @@ export async function loadThirdParty(roomId: string) {
 
   const jobs: Promise<Pair[]>[] = []
   if (emoteProviders.has('bttv')) {
+    console.log('room id', roomId)
     jobs.push(
-      getJson('https://api.betterttv.net/3/cached/emotes/global').then((list: any[]) =>
+      getJson('https://api.betterttv.net/3/cached/emotes/global').then((list: BTTVEmote[]) =>
         list.map((e): Pair => [e.code, bttvUrl(e.id)]),
       ),
-      getJson(`https://api.betterttv.net/3/cached/users/twitch/${roomId}`).then((u: any) =>
+      getJson(`https://api.betterttv.net/3/cached/users/twitch/${roomId}`).then((u: BTTVUserResponse) =>
         [...(u.channelEmotes ?? []), ...(u.sharedEmotes ?? [])].map((e): Pair => [
           e.code,
           bttvUrl(e.id),
@@ -63,11 +64,11 @@ export async function loadThirdParty(roomId: string) {
   }
   if (emoteProviders.has('7tv')) {
     jobs.push(
-      getJson('https://7tv.io/v3/emote-sets/global').then((s: any) =>
-        (s.emotes ?? []).map((e: any): Pair => [e.name, stvUrl(e.id)]),
+      getJson('https://7tv.io/v3/emote-sets/global').then((s: SevenTVEmoteSetResponse) =>
+        (s.emotes ?? []).map((e: SevenTVEmote): Pair => [e.name, stvUrl(e.id)]),
       ),
-      getJson(`https://7tv.io/v3/users/twitch/${roomId}`).then((u: any) =>
-        (u.emote_set?.emotes ?? []).map((e: any): Pair => [e.name, stvUrl(e.id)]),
+      getJson(`https://7tv.io/v3/users/twitch/${roomId}`).then((u: SevenTVUserResponse) =>
+        (u.emote_set?.emotes ?? []).map((e: SevenTVEmote): Pair => [e.name, stvUrl(e.id)]),
       ),
     )
   }
