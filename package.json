@@ -5,9 +5,11 @@
   "private": true,
   "scripts": {
     "dev": "concurrently -n bot,overlay -c purple,orange \"bun run bot\" \"bun run web\"",
-    "bot": "bun src/bot/twitch/main.ts",
+    "bot": "bun run src/bot/twitch/index.ts",
+    "format": "prettier --write .",
     "server": "bun src/web/index.ts",
-    "web": "vite"
+    "web": "vite",
+    "start": "bun run src/index.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
