@@ -38,8 +38,6 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}
-          labels: | 
-            org.opencontainers.image.source=https://github.com/secondubly/digittron
           tags: |
             type=ref,event=branch
             type=ref,event=pr
