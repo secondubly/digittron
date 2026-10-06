@@ -1,3 +1,5 @@
+// TODO: clean this up, it's a mess!
+
 import { StrictMode, useEffect, useState } from "react"
 import { createRoot } from "react-dom/client"
 
@@ -164,7 +166,7 @@ function useChat(): Msg[] {
                         let body = text
                         const action = body.startsWith("\u0001ACTION ")
                         if (action) body = body.slice(8, -1)
-                        if (hide.has(login) || body.startsWith("!")) continue
+                        if ((login && hide.has(login)) || body.startsWith("!")) continue
                         const name = tags["display-name"] || login
                         const msg: Msg = {
                             id: tags["id"] || crypto.randomUUID(),
@@ -213,7 +215,7 @@ function useChat(): Msg[] {
     return messages
 }
 
-// Audio alerts pushed from the bot (see alerts.ts)
+// Audio alerts pushed from the bot (see server/index.ts)
 const alertsUrl = params.get("alerts") ?? "ws://localhost:3001"
 const alertsHttp = alertsUrl.replace(/^ws/, "http") // sounds are served by the same server
 const volume = Math.min(1, Math.max(0, Number(params.get("volume") ?? 0.6)))
@@ -286,6 +288,7 @@ function Message({ msg }: { msg: Msg }) {
 
 function App() {
     const messages = useChat()
+    useAlerts()
     if (!channel) {
         return <div className="chat"><div className="msg">Add ?channel=yourchannel to the URL.</div></div>
     }
