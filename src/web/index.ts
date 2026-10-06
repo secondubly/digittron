@@ -23,7 +23,7 @@ export function buildServer(port: number) {
       if (srv.upgrade(req)) return // overlay connecting over WebSocket
 
       const { pathname } = new URL(req.url)
-      // 🚨 NEW: Handle incoming alert POST requests from the bot process
+      // Handle incoming alert POST requests from the bot
       if (req.method === 'POST' && pathname.startsWith('/api/alert')) {
         try {
           const alertData = (await req.json()) as Alert
@@ -53,7 +53,7 @@ export function buildServer(port: number) {
     },
     websocket: {
       open: (ws) => ws.subscribe('alerts'), // on connection, subscribe to the alerts event
-      message: () => {}, // the overlay only listens
+      message: () => {}, // no-op, overlay only listens
     },
     routes: {
       '/': homepage,
