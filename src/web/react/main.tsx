@@ -7,6 +7,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
 import { size } from './config';
+import '@fontsource/atkinson-hyperlegible'
 
 document.documentElement.style.setProperty('--size', `${size}px`);
 
