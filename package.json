@@ -4,9 +4,9 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "concurrently -n bot,server,overlay -c blue,greenBright,orange \"bun run server\" \"bun run bot\" \"bun run web\"",
+    "dev": "concurrently -n bot,overlay -c purple,orange \"bun run bot\" \"bun run web\"",
     "bot": "bun src/bot/twitch/main.ts",
-    "server": "bun src/server/index.ts",
+    "server": "bun src/web/index.ts",
     "web": "vite"
   },
   "devDependencies": {

@@ -1,10 +1,11 @@
 import { join } from "node:path"
+import homepage from './index.html'
+import type { Alert } from "./alerts"
 
-const port = Number(Bun.env.ALERT_PORT ?? 3001)
+const port = Number(Bun.env.ALERT_PORT ?? 3000)
 const SOUNDS_PREFIX = "/public/audio/"
 const soundsDir = join(import.meta.dir, SOUNDS_PREFIX)
 
-export type Alert = { type: "first-message"; name: string; sound: string }
 let server: ReturnType<typeof Bun.serve> | null = null
 
 // internally handle sending alerts
@@ -14,7 +15,7 @@ function broadcastAlert(alert: Alert) {
     console.log("Alert published to clients:", alert);
 }
 
-export function buildServer() {
+export function buildServer(port: number) {
     server = Bun.serve({
         port,
         hostname: "0.0.0.0", // need to listen on all interfaces due to Docker
@@ -52,25 +53,15 @@ export function buildServer() {
             open: (ws) => ws.subscribe("alerts"), // on connection, subscribe to the alerts event
             message: () => {}, // the overlay only listens
         },
+        routes: {
+            "/": homepage
+        }
     })
 
     console.log(`Alert server listening on ${server.hostname}:${server.port}`)
     return server
 }
 
-export const sendAlert = async (alert: Alert) => {
-    // the bot is running via a different process so we need to have a way for it to 
-    // connect to the server, we can't access it directly
-    try {
-        const response = await fetch(`http://localhost:${port}/api/alert`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(alert),
-        });
-        if (!response.ok) {
-            console.error(`Failed to send alert. Server status: ${response.status}`);
-        }
-    } catch (error) {
-        console.error("Failed to connect to the alert server from the bot process:", error);
-    }
-};
+if (import.meta.main) {
+    buildServer(port)
+}
