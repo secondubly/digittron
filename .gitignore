@@ -152,3 +152,4 @@ vite.config.ts.timestamp-*
 # custom lines
 tokens.*.json
 data/*
+.DS_Store
