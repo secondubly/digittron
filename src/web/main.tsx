@@ -18,6 +18,7 @@ const ttl = Number(params.get("ttl") ?? 30) * 1000
 const max = Number(params.get("max") ?? 12)
 const hide = new Set((params.get("hide") ?? "").toLowerCase().split(",").filter(Boolean))
 document.documentElement.style.setProperty("--size", `${params.get("size") ?? 22}px`)
+const debug = params.has("debug") // logs connection state and raw IRC lines to the console
 
 const FALLBACK_COLORS = ["#ff6b6b", "#ffa94d", "#ffd43b", "#69db7c", "#38d9a9", "#4dabf7", "#9775fa", "#f783ac"]
 const fallbackColor = (name: string) => {
@@ -142,6 +143,7 @@ function useChat(): Msg[] {
             ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443")
             ws.onopen = () => {
                 attempts = 0
+                if (debug) console.log(`[chat] connected, joining #${channel}`)
                 ws.send("CAP REQ :twitch.tv/tags twitch.tv/commands")
                 ws.send("PASS SCHMOOPIIE")
                 ws.send(`NICK justinfan${Math.floor(Math.random() * 80000) + 1000}`)
@@ -149,6 +151,7 @@ function useChat(): Msg[] {
             }
             ws.onmessage = (ev) => {
                 for (const raw of String(ev.data).split("\r\n").filter(Boolean)) {
+                    if (debug) console.log("[irc]", raw)
                     if (raw.startsWith("PING")) {
                         ws.send("PONG :tmi.twitch.tv")
                         continue
@@ -182,6 +185,7 @@ function useChat(): Msg[] {
                 }
             }
             ws.onclose = () => {
+                if (debug) console.log("[chat] socket closed", closed ? "(cleanup)" : "(will retry)")
                 if (!closed) timer = window.setTimeout(connect, Math.min(1000 * 2 ** attempts++, 15000))
             }
         }
@@ -207,6 +211,56 @@ function useChat(): Msg[] {
     }, [])
 
     return messages
+}
+
+// Audio alerts pushed from the bot (see alerts.ts)
+const alertsUrl = params.get("alerts") ?? "ws://localhost:3001"
+const alertsHttp = alertsUrl.replace(/^ws/, "http") // sounds are served by the same server
+const volume = Math.min(1, Math.max(0, Number(params.get("volume") ?? 0.6)))
+let lastSound = 0
+
+function useAlerts() {
+    useEffect(() => {
+        if (alertsUrl === "off") return
+        let ws: WebSocket
+        let timer: number
+        let attempts = 0
+        let closed = false
+
+        const connect = () => {
+            ws = new WebSocket(alertsUrl)
+            ws.onopen = () => {
+                attempts = 0
+                if (debug) console.log("[alerts] connected")
+            }
+            ws.onmessage = (ev) => {
+                let alert: { type?: string; sound?: string }
+                try {
+                    alert = JSON.parse(String(ev.data))
+                } catch {
+                    return
+                }
+                if (debug) console.log("[alerts]", alert)
+                if (alert.type !== "first-message" || !alert.sound) return
+                if (Date.now() - lastSound < 2000) return // avoid pile-ups during raids
+                lastSound = Date.now()
+                const audio = new Audio(`${alertsHttp}/sounds/${encodeURIComponent(alert.sound)}`)
+                audio.volume = volume
+                audio.play().catch((err) => console.warn("Alert sound blocked:", err))
+            }
+            ws.onclose = () => {
+                if (!closed) timer = window.setTimeout(connect, Math.min(1000 * 2 ** attempts++, 15000))
+            }
+        }
+
+        connect()
+        return () => {
+            closed = true
+            clearTimeout(timer)
+            if (ws.readyState === WebSocket.CONNECTING) ws.onopen = () => ws.close()
+            else ws.close()
+        }
+    }, [])
 }
 
 function Message({ msg }: { msg: Msg }) {
