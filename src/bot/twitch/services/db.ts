@@ -1,6 +1,11 @@
 import { Database } from 'bun:sqlite'
 
-export const db = new Database('./data/data.db')
+if (!Bun.env.DATABASE_PATH) {
+  throw new Error('Missing database path.')
+}
+
+export const db = new Database(Bun.env.DATABASE_PATH)
+
 db.run('PRAGMA journal_mode = WAL')
 
 db.run(`
