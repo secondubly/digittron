@@ -3,7 +3,7 @@ import {
   type AccessToken,
   type RefreshingAuthProviderConfig,
 } from '@twurple/auth'
-import { Bot } from '@twurple/easy-bot'
+import { Bot, createBotCommand } from '@twurple/easy-bot'
 import { EventSubWsListener } from '@twurple/eventsub-ws'
 import { trackFirstMessages } from './services/tracker'
 import { buildCommands } from './commands'
@@ -63,7 +63,7 @@ export const init = async () => {
 
     // on token refresh, update the appropriate file
     authProvider.onRefresh(async (userId: string, newTokenData: AccessToken) => {
-      await Bun.write(`./tokens.${userId}.json`, JSON.stringify(newTokenData, null, 2)).catch(
+      await Bun.write(`./data/tokens.${userId}.json`, JSON.stringify(newTokenData, null, 2)).catch(
         (err) => {
           console.error('Failed to save token', err.message)
         },
@@ -75,6 +75,15 @@ export const init = async () => {
     const api = new ApiClient({ authProvider })
 
     const channels = (Bun.env.TWITCH_CHANNELS as string).split(',') as string[]
+
+    const commands = buildCommands({ api })
+
+    // add !commands to list of commands
+    const available = createBotCommand('commands', (_, { say}) => {
+      const commandList = commands.map((command) => `!${command.name}`).join(', ')
+      say(`They do lots of things ➡️ [${commandList}]`)
+    })
+    commands.push(available)
 
     const bot = new Bot({ authProvider, channels, commands: buildCommands({ api }) })
 
