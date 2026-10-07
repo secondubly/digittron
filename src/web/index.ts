@@ -17,7 +17,7 @@ function broadcastAlert(alert: Alert) {
 }
 
 export function buildServer(port: number) {
-  server = Bun.serve({
+  server = Bun.serve<undefined>({
     port,
     hostname: '0.0.0.0', // need to listen on all interfaces due to Docker
     async fetch(req, srv) {
@@ -53,7 +53,7 @@ export function buildServer(port: number) {
       return new Response('Alert server running')
     },
     websocket: {
-      open: (ws) => ws.subscribe('alerts'), // on connection, subscribe to the alerts event
+      open(ws) { ws.subscribe('alerts') }, // on connection, subscribe to the alerts event
       message: () => {}, // no-op, overlay only listens
     },
     routes: {
