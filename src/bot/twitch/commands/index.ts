@@ -9,6 +9,7 @@ import discord from './discord'
 import test from './test'
 import title from './title'
 import testalert from './testalert'
+import nowplaying from './nowplaying'
 
 const commandList: BotCommand[] = []
 
@@ -16,7 +17,7 @@ const commandList: BotCommand[] = []
 
 export function buildCommands(deps: Deps): BotCommand[] {
   if (features.core) {
-    commandList.push(backseat, blind, discord, test, title(deps))
+    commandList.push(backseat, blind, discord, test, title(deps), nowplaying)
   }
 
   if (features.debug) {
