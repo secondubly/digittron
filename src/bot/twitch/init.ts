@@ -79,7 +79,7 @@ export const init = async () => {
     const commands = buildCommands({ api })
 
     // add !commands to list of commands
-    const available = createBotCommand('commands', (_, { say}) => {
+    const available = createBotCommand('commands', (_, { say }) => {
       const commandList = commands.map((command) => `!${command.name}`).join(', ')
       say(`They do lots of things ➡️ [${commandList}]`)
     })

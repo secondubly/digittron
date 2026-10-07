@@ -1,5 +1,12 @@
 import { emoteProviders } from '../config'
-import type { BTTVEmote, BTTVUserResponse, Part, SevenTVEmote, SevenTVEmoteSetResponse, SevenTVUserResponse } from '../types'
+import type {
+  BTTVEmote,
+  BTTVUserResponse,
+  Part,
+  SevenTVEmote,
+  SevenTVEmoteSetResponse,
+  SevenTVUserResponse,
+} from '../types'
 
 // Twitch emote ranges are in Unicode code points, so split with Array.from
 export function buildParts(text: string, emotesTag: string): Part[] {
@@ -54,11 +61,12 @@ export async function loadThirdParty(roomId: string) {
       getJson('https://api.betterttv.net/3/cached/emotes/global').then((list: BTTVEmote[]) =>
         list.map((e): Pair => [e.code, bttvUrl(e.id)]),
       ),
-      getJson(`https://api.betterttv.net/3/cached/users/twitch/${roomId}`).then((u: BTTVUserResponse) =>
-        [...(u.channelEmotes ?? []), ...(u.sharedEmotes ?? [])].map((e): Pair => [
-          e.code,
-          bttvUrl(e.id),
-        ]),
+      getJson(`https://api.betterttv.net/3/cached/users/twitch/${roomId}`).then(
+        (u: BTTVUserResponse) =>
+          [...(u.channelEmotes ?? []), ...(u.sharedEmotes ?? [])].map((e): Pair => [
+            e.code,
+            bttvUrl(e.id),
+          ]),
       ),
     )
   }
