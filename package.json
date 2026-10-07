@@ -6,7 +6,7 @@
   "scripts": {
     "build": "vite build",
     "bot": "bun run --hot src/bot/twitch/index.ts",
-    "dev": "concurrently -n bot,overlay -c purple,orange \"bun run bot\" \"bun run web\"",
+    "dev": "concurrently -n bot,overlay -c purple,orange \"bun run bot\" \"bun run server\"",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "server": "bun --hot src/web/index.ts",
