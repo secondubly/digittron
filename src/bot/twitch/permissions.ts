@@ -1,5 +1,6 @@
 import { createBotCommand, type BotCommand, type BotCommandContext } from '@twurple/easy-bot'
 import type { ChatUser } from '@twurple/chat'
+import { db } from './services/db'
 
 export type PermissionLevel = 'everyone' | 'sub' | 'vip' | 'mod' | 'broadcaster'
 
@@ -11,6 +12,11 @@ const levels: Record<PermissionLevel, (u: ChatUser) => boolean> = {
   broadcaster: (u) => u.isBroadcaster,
 }
 
+const insertUsage = db.prepare(
+  `INSERT INTO command_usage (used_at, command, user_id, user_name, channel, status, duration_ms)
+   VALUES (?, ?, ?, ?, ?, ?, ?)`,
+)
+
 export type CommandHandler = (params: string[], ctx: BotCommandContext) => void | Promise<void>
 
 export function command(
@@ -18,12 +24,28 @@ export function command(
   level: PermissionLevel,
   handler: CommandHandler,
   options?: Parameters<typeof createBotCommand>[2],
-): BotCommand {
+): BotCommand {  
   return createBotCommand(
     name,
     async (params, ctx) => {
-      if (!levels[level](ctx.msg.userInfo)) return
-      await handler(params, ctx)
+      const start = performance.now()
+      let status: 'ok' | 'error' | 'denied' = 'ok'
+
+      if (!levels[level](ctx.msg.userInfo)) {
+        status = 'denied'
+      } else {
+        try {
+          await handler(params, ctx)
+        } catch (err) {
+          status = 'error'
+          console.error('command failed', { err, command: name })
+        }
+      }
+
+      insertUsage.run(
+        Date.now(), name, ctx.userId, ctx.userName, ctx.broadcasterName,
+        status, Math.round(performance.now() - start),
+      )
     },
     options,
   )
