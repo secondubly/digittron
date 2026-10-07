@@ -3,9 +3,6 @@ import { Database } from 'bun:sqlite'
 if (!Bun.env.DATABASE_PATH) {
   throw new Error('Missing database path.')
 }
-
-console.log('Bun env variables', Bun.env)
-console.log('Database path', Bun.env.DATABASE_PATH)
 export const db = new Database(Bun.env.DATABASE_PATH)
 
 db.run('PRAGMA journal_mode = WAL')
@@ -23,3 +20,11 @@ db.run(`
   )
 `)
 db.run('CREATE INDEX IF NOT EXISTS idx_usage ON command_usage (command, used_at)')
+
+process.on("SIGINT", () => {
+  console.log("Shutting down database gracefully...");
+  
+  // Safely close the database connection
+  db.close();
+  process.exit(0);
+});
