@@ -5,6 +5,7 @@ if (!Bun.env.DATABASE_PATH) {
 }
 
 console.log('Bun env variables', Bun.env)
+console.log('Database path', Bun.env.DATABASE_PATH)
 export const db = new Database(Bun.env.DATABASE_PATH)
 
 db.run('PRAGMA journal_mode = WAL')
