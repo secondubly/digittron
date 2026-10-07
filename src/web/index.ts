@@ -59,8 +59,18 @@ export function buildServer(port: number) {
     routes: {
       '/': homepage,
       '/api/spotify/now-playing': async (req: Request) => {
-        const response = (await apiRoutes.getNowPlaying(req)) as Response
-        return response
+        const response = await apiRoutes.getNowPlaying(req)
+
+        console.log('response', response)
+        if (!response.data) {
+          if (response.status === 204) {
+            return new Response(null, { status: response.status })
+          } else {
+            return new Response('Something went wrong', { status: response.status })
+          }
+        } else {
+          return Response.json(response.data, { status: 200 })
+        }
       },
     },
   })

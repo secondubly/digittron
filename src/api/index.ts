@@ -1,10 +1,13 @@
+import type { SpotifyCurrentlyPlayingResponse, SpotifyToken } from "../bot/twitch/types"
+
 const maxRetries = 2
 
 const refreshSpotifyToken = async (id: string) => {
   const tokenPath = `./data/spotify.${id}.json`
 
   try {
-    const token = await Bun.file(tokenPath).json()
+    // get existing token
+    const token: SpotifyToken = await Bun.file(tokenPath).json()
 
     const res = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
@@ -22,25 +25,34 @@ const refreshSpotifyToken = async (id: string) => {
 
     if (!res.ok) {
       console.error(`Spotify token refresh failed: ${res.status}`)
-      return Response.json({})
+      return { token: null, status: res.status }
     }
 
-    const newToken = await res.json()
+    const newToken: SpotifyToken = await res.json()
 
+    if (!newToken.refresh_token) {
+        // if there is no refresh token in the response, use the old refresh token
+        newToken.refresh_token = token.refresh_token 
+    }
     await Bun.write(`./data/spotify.${id}.json`, JSON.stringify(newToken, null, 2)).catch((err) => {
       console.error('Failed to save token', err.message)
     })
 
-    return Response.json(newToken)
+    return { token: newToken, status: res.status }
   } catch (e) {
     console.error('Error', e)
+    return { token: null, status: 500 }
   }
 }
 
 export const apiRoutes = {
   // GET /api/spotify/now-playing
-  async getNowPlaying(req: Request, attempt: number = 0): Promise<Response> {
-    const token = await Bun.file(`./data/spotify.${Bun.env.TWITCH_OWNER_ID}.json`).json()
+  async getNowPlaying(req: Request, attempt: number = 0): Promise<{
+    data: SpotifyCurrentlyPlayingResponse | null,
+    status: number
+  }> {
+    const token: SpotifyToken = await Bun.file(`./data/spotify.${Bun.env.TWITCH_OWNER_ID}.json`).json()
+
     const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
       method: 'GET',
       headers: {
@@ -52,12 +64,11 @@ export const apiRoutes = {
     if (response.ok) {
       // 204 No Content — return null data (e.g. nothing playing on Spotify)
       if (response.status === 204) {
-        return Response.json({ data: null, status: 204, ok: true })
+        return { data: null, status: 204 }
       }
 
-      const data = await response.json()
-      console.log('response ok data: ', data)
-      return Response.json({ data, status: response.status, ok: true })
+      const data: SpotifyCurrentlyPlayingResponse  = await response.json()
+      return { data, status: response.status }
     }
 
     if (response.status === 401 && attempt < maxRetries) {
@@ -67,13 +78,8 @@ export const apiRoutes = {
 
       const refreshed = await refreshSpotifyToken(Bun.env.TWITCH_OWNER_ID ?? '89181064')
 
-      if (!refreshed) {
-        return {
-          data: null,
-          status: 401,
-          ok: false,
-          error: 'Token refresh failed — re-auth required',
-        }
+      if (refreshed.status === 500) {
+        return {data: null, status: 500}
       }
 
       return this.getNowPlaying(req, attempt + 1)
@@ -83,11 +89,9 @@ export const apiRoutes = {
       console.error(`Spotify fetch failed after ${maxRetries} retries.`)
     }
 
-    return Response.json({
+    return {
       data: null,
-      status: response.status,
-      ok: false,
-      error: `Spotify API error: ${response.status}`,
-    })
+      status: response.status
+    }
   },
 }
