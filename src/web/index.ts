@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import homepage from './index.html'
 import type { Alert } from './alerts'
+import { apiRoutes } from '../api'
 
 const port = Number(Bun.env.WEB_PORT ?? 3000)
 const SOUNDS_PREFIX = '/public/audio/'
@@ -57,6 +58,10 @@ export function buildServer(port: number) {
     },
     routes: {
       '/': homepage,
+      '/api/spotify/now-playing': async (req: Request) => {
+        const response = (await apiRoutes.getNowPlaying(req)) as Response
+        return response
+      },
     },
   })
 
