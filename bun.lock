@@ -10,7 +10,6 @@
         "@twurple/auth": "^8.2.0",
         "@twurple/easy-bot": "^8.2.0",
         "@twurple/eventsub-base": "^8.2.0",
-        "@twurple/eventsub-http": "^8.2.0",
         "@twurple/eventsub-ngrok": "^8.2.0",
         "@twurple/eventsub-ws": "^8.2.0",
         "react": "^19.3.0",
