@@ -1,4 +1,4 @@
-import { Database } from 'bun:sqlite'
+import { db } from './db'
 import type { ApiClient } from '@twurple/api'
 import type { Bot } from '@twurple/easy-bot'
 import type { EventSubWsListener } from '@twurple/eventsub-ws'
@@ -21,7 +21,6 @@ export async function trackFirstMessages({
   ignoreUserIds = [],
   onFirstMessage,
 }: Options) {
-  const db = new Database('./data/data.db')
   db.run(`
         CREATE TABLE IF NOT EXISTS stream_chatters (
             stream_id TEXT NOT NULL,
