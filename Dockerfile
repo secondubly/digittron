@@ -24,13 +24,14 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-RUN chown -R bun:bun /usr/src/app
+RUN mkdir -p /usr/src/app/data && chown bun:bun /usr/src/app /usr/src/app/data
+
 # switch back to bun
 USER bun
 # Bring in only the production-ready packages
-COPY --from=install /temp/prod/node_modules /usr/src/app/node_modules
+COPY --chown=bun:bun --from=install /temp/prod/node_modules /usr/src/app/node_modules
 # Copy the compiled application code and static assets from the build stage
-COPY --from=prerelease /usr/src/app /usr/src/app
+COPY --chown=bun:bun --from=prerelease /usr/src/app /usr/src/app
 # Explicitly take ownership of usr/src/app
 
 EXPOSE 3000/tcp
