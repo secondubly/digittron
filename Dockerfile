@@ -18,6 +18,13 @@ COPY . .
 RUN bun run build
 
 FROM base AS release
+# Add curl for healthcheck
+USER root
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+# switch back to bun
+USER bun
 # Bring in only the production-ready packages
 COPY --from=install /temp/prod/node_modules /usr/src/app/node_modules
 # Copy the compiled application code and static assets from the build stage
