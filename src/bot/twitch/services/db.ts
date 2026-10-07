@@ -4,6 +4,7 @@ if (!Bun.env.DATABASE_PATH) {
   throw new Error('Missing database path.')
 }
 
+console.log('Database path', Bun.env.database_path)
 export const db = new Database(Bun.env.DATABASE_PATH)
 
 db.run('PRAGMA journal_mode = WAL')
