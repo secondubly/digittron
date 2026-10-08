@@ -1,5 +1,6 @@
 import { Database } from 'bun:sqlite'
 import { log } from '@core/logger'
+import { onShutdown } from '@core/shutdown'
 
 if (!Bun.env.DATABASE_PATH) {
   throw new Error('Missing database path.')
@@ -22,9 +23,8 @@ db.run(`
 `)
 db.run('CREATE INDEX IF NOT EXISTS idx_usage ON command_usage (command, used_at)')
 
-process.on('SIGINT', () => {
-  log.app.info('Shutting down gracefully')
-  // Safely close the database connection
+onShutdown('close-db', async () => {
+  log.app.info('Database closing')
   db.close()
-  process.exit(0)
+  log.app.info('Database closed')
 })

@@ -6,6 +6,7 @@ import { buildCommands } from './commands'
 import { ApiClient } from '@twurple/api'
 import { EventSubChannelRaidModerationEvent } from '@twurple/eventsub-base'
 import { log, twurpleLogger } from '@core/logger'
+import { onShutdown } from '@core/shutdown'
 
 export const init = async () => {
   if (!Bun.env.TWITCH_CLIENT_ID || !Bun.env.TWITCH_CLIENT_SECRET || !Bun.env.TWITCH_CHANNELS) {
@@ -111,6 +112,16 @@ export const init = async () => {
           log.twitch.error({ e }, 'error occurred')
         }
       }
+    })
+
+    // handle bot shutdown
+    onShutdown('bot-quit', async () => {
+      log.twitch.info('Shutting down bot...')
+      // delete eventsub subscriptions
+      await bot.api.eventSub.deleteAllSubscriptions()
+      // leave chatrooms
+      bot.chat.quit()
+      log.twitch.info('Bot shut down successfully')
     })
 
     return bot

@@ -3,6 +3,7 @@ import homepage from './index.html'
 import type { Alert } from './alerts'
 import { apiRoutes } from '../api'
 import { log } from '@core/logger'
+import { onShutdown } from '@core/shutdown'
 
 const port = Number(Bun.env.WEB_PORT ?? 3000)
 const SOUNDS_PREFIX = '/public/audio/'
@@ -78,6 +79,14 @@ export function buildServer(port: number) {
   })
 
   log.web.info(`Alert server listening on ${server.hostname}:${server.port}`)
+
+  onShutdown('server-close', async () => {
+    if (!server) return
+    log.web.info('Shutting down web server gracefully')
+    await server.stop()
+    log.web.info('Web server shut down.')
+  })
+
   return server
 }
 
