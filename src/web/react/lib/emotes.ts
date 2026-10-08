@@ -56,7 +56,6 @@ export async function loadThirdParty(roomId: string) {
 
   const jobs: Promise<Pair[]>[] = []
   if (emoteProviders.has('bttv')) {
-    console.log('room id', roomId)
     jobs.push(
       getJson('https://api.betterttv.net/3/cached/emotes/global').then((list: BTTVEmote[]) =>
         list.map((e): Pair => [e.code, bttvUrl(e.id)]),

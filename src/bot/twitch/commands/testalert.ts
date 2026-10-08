@@ -2,7 +2,6 @@ import { command } from '../services/permissions'
 import { sendAlert } from '../../../web/alerts'
 
 export default command('testalert', 'broadcaster', async (_params, ctx) => {
-  console.log('testing sound alerts')
   sendAlert(
     {
       type: 'first-message',
