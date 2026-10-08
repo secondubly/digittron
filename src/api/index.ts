@@ -36,9 +36,10 @@ const refreshSpotifyToken = async (id: string) => {
       newToken.refresh_token = token.refresh_token
     }
     await Bun.write(`./data/spotify.${id}.json`, JSON.stringify(newToken, null, 2)).catch((err) => {
-      log.api.error({ err }, 'Failed to save token')
+      log.api.error({ err }, 'Failed to save updated token')
     })
 
+    log.api.info({ user: id }, 'Token refresh successful')
     return { token: newToken, status: res.status }
   } catch (e) {
     log.api.error({ e }, 'Unexpected error')
