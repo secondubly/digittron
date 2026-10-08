@@ -1,5 +1,5 @@
 // commands/title.ts
-import { command, hasLevel } from '../permissions.js'
+import { command, hasLevel } from '../services/permissions.js'
 import type { Deps } from '../deps.js'
 
 export default function title({ api }: Deps) {

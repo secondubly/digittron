@@ -1,4 +1,4 @@
-import { command } from '../permissions'
+import { command } from '../services/permissions'
 import type { SpotifyCurrentlyPlayingResponse, SpotifyTrackItem } from '../types'
 
 export default command(

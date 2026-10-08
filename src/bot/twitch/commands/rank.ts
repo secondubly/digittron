@@ -34,7 +34,7 @@ interface DeadlockPlayerRank {
   last_match: unknown
 }
 
-import { command } from '../permissions'
+import { command } from '../services/permissions'
 
 export default command('rank', 'everyone', async (_params, ctx) => {
     const response = await fetch(

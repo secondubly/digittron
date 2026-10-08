@@ -1,4 +1,4 @@
-import { command } from '../permissions'
+import { command } from '../services/permissions'
 
 export default command('backseat', 'everyone', async (_params, ctx) => {
   const broadcasterName = ctx.broadcasterName
