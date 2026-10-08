@@ -1,5 +1,6 @@
 import { startBot } from './bot/twitch'
 import { db } from './bot/twitch/services/db'
+import { log } from '@core/logger'
 import { buildServer } from './web'
 
 const startup = () => {
@@ -8,7 +9,7 @@ const startup = () => {
     buildServer(parseInt(Bun.env.WEB_PORT ?? '3000'))
   } catch (e) {
     db.close()
-    console.log('error', e)
+    log.app.error({ e }, 'failed to start app')
     process.exit(1)
   }
 }

@@ -1,3 +1,5 @@
+import { log } from '@core/logger'
+
 export type Alert = { type: 'first-message'; name: string; sound: string }
 
 export const sendAlert = async (alert: Alert, port: string) => {
@@ -10,9 +12,9 @@ export const sendAlert = async (alert: Alert, port: string) => {
       body: JSON.stringify(alert),
     })
     if (!response.ok) {
-      console.error(`Failed to send alert. Server status: ${response.status}`)
+      log.web.error({ response }, 'Failed to send alert.')
     }
   } catch (error) {
-    console.error('Failed to connect to the alert server from the bot process:', error)
+    log.web.error({ error }, 'Failed to connect to the alert server from the bot process')
   }
 }

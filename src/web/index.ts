@@ -2,6 +2,7 @@ import { join } from 'node:path'
 import homepage from './index.html'
 import type { Alert } from './alerts'
 import { apiRoutes } from '../api'
+import { log } from '@core/logger'
 
 const port = Number(Bun.env.WEB_PORT ?? 3000)
 const SOUNDS_PREFIX = '/public/audio/'
@@ -13,7 +14,7 @@ let server: ReturnType<typeof Bun.serve> | null = null
 function broadcastAlert(alert: Alert) {
   if (!server) return
   server.publish('alerts', JSON.stringify(alert))
-  console.log('Alert published to clients:', alert)
+  log.web.info({ alert: alert }, 'Alert published to clients')
 }
 
 export function buildServer(port: number) {
@@ -53,7 +54,9 @@ export function buildServer(port: number) {
       return new Response('Alert server running')
     },
     websocket: {
-      open(ws) { ws.subscribe('alerts') }, // on connection, subscribe to the alerts event
+      open(ws) {
+        ws.subscribe('alerts')
+      }, // on connection, subscribe to the alerts event
       message: () => {}, // no-op, overlay only listens
     },
     routes: {
@@ -61,7 +64,6 @@ export function buildServer(port: number) {
       '/api/spotify/now-playing': async (req: Request) => {
         const response = await apiRoutes.getNowPlaying(req)
 
-        console.log('response', response)
         if (!response.data) {
           if (response.status === 204) {
             return new Response(null, { status: response.status })
@@ -75,7 +77,7 @@ export function buildServer(port: number) {
     },
   })
 
-  console.log(`Alert server listening on ${server.hostname}:${server.port}`)
+  log.web.info(`Alert server listening on ${server.hostname}:${server.port}`)
   return server
 }
 

@@ -7,12 +7,12 @@ export default command(
   async (_params, ctx) => {
     const chatterDisplayName = ctx.userDisplayName
 
-    const res: Response = await fetch(
+    const res: Response = (await fetch(
       `http://localhost:${Bun.env.WEB_PORT ?? '3000'}/api/spotify/now-playing`,
       {
         method: 'GET',
       },
-    ) as Response
+    ))
 
     if (!res.ok) {
       return

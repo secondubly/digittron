@@ -1,20 +1,13 @@
-import {
-  RefreshingAuthProvider,
-  type AccessToken
-} from '@twurple/auth'
+import { RefreshingAuthProvider, type AccessToken } from '@twurple/auth'
 import { Bot, createBotCommand } from '@twurple/easy-bot'
 import { EventSubWsListener } from '@twurple/eventsub-ws'
 import { trackFirstMessages } from './services/tracker'
 import { buildCommands } from './commands'
 import { ApiClient } from '@twurple/api'
 import { EventSubChannelRaidModerationEvent } from '@twurple/eventsub-base'
-import { makeLogger, twurpleLogger } from '../../core/logger'
-import { logBotEvents } from './services/botLog'
-
-const log = makeLogger('bot')
+import { log, twurpleLogger } from '@core/logger'
 
 export const init = async () => {
-  
   if (!Bun.env.TWITCH_CLIENT_ID || !Bun.env.TWITCH_CLIENT_SECRET || !Bun.env.TWITCH_CHANNELS) {
     throw new Error('Missing required environment variables.')
   }
@@ -37,16 +30,17 @@ export const init = async () => {
   try {
     const authProvider = new RefreshingAuthProvider({
       clientId: Bun.env.TWITCH_CLIENT_ID,
-      clientSecret: Bun.env.TWITCH_CLIENT_SECRET})
+      clientSecret: Bun.env.TWITCH_CLIENT_SECRET,
+    })
 
     // on token refresh, update the appropriate file
     authProvider.onRefresh(async (userId: string, newTokenData: AccessToken) => {
       try {
-        await Bun.write(`./data/tokens.${userId}.json`, JSON.stringify(newTokenData, null, 2))  
-        log.debug({ userId }, 'access token refreshed and saved')
-      } catch(err) {
-          log.error({ err, userId }, 'failed to save refreshed token')
-        }
+        await Bun.write(`./data/tokens.${userId}.json`, JSON.stringify(newTokenData, null, 2))
+        log.twitch.debug({ userId }, 'access token refreshed and saved')
+      } catch (err) {
+        log.twitch.error({ err, userId }, 'failed to save refreshed token')
+      }
     })
 
     await authProvider.addUserForToken(botToken, ['chat'])
@@ -58,16 +52,18 @@ export const init = async () => {
     const commands = buildCommands({ api })
 
     // add !commands to list of commands
-    const available = createBotCommand('commands', (_, { say}) => {
+    const available = createBotCommand('commands', (_, { say }) => {
       const commandList = commands.map((command) => `!${command.name}`).join(', ')
       say(`They do lots of things ➡️ [${commandList}]`)
     })
     commands.push(available)
 
     const bot = new Bot({ authProvider, channels, commands })
-    logBotEvents(bot, authProvider)
 
-    const listener = new EventSubWsListener({ apiClient: api, logger: twurpleLogger('twurple:eventsub') })
+    const listener = new EventSubWsListener({
+      apiClient: api,
+      logger: twurpleLogger('twurple:eventsub'),
+    })
 
     await trackFirstMessages({
       bot,
@@ -83,8 +79,8 @@ export const init = async () => {
         return
       }
       const raidedChannel = event.userDisplayName
-      
-      log.info({ raidedChannel }, 'started a raid')
+
+      log.twitch.info({ raidedChannel }, 'started a raid')
       const messages = [
         `We're raiding @${raidedChannel}!`,
         `Use this as the raid message: second15Raid 01010010 01000001 01001001 01000100 00100001 00100001 00100001 second15Raid`,
@@ -110,15 +106,15 @@ export const init = async () => {
         })
       } catch (e) {
         if (e instanceof Error) {
-          console.error(`Error: ${e.message}`)
+          log.twitch.error({ e, raiderId }, 'shoutout failed')
         } else {
-          console.error(`Unexpected error occurred: ${e}`)
+          log.twitch.error({ e }, 'error occurred')
         }
       }
     })
 
     return bot
   } catch (err) {
-    console.error('Build error', err)
+    log.app.error({ err }, 'Build error')
   }
 }

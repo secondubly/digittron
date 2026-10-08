@@ -1,6 +1,7 @@
 import { createBotCommand, type BotCommand, type BotCommandContext } from '@twurple/easy-bot'
 import type { ChatUser } from '@twurple/chat'
 import { db } from './db'
+import { log } from '@core/logger'
 
 export type PermissionLevel = 'everyone' | 'sub' | 'vip' | 'mod' | 'broadcaster'
 
@@ -24,7 +25,7 @@ export function command(
   level: PermissionLevel,
   handler: CommandHandler,
   options?: Parameters<typeof createBotCommand>[2],
-): BotCommand {  
+): BotCommand {
   return createBotCommand(
     name,
     async (params, ctx) => {
@@ -38,13 +39,18 @@ export function command(
           await handler(params, ctx)
         } catch (err) {
           status = 'error'
-          console.error('command failed', { err, command: name })
+          log.twitch.info({ err, command: name }, 'command failed')
         }
       }
 
       insertUsage.run(
-        Date.now(), name, ctx.userId, ctx.userName, ctx.broadcasterName,
-        status, Math.round(performance.now() - start),
+        Date.now(),
+        name,
+        ctx.userId,
+        ctx.userName,
+        ctx.broadcasterName,
+        status,
+        Math.round(performance.now() - start),
       )
     },
     options,

@@ -1,4 +1,5 @@
 import { Database } from 'bun:sqlite'
+import { log } from '@core/logger'
 
 if (!Bun.env.DATABASE_PATH) {
   throw new Error('Missing database path.')
@@ -21,10 +22,9 @@ db.run(`
 `)
 db.run('CREATE INDEX IF NOT EXISTS idx_usage ON command_usage (command, used_at)')
 
-process.on("SIGINT", () => {
-  console.log("Shutting down database gracefully...");
-  
+process.on('SIGINT', () => {
+  log.app.info('Shutting down gracefully')
   // Safely close the database connection
-  db.close();
-  process.exit(0);
-});
+  db.close()
+  process.exit(0)
+})

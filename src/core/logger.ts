@@ -1,4 +1,3 @@
-
 import pino from 'pino'
 import pretty from 'pino-pretty'
 
@@ -8,21 +7,28 @@ const pinoLevels = ['fatal', 'error', 'warn', 'info', 'debug'] as const
 const stream = pretty({
   colorize: true,
   translateTime: 'SYS:yyyy-mm-dd HH:MM:ss', // local time instead of a raw timestamp
-  ignore: 'pid,hostname,module',             // drop noisy fields, and the module key is shown in the message instead
-  messageFormat: '[{module}] {msg}',         // prefix each line with its module
-  singleLine: true,                          // extra fields go on the same line instead of below
+  ignore: 'pid,hostname,module', // drop noisy fields, and the module key is shown in the message instead
+  messageFormat: '[{module}] {msg}', // prefix each line with its module
+  singleLine: true, // extra fields go on the same line instead of below
 })
 
-export const logger = pino(
+const logger = pino(
   {
     level: Bun.env.LOG_LEVEL ?? (isDev ? 'debug' : 'info'),
     // keep secrets out of logs if a token object ever gets logged
     redact: {
-      paths: ['accessToken', 'refreshToken', 'clientSecret', '*.accessToken', '*.refreshToken', '*.clientSecret'],
+      paths: [
+        'accessToken',
+        'refreshToken',
+        'clientSecret',
+        '*.accessToken',
+        '*.refreshToken',
+        '*.clientSecret',
+      ],
       censor: '[redacted]',
     },
   },
-  stream
+  stream,
 )
 
 export const makeLogger = (module: string) => logger.child({ module })
@@ -35,4 +41,11 @@ export function twurpleLogger(name: string) {
       log[method](message)
     },
   }
+}
+
+export const log = {
+  twitch: makeLogger('bot'),
+  api: makeLogger('api'),
+  app: makeLogger('app'),
+  web: makeLogger('web'),
 }
