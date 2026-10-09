@@ -1,5 +1,6 @@
 export const features = {
-  core: true,
   anniversary: false,
+  core: true,
   debug: true,
+  games: true
 } as const
