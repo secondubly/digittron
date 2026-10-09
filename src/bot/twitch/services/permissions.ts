@@ -14,7 +14,7 @@ const levels: Record<PermissionLevel, (u: ChatUser) => boolean> = {
 }
 
 const insertUsage = db.prepare(
-  `INSERT INTO command_usage (used_at, command, user_id, user_name, channel, status, duration_ms)
+  `INSERT INTO command_usage (used_at, command, user_id, user_name, channel_id, status, duration_ms)
    VALUES (?, ?, ?, ?, ?, ?, ?)`,
 )
 
@@ -48,7 +48,7 @@ export function command(
         name,
         ctx.userId,
         ctx.userName,
-        ctx.broadcasterName,
+        ctx.broadcasterId,
         status,
         Math.round(performance.now() - start),
       )
