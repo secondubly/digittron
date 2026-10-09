@@ -71,7 +71,7 @@ export const init = async () => {
       api,
       listener,
       broadcasterId: ownerId,
-      ignoreUserIds: [userId, ownerId], // ignore bot and streamer IDs
+      ignoreUserIds: [userId, ownerId, '19264788', '149110266'], // 19264788 = Nighbot, 149110266 = Serybot
     })
 
     // listener handlers
