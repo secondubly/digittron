@@ -44,6 +44,18 @@ body {
   overflow-wrap: anywhere;
   animation: in 180ms ease-out;
 }
+.msg.cheer { --accent: #f6c445; --tint: rgba(246, 196, 69, 0.2); }
+.msg.sub   { --accent: #a970ff; --tint: rgba(169, 112, 255, 0.22); }
+
+.msg.special {
+  padding: 10px 14px 11px 12px;
+  border-left: 6px solid var(--accent);
+  background: linear-gradient(var(--tint), var(--tint)), var(--panel);
+}
+.headline { font-weight: 700; color: var(--accent); }
+.headline .name { margin-right: 0; } /* the space after the name is real text here */
+.special .text { margin-top: 4px; }
+
 .name {
   font-weight: 700;
   color: var(--c, #fff);

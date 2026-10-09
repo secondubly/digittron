@@ -8,6 +8,8 @@ export type Msg = {
   action: boolean
   parts: Part[]
   at: number
+  kind: 'chat' | 'cheer' | 'sub'
+  headline?: string | undefined // e.g. "cheered 500 bits", only on special messages
 }
 
 // 7TV types

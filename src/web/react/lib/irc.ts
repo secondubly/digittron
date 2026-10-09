@@ -1,3 +1,6 @@
+const TAG_ESCAPES: Record<string, string> = { ':': ';', s: ' ', r: '\r', n: '\n', '\\': '\\' }
+const unescapeTag = (v: string) => v.replace(/\\(.?)/g, (_, c: string) => TAG_ESCAPES[c] ?? c)
+
 // IRC line -> tags + prefix + command + target + text
 export function parseLine(raw: string) {
   let line = raw
@@ -6,7 +9,7 @@ export function parseLine(raw: string) {
     const end = line.indexOf(' ')
     for (const kv of line.slice(1, end).split(';')) {
       const [k, v = ''] = kv.split('=')
-      if (k) tags[k] = v
+      if (k) tags[k] = unescapeTag(v)
     }
     line = line.slice(end + 1)
   }

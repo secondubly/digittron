@@ -5,6 +5,7 @@ import { buildParts, expandThirdParty, loadThirdParty } from '../lib/emotes'
 import { parseLine } from '../lib/irc'
 import { openSocket } from '../lib/socket'
 import type { Msg } from '../types'
+import { cheerHeadline, subHeadline } from '../lib/headlines'
 
 export function useChat(): Msg[] {
   const [messages, setMessages] = useState<Msg[]>([])
@@ -40,6 +41,7 @@ export function useChat(): Msg[] {
             if (action) body = body.slice(8, -1)
             if (hide.has(login) || body.startsWith('!')) continue
             const name = tags['display-name'] || login
+            const headline = cheerHeadline(tags)
             const msg: Msg = {
               id: tags['id'] || crypto.randomUUID(),
               userId: tags['user-id'] ?? '',
@@ -48,6 +50,8 @@ export function useChat(): Msg[] {
               action,
               parts: expandThirdParty(buildParts(body, tags['emotes'] ?? '')),
               at: Date.now(),
+              kind: headline ? 'cheer' : 'chat',
+              headline: headline ?? undefined,
             }
             setMessages((prev) => [...prev, msg].slice(-max))
           } else if (command === 'CLEARCHAT') {
@@ -55,6 +59,25 @@ export function useChat(): Msg[] {
             setMessages((prev) => (target ? prev.filter((m) => m.userId !== target) : []))
           } else if (command === 'CLEARMSG') {
             setMessages((prev) => prev.filter((m) => m.id !== tags['target-msg-id']))
+          } else if (command === 'USERNOTICE') {
+            const headline = subHeadline(tags)
+            if (!headline) continue // raids, gifts and the rest are ignored for now
+
+            const login = tags['login'] ?? ''
+            const name = tags['display-name'] || login
+            const msg: Msg = {
+              id: tags['id'] || crypto.randomUUID(),
+              userId: tags['user-id'] ?? '',
+              name,
+              color: tags['color'] || fallbackColor(name),
+              action: false,
+              parts: text ? expandThirdParty(buildParts(text, tags['emotes'] ?? '')) : [],
+              at: Date.now(),
+              kind: 'sub',
+              headline,
+            }
+
+            setMessages((prev) => [...prev, msg].slice(-max))
           }
         }
       },
