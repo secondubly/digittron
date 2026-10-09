@@ -52,7 +52,6 @@ export async function trackFirstMessages({
 
   bot.onMessage(async ({ userId, userName }) => {
     const sid = streamId
-    // TODO: add serybot, and nightbot to the ignore list
     if (!sid || ignored.has(userId) || seen.has(userId)) return
     seen.add(userId)
 
