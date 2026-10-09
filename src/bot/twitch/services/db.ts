@@ -25,7 +25,7 @@ db.run('CREATE INDEX IF NOT EXISTS idx_usage ON command_usage (command, used_at)
 
 // for tracking d20 rolls
 db.run(`
-  CREATE TABLE d20_rolls (
+  CREATE TABLE IF NOT EXISTS d20_rolls (
       id         INTEGER PRIMARY KEY AUTOINCREMENT,
       channel_id TEXT NOT NULL,
       user_id    TEXT NOT NULL,
