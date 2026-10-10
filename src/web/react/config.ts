@@ -22,6 +22,6 @@ export const debug = params.has('debug')
 
 export const emoteProviders = new Set((params.get('emotes') ?? '7tv,bttv').toLowerCase().split(','))
 
-export const alertsUrl = params.get('alerts') ?? `ws://localhost:${Bun.env.WEB_PORT}`
+export const alertsUrl = params.get('alerts') ?? 'ws://localhost:3001'
 export const alertsHttp = alertsUrl.replace(/^ws/, 'http') // sounds are served by the same server
 export const volume = Math.min(1, Math.max(0, Number(params.get('volume') ?? 0.6)))
