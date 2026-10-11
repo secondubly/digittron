@@ -8,35 +8,6 @@ import type {
   SevenTVUserResponse,
 } from '../types'
 
-// Twitch emote ranges are in Unicode code points, so split with Array.from
-export function buildParts(text: string, emotesTag: string): Part[] {
-  if (!emotesTag) return [text]
-  const chars = Array.from(text)
-  const ranges: [number, number, string][] = []
-  for (const group of emotesTag.split('/')) {
-    const [id, positions] = group.split(':')
-    if (!id || !positions) continue
-    for (const range of positions.split(',')) {
-      const [s, e] = range.split('-').map(Number)
-      if (s === undefined || e === undefined) continue
-      ranges.push([s, e, id])
-    }
-  }
-  ranges.sort((a, b) => a[0] - b[0])
-  const parts: Part[] = []
-  let cur = 0
-  for (const [s, e, id] of ranges) {
-    if (s > cur) parts.push(chars.slice(cur, s).join(''))
-    parts.push({
-      src: `https://static-cdn.jtvnw.net/emoticons/v2/${id}/default/dark/2.0`,
-      alt: chars.slice(s, e + 1).join(''),
-    })
-    cur = e + 1
-  }
-  if (cur < chars.length) parts.push(chars.slice(cur).join(''))
-  return parts
-}
-
 // Third-party emotes (7TV / BTTV): word -> image URL. Later sets override earlier ones.
 const thirdParty = new Map<string, string>()
 let loadedRoom = ''

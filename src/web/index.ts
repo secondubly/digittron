@@ -12,10 +12,8 @@ const soundsDir = join(import.meta.dir, SOUNDS_PREFIX)
 let server: ReturnType<typeof Bun.serve> | null = null
 
 // internally handle sending alerts
-function broadcastAlert(alert: Alert) {
-  if (!server) return
-  server.publish('alerts', JSON.stringify(alert))
-  log.web.info({ alert: alert }, 'Alert published to clients')
+export function broadcast(event: unknown) {
+  server?.publish('alerts', JSON.stringify(event))
 }
 
 export function buildServer(port: number) {
@@ -30,7 +28,7 @@ export function buildServer(port: number) {
       if (req.method === 'POST' && pathname.startsWith('/api/alert')) {
         try {
           const alertData = (await req.json()) as Alert
-          broadcastAlert(alertData)
+          broadcast(alertData)
           return new Response('Alert broadcasted', { status: 200 })
         } catch (_e) {
           return new Response('Invalid JSON payload', { status: 400 })
