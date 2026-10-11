@@ -52,7 +52,7 @@ export function command(
     name,
     async (params, ctx) => {
       const start = performance.now()
-      let status: 'ok' | 'error' | 'denied' = 'ok'
+      let status: 'ok' | 'error' | 'denied' = 'ok' // REVIEW: should we add a cooldown status?
 
       if (!levels[level](ctx.msg.userInfo)) return
       if (isOnCooldown(name, ctx, cooldown)) return // or ctx.reply('Slow down!') if you want feedback
