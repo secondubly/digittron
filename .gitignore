@@ -153,3 +153,4 @@ vite.config.ts.timestamp-*
 tokens.*.json
 data/*
 .DS_Store
+src/web/public/audio/*
