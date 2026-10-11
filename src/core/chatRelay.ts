@@ -31,7 +31,6 @@ function toFragments(parts: readonly RawFragment[]): Fragment[] {
  */
 export function relayChat(listener: EventSubWsListener, broadcasterId: string) {
     listener.onChannelChatMessage(broadcasterId, broadcasterId, (e) => {
-        console.log('message received')
         const bits = e.bits
         broadcast({
             type: 'chat',
