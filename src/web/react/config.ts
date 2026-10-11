@@ -12,6 +12,8 @@
  * Messages starting with "!" are hidden so command spam stays off stream.
  */
 const params = new URLSearchParams(location.search)
+const serverBase =
+  params.get('alerts') ?? `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}`
 
 export const channel = (params.get('channel') ?? '').toLowerCase()
 export const ttl = Number(params.get('ttl') ?? 30) * 1000
@@ -22,9 +24,8 @@ export const debug = params.has('debug')
 export const mock = params.get('mock')
 export const bg = params.get('bg')
 
-
 export const emoteProviders = new Set((params.get('emotes') ?? '7tv,bttv').toLowerCase().split(','))
 
-export const alertsUrl = params.get('alerts') ?? 'ws://localhost:3000'
-export const alertsHttp = alertsUrl.replace(/^ws/, 'http') // sounds are served by the same server
+export const alertsUrl = serverBase === 'off' ? 'off' : `${serverBase}/ws`
+export const alertsHttp = serverBase.replace(/^ws/, 'http')
 export const volume = Math.min(1, Math.max(0, Number(params.get('volume') ?? 0.6)))
