@@ -1,7 +1,7 @@
 import pino from 'pino'
 import pretty from 'pino-pretty'
 
-const isDev = Bun.env.NODE_ENV !== 'production'
+const isDev = Bun.env.NODE_ENV === 'development'
 const pinoLevels = ['fatal', 'error', 'warn', 'info', 'debug'] as const
 
 const stream = pretty({
