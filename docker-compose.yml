@@ -19,8 +19,6 @@ services:
       # Spotify (optional)
       - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
       - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
-      # Redis Cache
-      - REDIS_URL=${REDIS_URL}
       # Web/API
       - WEB_PORT=${WEB_PORT:-3000}
       # optionals
