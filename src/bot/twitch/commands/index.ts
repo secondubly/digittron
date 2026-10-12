@@ -13,6 +13,7 @@ import test from './test'
 import title from './title'
 import testalert from './testalert'
 import nowplaying from './nowplaying'
+import playlist from './playlist'
 import rank from './rank'
 import d20 from './d20'
 import { log } from '@core/logger'
@@ -21,7 +22,11 @@ const commandList: BotCommand[] = []
 
 export function buildCommands(deps: Deps): BotCommand[] {
   if (features.core) {
-    commandList.push(backseat, blind, clip(deps), details(deps), discord, game(deps), test, title(deps), rank)
+    commandList.push(
+      backseat, blind, clip(deps), 
+    details(deps), discord, game(deps), 
+    playlist,
+    test, title(deps), rank)
   }
 
   if (features.music) {
