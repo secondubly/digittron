@@ -14,12 +14,21 @@ import testalert from './testalert'
 import nowplaying from './nowplaying'
 import rank from './rank'
 import d20 from './d20'
+import { log } from '@core/logger'
 
 const commandList: BotCommand[] = []
 
 export function buildCommands(deps: Deps): BotCommand[] {
   if (features.core) {
-    commandList.push(backseat, blind, clip(deps), discord, game(deps), test, title(deps), nowplaying, rank)
+    commandList.push(backseat, blind, clip(deps), discord, game(deps), test, title(deps), rank)
+  }
+
+  if (features.music) {
+    if (!Bun.env.SPOTIFY_CLIENT_ID || !Bun.env.SPOTIFY_CLIENT_SECRET) {
+      log.twitch.warn('Spotify variables not set, skipping loading music commands')
+    } else {
+      commandList.push(nowplaying) 
+    }
   }
 
   if (features.debug) {
