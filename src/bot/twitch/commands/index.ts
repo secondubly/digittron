@@ -6,6 +6,7 @@ import type { Deps } from '../deps'
 import backseat from './backseat'
 import blind from './blind'
 import clip from './clip'
+import details from './details'
 import discord from './discord'
 import game from './game'
 import test from './test'
@@ -20,7 +21,7 @@ const commandList: BotCommand[] = []
 
 export function buildCommands(deps: Deps): BotCommand[] {
   if (features.core) {
-    commandList.push(backseat, blind, clip(deps), discord, game(deps), test, title(deps), rank)
+    commandList.push(backseat, blind, clip(deps), details(deps), discord, game(deps), test, title(deps), rank)
   }
 
   if (features.music) {
