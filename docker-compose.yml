@@ -8,8 +8,25 @@ services:
       - "${WEB_PORT:-3000}:3000"
     volumes:
       - ./data:/app/data
+    environment:
+      - DATABASE_PATH=${DATABASE_PATH}
+      # Twitch
+      - TWITCH_CLIENT_ID=${TWITCH_CLIENT_ID}
+      - TWITCH_CLIENT_SECRET=${TWITCH_CLIENT_SECRET}
+      - TWITCH_BOT_ID=${TWITCH_BOT_ID}
+      - TWITCH_OWNER_ID=${TWITCH_OWNER_ID}
+      - TWITCH_CHANNELS=${TWITCH_CHANNELS}
+      # Spotify (optional)
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+      # Redis Cache
+      - REDIS_URL=${REDIS_URL}
+      # Web/API
+      - WEB_PORT=${WEB_PORT:-3000}
+      # optionals
+      - STEAM_ID=${STEAM_ID}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      test: ["CMD", "curl", "-f", "http://localhost:$$WEB_PORT/"]
       interval: 30s
       timeout: 10s
       start_period: 10s
