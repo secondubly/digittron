@@ -85,6 +85,7 @@ docker run -p 3000:3000 --name whatever_you_want digittron:main
 * `!commands` - list all available commands
 * `!clip` - Clips the last 30 seconds of the stream
 * `!d20` - roll a d20
+* `!details` a summary of the current game
 * `!discord` - the discord url
 * `!game` - shows the game (or change the stream game if you're a moderator)
 * `!nowplaying` - gets the currently playing song (if available)
