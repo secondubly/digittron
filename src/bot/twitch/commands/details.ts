@@ -1,6 +1,7 @@
 import { command } from '../services/permissions'
 import type { Deps } from '../deps'
 import { log } from '@core/logger'
+import type { Game } from 'igdb-api-types';
 
 export default function details({ api, auth }: Deps) {
     return command("details", "everyone", async (params, ctx) => {
@@ -32,8 +33,6 @@ export default function details({ api, auth }: Deps) {
         }
         
         try {
-
-            // TODO: split this into a function probably?
             const response = await fetch('https://api.igdb.com/v4/games', {
                 method: 'POST',
                 headers: {
@@ -47,7 +46,7 @@ export default function details({ api, auth }: Deps) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json();
+            const data = await response.json() as Game[]
             const gameData = data[0]
 
             if (!gameData) {
@@ -55,14 +54,7 @@ export default function details({ api, auth }: Deps) {
                 return
             }
 
-            let message: string
-            if (gameData.storyline) {
-                message = gameData.storyline
-            } else if (gameData.summary) {
-                message = gameData.summary
-            } else {
-                message = 'Could not get a good enough summary for this game, ask the streamer!'
-            }
+            let message = buildResponse(gameData)
 
             let messages: string[] = []
             if (message.length > 500) {
@@ -83,6 +75,19 @@ export default function details({ api, auth }: Deps) {
             log.twitch.error(e)
         }
     })
+}
+
+const buildResponse = (data: Game) => {
+    let message: string
+    if (data.storyline) {
+        message = data.storyline
+    } else if (data.summary) {
+        message = data.summary
+    } else {
+        message = 'Could not get a good enough summary for this game, ask the streamer!'
+    }
+    
+    return message
 }
 
 const splitStringIntoParts = (text: string, size = 500): string[] => {

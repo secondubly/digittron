@@ -12,6 +12,7 @@
         "@twurple/eventsub-base": "^8.2.0",
         "@twurple/eventsub-ngrok": "^8.2.0",
         "@twurple/eventsub-ws": "^8.2.0",
+        "igdb-api-types": "^0.2.0",
         "pino": "^10.4.0",
         "pino-pretty": "^13.2.0",
         "react": "^19.3.0",
@@ -341,6 +342,8 @@
     "httpanda": ["httpanda@0.5.0", "", { "dependencies": { "@types/node": "^14.11.2", "tslib": "^2.0.3" } }, "sha512-cGCNiVt4CLymrWfogWmyLhOzYxiHAufG5HfC/Oapx+3+W6r6cfRq3I3va1ujRouUpArt1tdig7xMP6zrMhjY1A=="],
 
     "iconv-lite": ["iconv-lite@0.7.3", "", { "dependencies": { "safer-buffer": ">= 2.1.2 < 3.0.0" } }, "sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ=="],
+
+    "igdb-api-types": ["igdb-api-types@0.2.0", "", {}, "sha512-FeavoSQ1jQ6htJs8uqnJA4aB+Z9j3efG8NMDNrnEJ+LJrWkyDQ2U90XjgaA+l+kM4FzfnUlsWzyUTuhTsUoxqQ=="],
 
     "ignore": ["ignore@5.3.2", "", {}, "sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g=="],
 
