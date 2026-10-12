@@ -17,6 +17,7 @@ import playlist from './playlist'
 import rank from './rank'
 import d20 from './d20'
 import { log } from '@core/logger'
+import shoutout from './shoutout'
 
 const commandList: BotCommand[] = []
 
@@ -26,6 +27,7 @@ export function buildCommands(deps: Deps): BotCommand[] {
       backseat, blind, clip(deps), 
     details(deps), discord, game(deps), 
     playlist,
+    shoutout(deps),
     test, title(deps), rank)
   }
 

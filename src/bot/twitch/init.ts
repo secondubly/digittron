@@ -16,7 +16,7 @@ const STARTUP_MESSAGES = [
 
 export const init = async ({ authProvider, api, listener, botId, ownerId, channels }: Twitch) => {
 
-    const commands = buildCommands({ api, auth: authProvider })
+    const commands = buildCommands({ api, auth: authProvider, botId })
 
     // add !commands to list of commands
     commands.push(

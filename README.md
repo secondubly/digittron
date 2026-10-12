@@ -92,6 +92,7 @@ docker run -p 3000:3000 --name whatever_you_want digittron:main
 * `!playlist` - link to the stream playlist
 * `!raidmsg` - shows the outgoing raid message
 * `!rank` - Shows the broadcaster's deadlock rank
+* `!shoutout` - Shouts out the specified user in chat
 * `!title` - shows the stream title (or changes it if you're a moderator)
 * `!wishlist` - shows throne and steam wishlist
 

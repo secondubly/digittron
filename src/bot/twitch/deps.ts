@@ -4,4 +4,5 @@ import type { RefreshingAuthProvider } from '@twurple/auth'
 export interface Deps {
   api: ApiClient
   auth: RefreshingAuthProvider
+  botId: string
 }
