@@ -4,6 +4,7 @@ import { buildCommands } from './commands'
 import { EventSubChannelRaidModerationEvent } from '@twurple/eventsub-base'
 import { log, twurpleLogger } from '@core/logger'
 import type { Twitch } from '@core/twitch'
+import { startAdWarnings } from './services/adWarnings'
 
 export { TWITCH_BROADCASTER_SCOPES } from '@core/twitch' // other files may still import it from here
  
@@ -47,6 +48,8 @@ export const init = async ({ authProvider, api, listener, botId, ownerId, channe
         broadcasterId: ownerId,
         ignoreUserIds: [botId, ownerId], // ignore the bot and the streamer
     })
+
+    await startAdWarnings({ bot, api, listener, ownerId })
  
     // Raids started from this channel
     listener.onChannelModerate(ownerId, botId, async (event) => {
