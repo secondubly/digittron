@@ -5,6 +5,7 @@ import { EventSubChannelRaidModerationEvent } from '@twurple/eventsub-base'
 import { log, twurpleLogger } from '@core/logger'
 import type { Twitch } from '@core/twitch'
 import { startAdWarnings } from './services/adWarnings'
+import { trackFirsts } from './services/firsts'
 
 export { TWITCH_BROADCASTER_SCOPES } from '@core/twitch' // other files may still import it from here
  
@@ -47,6 +48,14 @@ export const init = async ({ authProvider, api, listener, botId, ownerId, channe
         listener,
         broadcasterId: ownerId,
         ignoreUserIds: [botId, ownerId], // ignore the bot and the streamer
+    })
+
+    trackFirsts({
+        api,
+        listener,
+        broadcasterId: ownerId,
+        rewardId: Bun.env.FIRST_REWARD_ID ?? 'ab119995-86a1-453f-bd08-c4bb4721a4cf',
+        onChange: undefined // no-op for now: onChange: () => broadcast({ type: 'firsts-updated' }), // broadcast comes from './web'
     })
 
     await startAdWarnings({ bot, api, listener, ownerId })
