@@ -23,6 +23,7 @@ export function useAlerts() {
         if (alert.type !== 'first-message' || !alert.sound) return
         if (Date.now() - lastSound < 2000) return // avoid pile-ups during raids
         lastSound = Date.now()
+        // audio is bundled with the build, so we can access it directly
         const audio = new Audio(`${alertsHttp}/audio/${encodeURIComponent(alert.sound)}`)
         audio.volume = volume
         audio.play().catch((err) => console.warn('Alert sound blocked:', err))

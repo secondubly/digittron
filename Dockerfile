@@ -24,7 +24,7 @@ RUN bun run build
 RUN mkdir /out \
     && cp -r tsconfig.json package.json dist src /out/ \
     && rm -rf /out/src/web/react /out/src/web/*.html /out/src/web/styles.css \
-    /out/src/web/postcss.config.cjs /out/src/web/public
+    /out/src/web/postcss.config.cjs
 
 # RUN pwd && ls -la /out
 # RUN echo "Pausing build for 5 minutes..." && sleep 300

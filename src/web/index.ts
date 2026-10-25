@@ -7,7 +7,7 @@ import { getLeaderboard } from '../bot/twitch/services/firsts'
 import { serveStatic } from '@core/utils'
 
 const port = Number(Bun.env.WEB_PORT ?? 3000)
-const SOUNDS_PREFIX = '/audio/'
+const SOUNDS_PREFIX = '/public/audio/'
 const soundsDir = join(import.meta.dir, SOUNDS_PREFIX)
 
 let server: ReturnType<typeof Bun.serve> | null = null
@@ -43,6 +43,7 @@ export function buildServer(port: number) {
         }
         // plain file names only, so requests can't escape the sounds folder
         if (!/^[\w-][\w.-]*$/.test(name)) return new Response('Bad request', { status: 400 })
+        // REVIEW: this is probably broken?
         const file = Bun.file(join(soundsDir, name))
         return (await file.exists())
           ? new Response(file)
