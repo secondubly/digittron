@@ -50,13 +50,15 @@ export const init = async ({ authProvider, api, listener, botId, ownerId, channe
         ignoreUserIds: [botId, ownerId], // ignore the bot and the streamer
     })
 
-    trackFirsts({
-        api,
-        listener,
-        broadcasterId: ownerId,
-        rewardId: Bun.env.FIRST_REWARD_ID ?? 'ab119995-86a1-453f-bd08-c4bb4721a4cf',
-        onChange: undefined // no-op for now: onChange: () => broadcast({ type: 'firsts-updated' }), // broadcast comes from './web'
-    })
+    if (Bun.env.FIRST_REWARD_ID) {
+        trackFirsts({
+            api,
+            listener,
+            broadcasterId: ownerId,
+            rewardId: Bun.env.FIRST_REWARD_ID,
+            onChange: undefined // no-op for now: onChange: () => broadcast({ type: 'firsts-updated' }), // broadcast comes from './web'
+        })
+    }
 
     await startAdWarnings({ bot, api, listener, ownerId })
  
