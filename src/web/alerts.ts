@@ -14,7 +14,7 @@ export const sendAlert = async (alert: Alert, port: string) => {
     if (!response.ok) {
       log.web.error({ response }, 'Failed to send alert.')
     }
-  } catch (error) {
-    log.web.error({ error }, 'Failed to connect to the alert server from the bot process')
+  } catch (err) {
+    log.web.error({ err }, 'Failed to connect to the alert server from the bot process')
   }
 }

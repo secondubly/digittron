@@ -41,8 +41,8 @@ const refreshSpotifyToken = async (id: string) => {
 
     log.api.info({ user: id }, 'Token refresh successful')
     return { token: newToken, status: res.status }
-  } catch (e) {
-    log.api.error({ e }, 'Unexpected error')
+  } catch (err) {
+    log.api.error({ err }, 'Unexpected error')
     return { token: null, status: 500 }
   }
 }

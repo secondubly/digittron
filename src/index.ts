@@ -1,4 +1,4 @@
-import { db } from './bot/twitch/services/db'
+import { db } from '@core/db'
 import { log } from '@core/logger'
 import { buildServer } from './web'
 import { setupShutdownHandlers } from '@core/shutdown'
@@ -19,9 +19,9 @@ const startup = async () => {
     } catch (err) {
       log.app.error({ err }, 'chat bot failed to start')
     }
-  } catch (e) {
+  } catch (err) {
     db.close()
-    log.app.error({ e }, 'failed to start app')
+    log.app.error({ err }, 'failed to start app')
     process.exit(1)
   }
 }
