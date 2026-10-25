@@ -1,12 +1,13 @@
 import { join } from 'node:path'
-import homepage from './index.html'
 import type { Alert } from './alerts'
 import { apiRoutes } from '../api'
 import { log } from '@core/logger'
 import { onShutdown } from '@core/shutdown'
+import { getLeaderboard } from '../bot/twitch/services/firsts'
+import { serveStatic } from '@core/utils'
 
 const port = Number(Bun.env.WEB_PORT ?? 3000)
-const SOUNDS_PREFIX = '/public/audio/'
+const SOUNDS_PREFIX = '/audio/'
 const soundsDir = join(import.meta.dir, SOUNDS_PREFIX)
 
 let server: ReturnType<typeof Bun.serve> | null = null
@@ -33,10 +34,7 @@ export function buildServer(port: number) {
         } catch (_e) {
           return new Response('Invalid JSON payload', { status: 400 })
         }
-      }
-
-      // serve static audio assets
-      if (pathname.startsWith(SOUNDS_PREFIX)) {
+      } else if (pathname.startsWith(SOUNDS_PREFIX)) {
         let name: string
         try {
           name = decodeURIComponent(pathname.slice(SOUNDS_PREFIX.length))
@@ -49,8 +47,13 @@ export function buildServer(port: number) {
         return (await file.exists())
           ? new Response(file)
           : new Response('Not found', { status: 404 })
+      } else if (req.method === 'GET' || req.method === 'HEAD') {
+        const response = await serveStatic(pathname)
+        if (response) return response
       }
-      return new Response('Alert server running')
+
+      // if none of the above match, return 404
+      return new Response('Not found', { status: 404 })
     },
     websocket: {
       open(ws) {
@@ -59,7 +62,6 @@ export function buildServer(port: number) {
       message: () => {}, // no-op, overlay only listens
     },
     routes: {
-      '/': homepage,
       '/api/spotify/now-playing': async (req: Request) => {
         const response = await apiRoutes.getNowPlaying(req)
 
@@ -73,6 +75,7 @@ export function buildServer(port: number) {
           return Response.json(response.data, { status: 200 })
         }
       },
+      '/api/firsts': () => Response.json(getLeaderboard(10))
     },
   })
 
