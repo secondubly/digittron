@@ -1,6 +1,6 @@
 import { createBotCommand, type BotCommand, type BotCommandContext } from '@twurple/easy-bot'
 import type { ChatUser } from '@twurple/chat'
-import { db } from './db'
+import { db } from '@core/db'
 import { log } from '@core/logger'
 
 export type PermissionLevel = 'everyone' | 'sub' | 'vip' | 'mod' | 'broadcaster'

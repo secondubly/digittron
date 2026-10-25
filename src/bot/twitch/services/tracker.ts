@@ -1,4 +1,4 @@
-import { db } from './db'
+import { db } from '@core/db'
 import type { ApiClient } from '@twurple/api'
 import type { Bot } from '@twurple/easy-bot'
 import type { EventSubWsListener } from '@twurple/eventsub-ws'

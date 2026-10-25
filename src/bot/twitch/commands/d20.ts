@@ -1,4 +1,4 @@
-import { db } from '../services/db'
+import { db } from '@core/db'
 import { command } from '../services/permissions'
 
 export default command('d20', 'everyone', async (_params, ctx) => {
