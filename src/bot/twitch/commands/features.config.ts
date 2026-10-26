@@ -3,5 +3,5 @@ export const features = {
   core: true,
   debug: true,
   games: true,
-  music: true
+  music: true,
 } as const

@@ -46,7 +46,7 @@ export function command(
   level: PermissionLevel,
   handler: CommandHandler,
   options?: Parameters<typeof createBotCommand>[2],
-  cooldown?: Cooldown
+  cooldown?: Cooldown,
 ): BotCommand {
   return createBotCommand(
     name,
@@ -68,8 +68,8 @@ export function command(
         } catch (err) {
           status = 'error'
           log.twitch.info({ err, command: name }, 'command failed')
-        }        
-      } 
+        }
+      }
 
       insertUsage.run(
         Date.now(),

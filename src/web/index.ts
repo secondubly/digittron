@@ -32,9 +32,9 @@ export function buildServer(port: number) {
 
       // handle websocket upgrades
       if (pathname === '/ws') {
-        const upgraded = srv.upgrade(req);
+        const upgraded = srv.upgrade(req)
         if (!upgraded) {
-          return new Response("Upgrade failed", { status: 400 });
+          return new Response('Upgrade failed', { status: 400 })
         }
       } else {
         return new Response('Not found', { status: 404 })
@@ -50,7 +50,7 @@ export function buildServer(port: number) {
     routes: {
       '/': {
         GET: handleStatic,
-        HEAD: handleStatic // see: https://http.dev/head for info on what HEAD is used for 
+        HEAD: handleStatic, // see: https://http.dev/head for info on what HEAD is used for
       },
       '/api/spotify/now-playing': async (req: Request) => {
         const response = await apiRoutes.getNowPlaying(req)
@@ -75,7 +75,7 @@ export function buildServer(port: number) {
           } catch (_e) {
             return new Response('Invalid JSON payload', { status: 400 })
           }
-        }
+        },
       },
       '/public/audio': {
         GET: async (req: Request) => {
@@ -93,7 +93,7 @@ export function buildServer(port: number) {
           return (await file.exists())
             ? new Response(file)
             : new Response('Not found', { status: 404 })
-          }
+        },
       },
     },
   })

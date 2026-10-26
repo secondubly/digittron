@@ -8,20 +8,20 @@ const TIERS: Record<string, string> = { '1000': 'Tier 1', '2000': 'Tier 2', '300
 
 // The parts of an EventSub message fragment we read
 interface RawFragment {
-    type: string
-    text: string
-    emote?: { id: string }
-    cheermote?: { prefix: string; tier: number }
+  type: string
+  text: string
+  emote?: { id: string }
+  cheermote?: { prefix: string; tier: number }
 }
 
 function toFragments(parts: readonly RawFragment[]): Fragment[] {
-    return parts.map((p): Fragment => {
-        if (p.type === 'emote' && p.emote) return { type: 'emote', text: p.text, id: p.emote.id }
-        if (p.type === 'cheermote' && p.cheermote) {
-            return { type: 'cheermote', text: p.text, prefix: p.cheermote.prefix, tier: p.cheermote.tier }
-        }
-        return { type: 'text', text: p.text }
-    })
+  return parts.map((p): Fragment => {
+    if (p.type === 'emote' && p.emote) return { type: 'emote', text: p.text, id: p.emote.id }
+    if (p.type === 'cheermote' && p.cheermote) {
+      return { type: 'cheermote', text: p.text, prefix: p.cheermote.prefix, tier: p.cheermote.tier }
+    }
+    return { type: 'text', text: p.text }
+  })
 }
 
 /**
@@ -30,63 +30,65 @@ function toFragments(parts: readonly RawFragment[]): Fragment[] {
  * different broadcaster id as the first argument of each call below.
  */
 export function relayChat(listener: EventSubWsListener, broadcasterId: string) {
-    listener.onChannelChatMessage(broadcasterId, broadcasterId, (e) => {
-        const bits = e.bits
-        broadcast({
-            type: 'chat',
-            id: e.messageId,
-            channel: e.broadcasterName,
-            login: e.chatterName,
-            userId: e.chatterId,
-            name: e.chatterDisplayName,
-            color: e.color ?? '',
-            text: e.messageText,
-            fragments: toFragments(e.messageParts),
-            roomId: e.broadcasterId,
-            kind: bits > 0 ? 'cheer' : 'chat',
-            ...(bits > 0 ? { headline: `cheered ${bits.toLocaleString('en-US')} bit${bits === 1 ? '' : 's'}` } : {}),
-        } satisfies ChatEvent)
-    })
+  listener.onChannelChatMessage(broadcasterId, broadcasterId, (e) => {
+    const bits = e.bits
+    broadcast({
+      type: 'chat',
+      id: e.messageId,
+      channel: e.broadcasterName,
+      login: e.chatterName,
+      userId: e.chatterId,
+      name: e.chatterDisplayName,
+      color: e.color ?? '',
+      text: e.messageText,
+      fragments: toFragments(e.messageParts),
+      roomId: e.broadcasterId,
+      kind: bits > 0 ? 'cheer' : 'chat',
+      ...(bits > 0
+        ? { headline: `cheered ${bits.toLocaleString('en-US')} bit${bits === 1 ? '' : 's'}` }
+        : {}),
+    } satisfies ChatEvent)
+  })
 
-    // subs and resubs arrive as chat notifications
-    listener.onChannelChatNotification(broadcasterId, broadcasterId, (e) => {
-        if (e.type !== 'sub' && e.type !== 'resub') return // gifts, raids and the rest are ignored for now
+  // subs and resubs arrive as chat notifications
+  listener.onChannelChatNotification(broadcasterId, broadcasterId, (e) => {
+    if (e.type !== 'sub' && e.type !== 'resub') return // gifts, raids and the rest are ignored for now
 
-        const plan = e.isPrime ? 'Prime' : TIERS[e.tier]
-        const withPlan = plan ? ` with ${plan}` : ''
+    const plan = e.isPrime ? 'Prime' : TIERS[e.tier]
+    const withPlan = plan ? ` with ${plan}` : ''
 
-        let headline = `subscribed${withPlan}`
-        if (e.type === 'resub') {
-            const months = e.cumulativeMonths > 1 ? ` for ${e.cumulativeMonths} months` : ''
-            const streak = e.streakMonths && e.streakMonths > 1 ? ` (${e.streakMonths} month streak)` : ''
-            headline = `resubscribed${withPlan}${months}${streak}`
-        }
+    let headline = `subscribed${withPlan}`
+    if (e.type === 'resub') {
+      const months = e.cumulativeMonths > 1 ? ` for ${e.cumulativeMonths} months` : ''
+      const streak = e.streakMonths && e.streakMonths > 1 ? ` (${e.streakMonths} month streak)` : ''
+      headline = `resubscribed${withPlan}${months}${streak}`
+    }
 
-        broadcast({
-            type: 'chat',
-            id: e.messageId,
-            channel: e.broadcasterName,
-            login: e.chatterName,
-            userId: e.chatterId,
-            name: e.chatterDisplayName,
-            color: e.color ?? '',
-            text: e.messageText,
-            fragments: toFragments(e.messageParts),
-            roomId: e.broadcasterId,
-            kind: 'sub',
-            headline,
-        } satisfies ChatEvent)
-    })
+    broadcast({
+      type: 'chat',
+      id: e.messageId,
+      channel: e.broadcasterName,
+      login: e.chatterName,
+      userId: e.chatterId,
+      name: e.chatterDisplayName,
+      color: e.color ?? '',
+      text: e.messageText,
+      fragments: toFragments(e.messageParts),
+      roomId: e.broadcasterId,
+      kind: 'sub',
+      headline,
+    } satisfies ChatEvent)
+  })
 
-    // moderation: keep the overlay in step with what mods remove
-    listener.onChannelChatMessageDelete(broadcasterId, broadcasterId, (e) => {
-        broadcast({ type: 'chat-remove', id: e.messageId } satisfies ChatEvent)
-    })
-    listener.onChannelChatClear(broadcasterId, broadcasterId, () => {
-        broadcast({ type: 'chat-clear' } satisfies ChatEvent)
-    })
-    // fires for bans and timeouts as well
-    listener.onChannelChatClearUserMessages(broadcasterId, broadcasterId, (e) => {
-        broadcast({ type: 'chat-clear', userId: e.userId } satisfies ChatEvent)
-    })
+  // moderation: keep the overlay in step with what mods remove
+  listener.onChannelChatMessageDelete(broadcasterId, broadcasterId, (e) => {
+    broadcast({ type: 'chat-remove', id: e.messageId } satisfies ChatEvent)
+  })
+  listener.onChannelChatClear(broadcasterId, broadcasterId, () => {
+    broadcast({ type: 'chat-clear' } satisfies ChatEvent)
+  })
+  // fires for bans and timeouts as well
+  listener.onChannelChatClearUserMessages(broadcasterId, broadcasterId, (e) => {
+    broadcast({ type: 'chat-clear', userId: e.userId } satisfies ChatEvent)
+  })
 }

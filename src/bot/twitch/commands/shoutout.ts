@@ -3,7 +3,7 @@ import type { Deps } from '../deps'
 import { command } from '../services/permissions'
 
 export default function shoutout({ api, botId }: Deps) {
-    return command('shoutout', 'mod', async (params, ctx) => {
+  return command('shoutout', 'mod', async (params, ctx) => {
     const target = params[0]?.replace('@', '').toLocaleLowerCase()
     if (!target) {
       ctx.say(`Invalid command! Usage: !shoutout @username`)
@@ -38,5 +38,5 @@ export default function shoutout({ api, botId }: Deps) {
       }
       return
     }
-})
+  })
 }

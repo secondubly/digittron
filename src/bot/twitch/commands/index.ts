@@ -24,18 +24,25 @@ const commandList: BotCommand[] = []
 export function buildCommands(deps: Deps): BotCommand[] {
   if (features.core) {
     commandList.push(
-      backseat, blind, clip(deps), 
-    details(deps), discord, game(deps), 
-    playlist,
-    shoutout(deps),
-    test, title(deps), rank)
+      backseat,
+      blind,
+      clip(deps),
+      details(deps),
+      discord,
+      game(deps),
+      playlist,
+      shoutout(deps),
+      test,
+      title(deps),
+      rank,
+    )
   }
 
   if (features.music) {
     if (!Bun.env.SPOTIFY_CLIENT_ID || !Bun.env.SPOTIFY_CLIENT_SECRET) {
       log.twitch.warn('Spotify variables not set, skipping loading music commands')
     } else {
-      commandList.push(nowplaying) 
+      commandList.push(nowplaying)
     }
   }
 

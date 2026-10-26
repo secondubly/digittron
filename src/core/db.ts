@@ -45,7 +45,6 @@ db.run(`
   CREATE INDEX IF NOT EXISTS idx_d20_crit_1s ON d20_rolls(user_id) WHERE is_nat_1 = TRUE;  
 `)
 
-
 // first rewards tracker
 db.run(`
     CREATE TABLE IF NOT EXISTS first_redemptions (

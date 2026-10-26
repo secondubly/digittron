@@ -5,25 +5,25 @@ import { join, sep } from 'node:path'
 const WEB_DIR = join(process.cwd(), 'dist', 'web')
 
 const PAGES: Record<string, string> = {
-    '/': 'index.html',
-    '/leaderboard': 'leaderboard.html',
+  '/': 'index.html',
+  '/leaderboard': 'leaderboard.html',
 }
 
 /** Returns the file's response, or null so the caller can carry on to its 404. */
 export async function serveStatic(pathname: string): Promise<Response | null> {
-    let rel: string
-    try {
-        rel = (PAGES[pathname] ?? decodeURIComponent(pathname)).replace(/^\/+/, '')
-    } catch {
-        return null // malformed %-encoding
-    }
+  let rel: string
+  try {
+    rel = (PAGES[pathname] ?? decodeURIComponent(pathname)).replace(/^\/+/, '')
+  } catch {
+    return null // malformed %-encoding
+  }
 
-    const path = join(WEB_DIR, rel)
-    if (!path.startsWith(WEB_DIR + sep)) return null // never serve anything outside dist/web
+  const path = join(WEB_DIR, rel)
+  if (!path.startsWith(WEB_DIR + sep)) return null // never serve anything outside dist/web
 
-    const file = Bun.file(path)
-    if (!(await file.exists())) return null
+  const file = Bun.file(path)
+  if (!(await file.exists())) return null
 
-    const cache = rel.startsWith('assets/') ? 'public, max-age=31536000, immutable' : 'no-cache'
-    return new Response(file, { headers: { 'Cache-Control': cache } })
+  const cache = rel.startsWith('assets/') ? 'public, max-age=31536000, immutable' : 'no-cache'
+  return new Response(file, { headers: { 'Cache-Control': cache } })
 }

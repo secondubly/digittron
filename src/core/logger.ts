@@ -1,4 +1,5 @@
-import pino from 'pino'
+import type { LoggerInterface } from 'arcscord'
+import pino, { type Logger } from 'pino'
 import pretty from 'pino-pretty'
 
 const isDev = Bun.env.NODE_ENV === 'development'
@@ -43,7 +44,24 @@ export function twurpleLogger(name: string) {
   }
 }
 
+export function discordLogger(instance: Logger): LoggerInterface {
+  return {
+    trace: (message, meta) => instance.trace(meta ?? {}, message),
+    debug: (message, meta) =>
+      instance.debug(meta ?? {}, typeof message === 'string' ? message : message.join(' : ')),
+    info: (message, meta) => instance.info(meta ?? {}, message),
+    warn: (message, meta) => instance.warn(meta ?? {}, message),
+    error: (message, meta) => instance.error(meta ?? {}, message),
+    logError: (error, meta) => instance.error({ err: error, ...meta }, 'an error occurred'),
+    fatal: (message, meta) => instance.fatal(meta ?? {}, message),
+    fatalError: (error, meta) => instance.fatal({ err: error, ...meta }, 'a fatal error occurred'),
+    log: (level, message, meta) => instance[level](meta ?? {}, message),
+    child: (bindings) => discordLogger(instance.child(bindings)),
+  }
+}
+
 export const log = {
+  discord: makeLogger('discord'),
   twitch: makeLogger('bot'),
   api: makeLogger('api'),
   app: makeLogger('app'),

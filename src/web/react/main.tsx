@@ -10,7 +10,7 @@ import { size } from './config';
 import '@fontsource/atkinson-hyperlegible';
 import { bg } from './config';
 
-if (bg) document.body.style.background = bg
+if (bg) document.body.style.background = bg;
 document.documentElement.style.setProperty('--size', `${size}px`);
 
 createRoot(document.getElementById('root')!).render(

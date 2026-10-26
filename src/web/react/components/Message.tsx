@@ -9,15 +9,15 @@ export function Message({ msg }: { msg: Msg }) {
     ),
   );
 
-  const style = { ['--c' as string]: msg.color }
+  const style = { ['--c' as string]: msg.color };
 
   if (msg.kind === 'chat') {
-      return (
-    <div className={`msg${msg.action ? ' action' : ''}`} style={{ ['--c' as string]: msg.color }}>
-      <span className="name">{msg.name}</span>
-      <span className="text">{body}</span>
-    </div>
-  );
+    return (
+      <div className={`msg${msg.action ? ' action' : ''}`} style={{ ['--c' as string]: msg.color }}>
+        <span className="name">{msg.name}</span>
+        <span className="text">{body}</span>
+      </div>
+    );
   }
 
   return (
@@ -27,5 +27,5 @@ export function Message({ msg }: { msg: Msg }) {
       </div>
       {body.length > 0 && <div className="text">{body}</div>}
     </div>
-  )
+  );
 }
