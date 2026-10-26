@@ -7,7 +7,7 @@
     "build": "vite build",
     "bot": "bun run --hot src/bot/twitch/index.ts",
     "discord": "bun run --hot src/bot/discord/index.ts",
-    "dev": "concurrently -n bot,overlay -c magenta,yellow \"bun run bot\" \"bun run web\"",
+    "dev": "concurrently -n server,bot,overlay -c green,magenta,yellow \"bun run server\" \"bun run bot\" \"bun run web\"",
     "format": "prettier --write .",
     "lint": "eslint . --ext .ts",
     "server": "bun --hot src/web/index.ts",
