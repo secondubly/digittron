@@ -17,6 +17,20 @@
             },
             "stopOnEntry": false,
             "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "type": "bun",
+            "request": "launch",
+            "name": "Web server only",
+            "program": "${workspaceFolder}/src/web/index.ts",
+            "cwd": "${workspaceFolder}", // Bun loads .env from here, and ./data/ paths are relative to it
+            "env": {
+                "NODE_ENV": "development",
+                "LOG_LEVEL": "debug",
+                "DATABASE_PATH": "${workspaceFolder}/data/data.db"
+            },
+            "stopOnEntry": false,
+            "internalConsoleOptions": "neverOpen"
         }
     ]
 }
