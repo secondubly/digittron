@@ -21,7 +21,7 @@ export default defineConfig({
       '/public': 'http://localhost:3000',
       '/ws': { 
         changeOrigin: true,
-        target: 'ws://localhost:3000', 
+        target: 'ws://localhost:3000/ws', 
         ws: true 
       },
     }
