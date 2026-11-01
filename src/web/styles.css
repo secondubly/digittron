@@ -128,7 +128,7 @@ body {
 
 }
 /** special messages: cheers, raids, bits, subs */
-.msg.cheer {
+.msg.cheer, .msg.gift {
   --accent: #f6c445;
   --tint: rgba(246, 196, 69, 0.2);
 }
