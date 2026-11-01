@@ -6,6 +6,7 @@ import { log, twurpleLogger } from '@core/logger'
 import type { Twitch } from '@core/twitch'
 import { startAdWarnings } from './services/adWarnings'
 import { trackFirsts } from './services/firsts'
+import { startBadges } from './services/badges'
 
 export { TWITCH_BROADCASTER_SCOPES } from '@core/twitch' // other files may still import it from here
 
@@ -60,6 +61,8 @@ export const init = async ({ authProvider, api, listener, botId, ownerId, channe
   }
 
   await startAdWarnings({ bot, api, listener, ownerId })
+  // grab chat badges
+  await startBadges(api, ownerId)
 
   // Raids started from this channel
   listener.onChannelModerate(ownerId, botId, async (event) => {

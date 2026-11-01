@@ -8,9 +8,21 @@ export function App() {
 
   return (
     <div className="chat">
-      {messages.map((m) => (
-        <Message key={m.id} msg={m} />
-      ))}
+      <div className='container'>
+        <div className="titlebar">
+          <div className="traffic-lights">
+            <span className={`traffic-light red`}></span>
+            <span className={`traffic-light yellow`}></span>
+            <span className={`traffic-light green`}></span>
+          </div>
+          <div className="window-title"><strong>#secondubly</strong> – chat</div>
+        </div>
+        <div className="messages">
+          {messages.map((m) => (
+            <Message key={m.id} msg={m} />
+          ))}
+        </div>
+        </div>
     </div>
   );
 }

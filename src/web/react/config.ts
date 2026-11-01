@@ -9,6 +9,8 @@
  *   alerts   bot alert server, default ws://localhost:3000 ("off" to disable)
  *   volume   alert volume from 0 to 1 (default 0.6)
  *   debug    log connection state and raw lines to the console
+ *   mock     displays mock data for testing purposes
+ *   max      maximum number of messages to display
  * Messages starting with "!" are hidden so command spam stays off stream.
  */
 const params = new URLSearchParams(location.search)

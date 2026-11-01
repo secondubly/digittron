@@ -1,14 +1,17 @@
+import type { Badge } from "@core/chatEvents";
+
 export type Part = string | { src: string; alt: string }
 
 export type Msg = {
   id: string
+  badges: Badge[]
   userId: string
   name: string
   color: string
   action: boolean
   parts: Part[]
   at: number
-  kind: 'chat' | 'cheer' | 'sub'
+  kind: 'chat' | 'cheer' | 'sub' | 'gift' | 'raid'
   headline?: string | undefined // e.g. "cheered 500 bits", only on special messages
 }
 

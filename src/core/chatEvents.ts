@@ -15,8 +15,14 @@ export type ChatEvent =
       text: string // plain text, used for the "!command" filter
       fragments: Fragment[]
       roomId: string // channel id, used to load 7TV / BTTV emotes
-      kind: 'chat' | 'cheer' | 'sub'
+      badges: Badge[]
+      kind: 'chat' | 'cheer' | 'sub' | 'gift' | 'raid'
       headline?: string // e.g. "cheered 500 bits"
     }
   | { type: 'chat-remove'; id: string } // one message deleted by a mod
   | { type: 'chat-clear'; userId?: string } // chat cleared, or one user's messages purged
+
+export interface Badge {
+  url: string
+  title: string
+}
