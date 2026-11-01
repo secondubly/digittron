@@ -101,11 +101,6 @@ body {
 .msg {
   align-self: stretch;
   max-width: 100%;
-  /* padding: 6px 12px 7px 10px; */
-  /* background: var(--panel); */
-  /* border-left: 4px solid var(--c, #9aa); */
-  /* border-radius: 4px 10px 10px 4px; */
-  /* text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); */
   overflow-wrap: anywhere;
   animation: in 180ms ease-out;
 }
@@ -117,7 +112,6 @@ body {
   display: inline-flex;
   align-items: center;
   vertical-align: middle;
-  /* margin-right: 0.15em; */
   gap: 0.15em;
 }
 
@@ -140,7 +134,6 @@ body {
 .msg.special {
   padding: 10px 14px 11px 12px;
   margin-bottom: 0.4em;
-  /* border-left: 6px solid var(--accent); */
   background: linear-gradient(var(--tint), var(--tint)), var(--panel);
 }
 .headline {
