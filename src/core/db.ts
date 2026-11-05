@@ -62,6 +62,22 @@ db.run(`
 db.run('CREATE INDEX IF NOT EXISTS idx_firsts_user ON first_redemptions (user_id, status)')
 db.run('CREATE INDEX IF NOT EXISTS idx_firsts_stream ON first_redemptions (stream_id)')
 
+// quotes table
+db.run(`
+    CREATE TABLE IF NOT EXISTS quotes (
+        id               INTEGER PRIMARY KEY AUTOINCREMENT,
+        text             TEXT NOT NULL CHECK (length(trim(text)) BETWEEN 1 AND 500),
+        author           TEXT,                
+        author_user_id   TEXT,                
+        game             TEXT,                
+        added_by_user_id TEXT NOT NULL,
+        added_by_name    TEXT NOT NULL,
+        created_at       INTEGER NOT NULL,    -- ms since epoch
+        deleted_at       INTEGER              
+    )
+`)
+db.run('CREATE INDEX IF NOT EXISTS idx_quotes_author ON quotes (author COLLATE NOCASE)')
+
 onShutdown('close-db', async () => {
   log.app.info('Database closing')
   db.close()
