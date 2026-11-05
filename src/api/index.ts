@@ -1,7 +1,11 @@
+import { db } from '@core/db'
 import type { SpotifyCurrentlyPlayingResponse, SpotifyToken } from '../bot/twitch/types'
 import { log } from '@core/logger'
+import type { Quote } from './types'
 
 const maxRetries = 2
+
+const COLUMNS = 'id, text, author, game, added_by_name AS addedByName, created_at AS createdAt'
 
 const refreshSpotifyToken = async (id: string) => {
   const tokenPath = `./data/spotify.${id}.json`
@@ -101,4 +105,74 @@ export const apiRoutes = {
       status: response.status,
     }
   },
+
+  // TODO: POST /api/quotes
+
+  // GET /api/quotes/random
+  getRandomQuote() {
+    const quote = db.query(`SELECT ${COLUMNS} FROM quotes WHERE deleted_at IS NULL ORDER BY RANDOM() LIMIT 1`).get() as Quote | null
+    return Response.json(quote)
+  },
+
+  // GET /api/quotes/:id
+  getQuoteById(req: Request) {
+    const id = Number(req.params.id)
+    if (!Number.isInteger(id) || id < 1) return Response.json({ error: 'Invalid id' }, { status: 400 })
+    
+    const quote = db.query(`SELECT ${COLUMNS} FROM quotes WHERE id = ? AND deleted_at IS NULL`).get(id) as Quote | null
+
+    if (quote) {
+      return Response.json(quote)
+    } else {
+      return Response.json({ error: 'Quote not found' }, { status: 404 })
+    }
+  },
+
+  
+  // GET /api/quotes?q=term
+  searchQuote(req: Request) {
+    const url = new URL(req.url)
+
+    const term = url.searchParams.get('q')
+
+    if (!term) {
+      return Response.json({ error: 'Missing search term'}, { status: 400 })
+    }
+
+    const pattern = `%${term.replace(/[\\%_]/g, '\\$&')}%` // match % and _ literally
+    const quote = db
+            .query(
+                `SELECT ${COLUMNS} FROM quotes
+                 WHERE deleted_at IS NULL AND (text LIKE ? ESCAPE '\\' OR author LIKE ? ESCAPE '\\')
+                 ORDER BY RANDOM() LIMIT 1`,
+            )
+            .get(pattern, pattern) as Quote | null
+
+    if (quote) {
+      return Response.json(quote)
+    } else {
+      return Response.json({ error: 'Could not find a quote with that term.'}, { status: 404 })
+    }
+  },
+
+  // DELETE /api/quotes/:id
+  deleteQuote(req: Request) {
+    const id = Number(req.params.id)
+
+    if (!Number.isInteger(id) || id < 1) {
+      return Response.json({ error: 'Invalid id'}, { status: 400 })
+    }
+
+    /** Soft delete: the row stays, but the quote disappears and its number is never reused. */
+    const result = db
+      .query('UPDATE quotes SET deleted_at = ? WHERE id = ? AND deleted_at IS NULL')
+      .run(Date.now(), id)
+
+    if (result.changes > 0) {
+      return Response.json({}, { status: 204 })
+    } else {
+      // TODO: handle other cases
+      return Response.json({ error: 'Quote not found.'}, { status: 404 })
+    }
+  }
 }
