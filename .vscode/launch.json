@@ -19,6 +19,20 @@
             "internalConsoleOptions": "neverOpen"
         },
         {
+            // Needs the "Bun for Visual Studio Code" extension (oven.bun-vscode)
+            "type": "bun",
+            "request": "launch",
+            "name": "Discord bot only",
+            "program": "${workspaceFolder}/src/bot/discord/index.ts",
+            "cwd": "${workspaceFolder}", // Bun loads .env from here, and ./data/ paths are relative to it
+            "env": {
+                "NODE_ENV": "development",
+                "LOG_LEVEL": "debug"
+            },
+            "stopOnEntry": false,
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
             "type": "bun",
             "request": "launch",
             "name": "Web server only",
