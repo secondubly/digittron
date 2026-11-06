@@ -4,18 +4,17 @@ import { buildServer } from './web'
 import { setupShutdownHandlers } from '@core/shutdown'
 import { createTwitch } from '@core/twitch'
 import { relayChat } from '@core/chatRelay'
-import { startBot } from './bot/twitch'
+import { startBots } from './bot'
 
 const startup = async () => {
   setupShutdownHandlers()
   try {
     buildServer(Number(Bun.env.WEB_PORT ?? 3000))
     const twitch = await createTwitch()
-
     relayChat(twitch.listener, twitch.ownerId)
 
     try {
-      await startBot(twitch)
+      await startBots(twitch)
     } catch (err) {
       log.app.error({ err }, 'chat bot failed to start')
     }
