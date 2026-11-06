@@ -34,7 +34,7 @@ const startBot = async () => {
         log = this.#inner.log;
         child = this.#inner.child;
       },
-      level: 'trace',
+      level: Bun.env.NODE_ENV === 'production' ? 'info' : 'debug',
     },
   }
 
