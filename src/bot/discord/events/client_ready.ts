@@ -1,9 +1,9 @@
-import { createEvent } from "arcscord"
+import { createEvent } from 'arcscord'
 
 export const clientReady = createEvent({
-    event: 'clientReady',
-    options: { once: true },
-    run: (ctx) => {
-        ctx.logger.info('ready!')
-    }
+  event: 'clientReady',
+  options: { once: true },
+  run: (ctx) => {
+    ctx.logger.info('ready!')
+  },
 })

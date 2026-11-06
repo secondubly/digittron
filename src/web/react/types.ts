@@ -1,4 +1,4 @@
-import type { Badge } from "@core/chatEvents";
+import type { Badge } from '@core/chatEvents'
 
 export type Part = string | { src: string; alt: string }
 

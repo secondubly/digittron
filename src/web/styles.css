@@ -16,16 +16,15 @@
 html,
 body,
 #root {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: transparent;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
 }
 body {
-  font-family:
-    'Geist Mono Variable', monospace;
+  font-family: 'Geist Mono Variable', monospace;
   font-size: 1.3rem;
   line-height: 1.35;
   color: var(--ink);
@@ -83,9 +82,15 @@ body {
   display: inline-block;
 }
 
-.traffic-light.red { background-color: var(--traffic-red); }
-.traffic-light.yellow { background-color: var(--traffic-yellow); }
-.traffic-light.green { background-color: var(--traffic-green); }
+.traffic-light.red {
+  background-color: var(--traffic-red);
+}
+.traffic-light.yellow {
+  background-color: var(--traffic-yellow);
+}
+.traffic-light.green {
+  background-color: var(--traffic-green);
+}
 
 /** messages */
 .messages {
@@ -105,7 +110,6 @@ body {
   animation: in 180ms ease-out;
 }
 
-
 /** badges */
 
 .badges {
@@ -119,10 +123,10 @@ body {
   width: 1.2em;
   height: 1.2em;
   vertical-align: middle;
-
 }
 /** special messages: cheers, raids, bits, subs */
-.msg.cheer, .msg.gift {
+.msg.cheer,
+.msg.gift {
   --accent: #f6c445;
   --tint: rgba(246, 196, 69, 0.2);
 }

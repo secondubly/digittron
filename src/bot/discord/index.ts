@@ -7,7 +7,14 @@ const init = async () => {
     throw Error('Missing discord token, please check environment variables.')
   }
 
-  const intents = Bun.env.HONEYPOT_CHANNEL_ID ? [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers] : [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
+  const intents = Bun.env.HONEYPOT_CHANNEL_ID
+    ? [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers,
+      ]
+    : [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
   const arcClientOptions: ArcClientOptions = {
     intents,
     applicationId: Bun.env.DISCORD_APP_ID ?? undefined,
