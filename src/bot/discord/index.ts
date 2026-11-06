@@ -1,8 +1,9 @@
-import { ArcClient, type ArcClientOptions } from 'arcscord'
+import { ArcClient, type ArcClientOptions, type LoggerInterface } from 'arcscord'
 import { GatewayIntentBits } from 'discord.js'
 import handlers from './handlers'
+import { log } from '@core/logger'
 
-const init = async () => {
+const startBot = async () => {
   if (!Bun.env.DISCORD_TOKEN) {
     throw Error('Missing discord token, please check environment variables.')
   }
@@ -19,14 +20,26 @@ const init = async () => {
     intents,
     applicationId: Bun.env.DISCORD_APP_ID ?? undefined,
     logger: {
-      format: 'pretty',
-      level: Bun.env.NODE_ENV === 'production' ? 'info' : 'debug',
+      customLogger: class PinoLogger implements LoggerInterface {
+        #inner: LoggerInterface = log.discord
+
+        trace = this.#inner.trace;
+        debug = this.#inner.debug;
+        info = this.#inner.info;
+        warn = this.#inner.warn;
+        error = this.#inner.error;
+        logError = this.#inner.logError;
+        fatal = this.#inner.fatal;
+        fatalError = this.#inner.fatalError;
+        log = this.#inner.log;
+        child = this.#inner.child;
+      },
+      level: 'trace',
     },
   }
 
   const discord = new ArcClient(Bun.env.DISCORD_TOKEN, arcClientOptions)
   await discord.loadHandlers(handlers)
-
   try {
     await discord.login()
   } catch (err) {
@@ -35,5 +48,7 @@ const init = async () => {
 }
 
 if (import.meta.main) {
-  await init()
+  await startBot()
 }
+
+export { startBot }
