@@ -1,7 +1,8 @@
 
 import type { ApiClient } from '@twurple/api'
 import { command, hasLevel, type PermissionLevel } from '../services/permissions'
-import { addQuote, deleteQuote, formatQuote, getQuote, randomQuote, searchQuote } from '../services/quotes'
+import { addQuote, deleteQuote, getQuote, getRandomQuote, searchQuote } from '../services/quotes'
+import type { Quote } from '../../../api/types'
 
 //  Command to get quotes, available options:
 //   !quote                          a random quote
@@ -38,6 +39,14 @@ async function currentGame(api: ApiClient, channelId: string | null): Promise<st
     }
 }
 
+/** e.g. `#12: "Never trust a shortcut" - Streamer, Elden Ring (2026-10-07)` */
+function formatQuote(q: Quote): string {
+    const date = new Date(q.createdAt).toISOString().slice(0, 10)
+    const who = q.author ? ` - ${q.author}` : ''
+    const game = q.game ? `, ${q.game}` : ''
+    return `#${q.id}: "${q.text}"${who}${game} (${date})`
+}
+
 export default function quoteCommand({ api }: { api: ApiClient }) {
     return command(
         'quote',
@@ -51,20 +60,20 @@ export default function quoteCommand({ api }: { api: ApiClient }) {
             }
 
             if (!sub) {
-                const quote = randomQuote()
+                const quote = await getRandomQuote()
                 return say(quote ? formatQuote(quote) : 'There are no quotes yet.')
             }
 
             const number = parseId(first)
             if (number !== null) {
-                const quote = getQuote(number)
+                const quote = await getQuote(number)
                 return say(quote ? formatQuote(quote) : `There is no quote #${number}.`)
             }
 
             if (sub === 'search') {
                 const term = rest.join(' ').trim()
                 if (!term) return say('Usage: !quote search <text>')
-                const quote = searchQuote(term)
+                const quote = await searchQuote(term)
                 // the search term isn't repeated back, so the bot can't be made to say what a viewer typed
                 return say(quote ? formatQuote(quote) : 'No quotes match that.')
             }
@@ -98,7 +107,7 @@ export default function quoteCommand({ api }: { api: ApiClient }) {
 
                 const target = parseId(rest[0])
                 if (target === null) return say('Usage: !quote delete <number>')
-                return say(deleteQuote(target) ? `Deleted quote #${target}.` : `There is no quote #${target}.`)
+                return say(await deleteQuote(target) ? `Deleted quote #${target}.` : `There is no quote #${target}.`)
             }
 
             return say('Usage: !quote [number] | !quote search <text> | !quote add <text> - <author> | !quote delete <number>')
