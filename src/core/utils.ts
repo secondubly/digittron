@@ -25,5 +25,9 @@ export async function serveStatic(pathname: string): Promise<Response | null> {
   if (!(await file.exists())) return null
 
   const cache = rel.startsWith('assets/') ? 'public, max-age=31536000, immutable' : 'no-cache'
-  return new Response(file, { headers: { 'Cache-Control': cache } })
+  if (pathname.endsWith('.js')) {
+    return new Response(file, { headers: { "Content-Type": "text/javascript; charset=utf-8"}})
+  } else {
+    return new Response(file, { headers: { 'Cache-Control': cache } })
+  }
 }
