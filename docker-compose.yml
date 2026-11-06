@@ -9,6 +9,10 @@ services:
       - ./data:/usr/src/app/data
     environment:
       - DATABASE_PATH=${DATABASE_PATH}
+      # Discord
+      - DISCORD_APP_ID=${DISCORD_APP_ID}
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - DISCORD_LOG_CHANNEL_ID=${DISCORD_LOG_CHANNEL_ID}
       # Twitch
       - TWITCH_CLIENT_ID=${TWITCH_CLIENT_ID}
       - TWITCH_CLIENT_SECRET=${TWITCH_CLIENT_SECRET}
