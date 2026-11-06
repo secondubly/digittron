@@ -115,8 +115,8 @@ export const apiRoutes = {
   },
 
   // GET /api/quotes/:id
-  getQuoteById(req: Request) {
-    const id = Number(req.params.id)
+  getQuoteById(req: Request, idStr: string | undefined) {
+    const id = Number(idStr)
     if (!Number.isInteger(id) || id < 1) return Response.json({ error: 'Invalid id' }, { status: 400 })
     
     const quote = db.query(`SELECT ${COLUMNS} FROM quotes WHERE id = ? AND deleted_at IS NULL`).get(id) as Quote | null
@@ -156,8 +156,8 @@ export const apiRoutes = {
   },
 
   // DELETE /api/quotes/:id
-  deleteQuote(req: Request) {
-    const id = Number(req.params.id)
+  deleteQuote(req: Request, idStr: string | undefined) {
+    const id = Number(idStr)
 
     if (!Number.isInteger(id) || id < 1) {
       return Response.json({ error: 'Invalid id'}, { status: 400 })
