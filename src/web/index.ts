@@ -99,9 +99,12 @@ export function buildServer(port: number) {
       '/api/quotes/random': () => apiRoutes.getRandomQuote(),
       '/api/quotes/:id': {
         GET: (req: Request, params: { id: string }) => apiRoutes.getQuoteById(req, params.id),
-        DELETE: (req: Request, params: { id: string }) => apiRoutes.deleteQuote(req, params.id)
+        DELETE: (req: Request, params: { id: string }) => apiRoutes.deleteQuote(req, params.id),
       },
-      '/api/quotes': (req: Request) => apiRoutes.searchQuote(req)
+      '/api/quotes': {
+        GET: (req: Request) => apiRoutes.searchQuote(req),
+        POST: (req: Request) => apiRoutes.addQuote(req),
+      },
     },
   })
 

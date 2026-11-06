@@ -1,7 +1,7 @@
 import { db } from '@core/db'
 import type { SpotifyCurrentlyPlayingResponse, SpotifyToken } from '../bot/twitch/types'
 import { log } from '@core/logger'
-import type { Quote } from './types'
+import type { NewQuote, Quote } from './types'
 
 const maxRetries = 2
 
@@ -107,19 +107,47 @@ export const apiRoutes = {
   },
 
   // TODO: POST /api/quotes
+  async addQuote(req: Request) {
+    let quote: NewQuote | null = null
+    quote = await req.json()
+
+    if (!quote) return Response.json({ error: 'Invalid request' }, { status: 400 })
+
+    const result = db
+      .query(
+        `INSERT INTO quotes (text, author, author_user_id, game, added_by_user_id, added_by_name, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .run(
+        quote.text.trim(),
+        quote.author ?? null,
+        quote.authorUserId ?? null,
+        quote.game ?? null,
+        quote.addedByUserId,
+        quote.addedByName,
+        Date.now(),
+      )
+
+    return Response.json(result.lastInsertRowid)
+  },
 
   // GET /api/quotes/random
   getRandomQuote() {
-    const quote = db.query(`SELECT ${COLUMNS} FROM quotes WHERE deleted_at IS NULL ORDER BY RANDOM() LIMIT 1`).get() as Quote | null
+    const quote = db
+      .query(`SELECT ${COLUMNS} FROM quotes WHERE deleted_at IS NULL ORDER BY RANDOM() LIMIT 1`)
+      .get() as Quote | null
     return Response.json(quote)
   },
 
   // GET /api/quotes/:id
   getQuoteById(req: Request, idStr: string | undefined) {
     const id = Number(idStr)
-    if (!Number.isInteger(id) || id < 1) return Response.json({ error: 'Invalid id' }, { status: 400 })
-    
-    const quote = db.query(`SELECT ${COLUMNS} FROM quotes WHERE id = ? AND deleted_at IS NULL`).get(id) as Quote | null
+    if (!Number.isInteger(id) || id < 1)
+      return Response.json({ error: 'Invalid id' }, { status: 400 })
+
+    const quote = db
+      .query(`SELECT ${COLUMNS} FROM quotes WHERE id = ? AND deleted_at IS NULL`)
+      .get(id) as Quote | null
 
     if (quote) {
       return Response.json(quote)
@@ -128,7 +156,6 @@ export const apiRoutes = {
     }
   },
 
-  
   // GET /api/quotes?q=term
   searchQuote(req: Request) {
     const url = new URL(req.url)
@@ -136,22 +163,22 @@ export const apiRoutes = {
     const term = url.searchParams.get('q')
 
     if (!term) {
-      return Response.json({ error: 'Missing search term'}, { status: 400 })
+      return Response.json({ error: 'Missing search term' }, { status: 400 })
     }
 
     const pattern = `%${term.replace(/[\\%_]/g, '\\$&')}%` // match % and _ literally
     const quote = db
-            .query(
-                `SELECT ${COLUMNS} FROM quotes
+      .query(
+        `SELECT ${COLUMNS} FROM quotes
                  WHERE deleted_at IS NULL AND (text LIKE ? ESCAPE '\\' OR author LIKE ? ESCAPE '\\')
                  ORDER BY RANDOM() LIMIT 1`,
-            )
-            .get(pattern, pattern) as Quote | null
+      )
+      .get(pattern, pattern) as Quote | null
 
     if (quote) {
       return Response.json(quote)
     } else {
-      return Response.json({ error: 'Could not find a quote with that term.'}, { status: 404 })
+      return Response.json({ error: 'Could not find a quote with that term.' }, { status: 404 })
     }
   },
 
@@ -160,7 +187,7 @@ export const apiRoutes = {
     const id = Number(idStr)
 
     if (!Number.isInteger(id) || id < 1) {
-      return Response.json({ error: 'Invalid id'}, { status: 400 })
+      return Response.json({ error: 'Invalid id' }, { status: 400 })
     }
 
     /** Soft delete: the row stays, but the quote disappears and its number is never reused. */
@@ -172,7 +199,7 @@ export const apiRoutes = {
       return Response.json({}, { status: 204 })
     } else {
       // TODO: handle other cases
-      return Response.json({ error: 'Quote not found.'}, { status: 404 })
+      return Response.json({ error: 'Quote not found.' }, { status: 404 })
     }
-  }
+  },
 }
