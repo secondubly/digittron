@@ -61,7 +61,7 @@ export function discordLogger(instance: Logger): LoggerInterface {
 }
 
 export const log = {
-  discord: makeLogger('discord'),
+  discord: discordLogger(makeLogger('discord')),
   twitch: makeLogger('bot'),
   api: makeLogger('api'),
   app: makeLogger('app'),
