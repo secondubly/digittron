@@ -48,10 +48,6 @@ export function buildServer(port: number) {
       message: () => {}, // no-op, overlay only listens
     },
     routes: {
-      '/': {
-        GET: handleStatic,
-        HEAD: handleStatic, // see: https://http.dev/head for info on what HEAD is used for
-      },
       '/api/spotify/now-playing': async (req: Request) => {
         const response = await apiRoutes.getNowPlaying(req)
 
@@ -104,6 +100,18 @@ export function buildServer(port: number) {
       '/api/quotes': {
         GET: (req: Request) => apiRoutes.searchQuote(req),
         POST: (req: Request) => apiRoutes.addQuote(req),
+      },
+      '/': {
+        GET: handleStatic,
+        HEAD: handleStatic, // see: https://http.dev/head for info on what HEAD is used for
+      },
+      '/leaderboard': {
+        GET: handleStatic,
+        HEAD: handleStatic,
+      },
+      '/assets/*': {
+        GET: handleStatic,
+        HEAD: handleStatic,
       },
     },
   })
