@@ -1,4 +1,3 @@
-// src/web/static.ts - serves the files `vite build` produced (dist/web).
 import { join, sep } from 'node:path'
 
 // Relative to the working directory, like ./data and the token files. Run the server from the project root.

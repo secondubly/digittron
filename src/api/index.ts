@@ -106,7 +106,7 @@ export const apiRoutes = {
     }
   },
 
-  // TODO: POST /api/quotes
+  // POST /api/quotes
   async addQuote(req: Request) {
     let quote: NewQuote | null = null
     quote = await req.json()
@@ -183,7 +183,7 @@ export const apiRoutes = {
   },
 
   // DELETE /api/quotes/:id
-  deleteQuote(req: Request, idStr: string | undefined) {
+  deleteQuote(_req: Request, idStr: string | undefined) {
     const id = Number(idStr)
 
     if (!Number.isInteger(id) || id < 1) {
