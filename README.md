@@ -1,5 +1,5 @@
 # digittron
-Twitch bot for secondubly and his community, built in NodeJS with a React frontend using [Bun](https://bun.com)
+Discord and Twitch bot for secondubly and his community, built in NodeJS with a React frontend using [Bun](https://bun.com)
 
 ## Project Structure
 ```
@@ -9,6 +9,7 @@ Twitch bot for secondubly and his community, built in NodeJS with a React fronte
 └── src/
     ├── api/ # api methods
     ├── bot/ # bot code
+    │   └── discord/ # discord bot    
     │   └── twitch/ # twitch bot
     ├── core/ # shared functionality
     └── web/ # overlay system
