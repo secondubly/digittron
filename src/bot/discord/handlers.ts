@@ -1,9 +1,9 @@
-import type { HandlersList } from 'arcscord'
+import type { EventHandler, HandlersList } from 'arcscord'
 import { commands } from './commands'
 import { messageHoneypotEvent } from './events/honeypot'
 import { clientReady } from './events/client_ready'
 
-const events = []
+const events: (EventHandler<"clientReady"> | EventHandler<"messageCreate">)[] = []
 
 if (Bun.env.HONEYPOT_CHANNEL_ID) {
   events.push(messageHoneypotEvent)
