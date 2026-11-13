@@ -6,7 +6,7 @@ export default command('testalert', 'broadcaster', async (_params, ctx) => {
     {
       type: 'first-message',
       name: ctx.msg.userInfo.displayName,
-      sound: '89181064.mp3', // must exist in your sounds/ folder
+      sound: '537326154.mp3', // must exist in your sounds/ folder
     },
     Bun.env.WEB_PORT ?? '3000',
   )
