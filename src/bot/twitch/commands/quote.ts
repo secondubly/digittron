@@ -1,6 +1,6 @@
 import type { ApiClient } from '@twurple/api'
 import { command, hasLevel, type PermissionLevel } from '../services/permissions'
-import { addQuote, deleteQuote, getQuote, getRandomQuote, searchQuote } from '../services/quotes'
+import { addQuote, deleteQuote, getQuote, getRandomQuote, searchQuote } from '@core/quotes'
 import type { Quote } from '../../../api/types'
 
 //  Command to get quotes, available options:
