@@ -1,7 +1,7 @@
 export const features = {
   anniversary: false,
   core: true,
-  debug: true,
+  debug: false,
   games: true,
   music: true,
 } as const

@@ -1,4 +1,3 @@
-// src/web/static.ts - serves the files `vite build` produced (dist/web).
 import { join, sep } from 'node:path'
 
 // Relative to the working directory, like ./data and the token files. Run the server from the project root.
@@ -25,5 +24,9 @@ export async function serveStatic(pathname: string): Promise<Response | null> {
   if (!(await file.exists())) return null
 
   const cache = rel.startsWith('assets/') ? 'public, max-age=31536000, immutable' : 'no-cache'
-  return new Response(file, { headers: { 'Cache-Control': cache } })
+  if (pathname.endsWith('.js')) {
+    return new Response(file, { headers: { "Content-Type": "text/javascript; charset=utf-8"}})
+  } else {
+    return new Response(file, { headers: { 'Cache-Control': cache } })
+  }
 }

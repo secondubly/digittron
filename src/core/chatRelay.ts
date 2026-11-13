@@ -1,6 +1,6 @@
 import type { EventSubWsListener } from '@twurple/eventsub-ws'
 import type { ChatEvent, Fragment } from '@core/chatEvents'
-import { broadcast } from '../web' // src/web/index.ts
+import { broadcast } from '../web'
 import { resolveBadges } from '../bot/twitch/services/badges'
 
 const TIERS: Record<string, string> = { '1000': 'Tier 1', '2000': 'Tier 2', '3000': 'Tier 3' }
@@ -102,8 +102,6 @@ export function relayChat(listener: EventSubWsListener, broadcasterId: string) {
         return
       }
       case 'sub_gift': {
-        // Part of a gift bomb? The community_sub_gift notice below already covers it,
-        // so showing every recipient would flood the overlay.
         if (e.communityGiftId) return
         sendNotice(e, 'gift', `gifted a${tierText(e.tier)} sub to ${e.recipientDisplayName}`)
         return
